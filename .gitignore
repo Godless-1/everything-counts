@@ -1,0 +1,21 @@
+# build products
+build/
+build-dbg/
+dist/
+src/gen/
+
+# emulator + harness artefacts
+*.sav
+test/shots/
+test/soak/
+test/host/shim/__pycache__/
+__pycache__/
+*.pyc
+
+# editor / desktop cruft
+.directory
+*.swp
+
+# emulator config/state accidentally captured by the harness
+mgbacfg/
+mgba.log
