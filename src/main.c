@@ -48,7 +48,7 @@ static void boot_screen(void)
         if (shown > n && ((g_t / 12) & 1))
             vid_text_center(120, 132, "\x13", C_CYAN);
         /* AGPLv3 s5(d): appropriate legal notices */
-        vid_text_center(120, 140, "EVERYTHING COUNTS (C) 2026 GODLESS-1", C_DIM);
+        vid_text_center(120, 140, "EVERYTHING COUNTS \x7F 2026 GODLESS-1", C_DIM);
         vid_text_center(120, 150, "AGPLv3 - FREE SOFTWARE - NO WARRANTY", C_DIM);
         app_frame_end();
     }

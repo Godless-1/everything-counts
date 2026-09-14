@@ -325,7 +325,7 @@ int sc_codex(int arg)
         vid_hline(0, 136, 240, C_GRID);
         vid_text(4, 138, "ALL OF IT IS FREE, AND ALWAYS OPEN.", C_DIM);
         vid_text(4, 147, "THE HOUSE HAS NO RULE AGAINST KNOWING.", C_DIM);
-        vid_text(4, 155, "AGPLv3 \x12 (C) 2026 GODLESS-1 \x12 NO WARRANTY", C_GRID);
+        vid_text(4, 155, "AGPLv3 \x12 \x7F 2026 GODLESS-1 \x12 NO WARRANTY", C_GRID);
         app_frame_end();
     }
 }

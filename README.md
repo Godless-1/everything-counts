@@ -259,7 +259,8 @@ Copyleft, as appropriate to each kind of work.
 - **Documentation, prose, story text and art assets** —
   [CC BY-SA 4.0](LICENSE-DOCS).
 
-Copyright © 2026 Godless-1. This program comes with **absolutely no warranty**.
+Copyleft 🄯 2026 Godless-1 — all rights reversed.
+This program comes with **absolutely no warranty**.
 
 *Blackjack strategy and the Hi-Lo counting system are mathematical facts and
 belong to nobody. The specific expression of them here is copylefted so it
