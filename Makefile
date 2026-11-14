@@ -90,11 +90,15 @@ debug: gen
 	@$(MAKE) -s BUILD=build-dbg TARGET=$(TARGET)-debug \
 	       CFLAGS='$(CFLAGS) -DEC_DEBUG -DEC_DEBUG_NIGHT=6' all
 
+# rules engine (millions of simulated hands), then scripted sessions through
+# a host build of the whole game: money, save file, and every screen's text
 test:
 	@bash test/host/run.sh
+	@bash test/play/run.sh build
+	@python3 test/play/check.py
 
 run: all
 	@bash test/run.sh
 
 clean:
-	@rm -rf $(BUILD) build-dbg $(DIST) $(GEN)
+	@rm -rf $(BUILD) build-dbg build-host $(DIST) $(GEN)

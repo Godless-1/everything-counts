@@ -161,6 +161,12 @@ void host_px(int x, int y, int w, int h)
         }
 }
 
+/* a pop-up is about to cover the picture: forget what is underneath */
+void host_overlay(void) { memset(owner, 0, sizeof owner); }
+
+/* scripts can switch the random count checks off to stay deterministic */
+int host_no_pulse;
+
 /* an inked glyph pixel that fell off the screen */
 void host_clip(int x, int y)
 {
@@ -374,6 +380,8 @@ static void script_step(void)
             sscanf(line, "%*s %127s %d", a, &n); set_field(a, n);
         } else if (!strcmp(cmd, "save")) {
             save_write();
+        } else if (!strcmp(cmd, "nopulse")) {
+            sscanf(line, "%*s %d", &host_no_pulse);
         } else if (!strcmp(cmd, "seed")) {
             sscanf(line, "%*s %d", &n); rng_seed((u32)n);
         } else if (!strcmp(cmd, "stack")) {            /* stack 1 13 8 8 ... */

@@ -26,6 +26,16 @@ void vid_set_palette(const u16 *pal);
 void vid_fade(int amount);      /* 0 = normal, 16 = black (BLDY) */
 void vid_fade_white(int amount);
 
+/* Call before drawing a pop-up over a finished picture.  It tells the
+ * host test harness that what is underneath is now background, so being
+ * covered is intended.  Compiles to nothing on the GBA. */
+#ifdef EC_HOST
+void host_overlay(void);
+#define vid_overlay() host_overlay()
+#else
+#define vid_overlay() ((void)0)
+#endif
+
 /* ---- primitives ------------------------------------------------------ */
 void vid_clear(u8 c);
 void vid_plot(int x, int y, u8 c);

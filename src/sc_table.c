@@ -147,10 +147,12 @@ static void hand_label(int x, int y, const Hand *h, int hide_hole, u8 col)
     } else {
         int tot = hand_total(h);
         char *p = b;
-        if (hand_is_soft(h) && !h->busted) p = str_cat(p, "SOFT ");
-        p = str_int(p, tot);
-        if (h->busted) str_cat(p, " BUST");
-        else if (hand_is_bj(h)) str_cat(p, "  BLACKJACK");
+        if (hand_is_bj(h)) str_cat(p, "BLACKJACK");
+        else {
+            if (hand_is_soft(h) && !h->busted) p = str_cat(p, "SOFT ");
+            p = str_int(p, tot);
+            if (h->busted) str_cat(p, " BUST");
+        }
     }
     vid_rect(x, y, vid_text_len(b) + 6, 10, C_BLACK);
     vid_frame_rect(x, y, vid_text_len(b) + 6, 10, col);
@@ -247,7 +249,7 @@ static const char *act_help(int a)
     switch (a) {
         case ACT_HIT:       return "TAKE ONE MORE CARD";
         case ACT_STAND:     return "STOP. KEEP THIS TOTAL";
-        case ACT_DOUBLE:    return "DOUBLE THE BET, TAKE EXACTLY ONE CARD";
+        case ACT_DOUBLE:    return "DOUBLE THE BET, TAKE ONE CARD ONLY";
         case ACT_SPLIT:     return "SPLIT THE PAIR INTO TWO HANDS";
         case ACT_SURRENDER: return "FOLD NOW, LOSE ONLY HALF THE BET";
     }
@@ -474,6 +476,7 @@ static int pulse_check(int kind)
 
         draw_table(0);
         /* dim the felt behind the check */
+        vid_overlay();
         for (int j = 0; j < 160; j += 2) vid_hline(0, j, 240, C_BLACK);
 
         ui_panel(28, 38, 184, 74, C_MAG, "PULSE CHECK");
@@ -515,16 +518,17 @@ static int pulse_check(int kind)
     for (int f = 0; f < 600; f++) {
         app_frame_begin();
         draw_table(0);
+        vid_overlay();
         for (int j = 0; j < 160; j += 2) vid_hline(0, j, 240, C_BLACK);
-        ui_panel(20, 34, 200, 86, ok ? C_GREEN : C_BLOOD,
+        ui_panel(16, 26, 208, 116, ok ? C_GREEN : C_BLOOD,
                  ok ? "HELD" : "DROPPED");
         char b[64], *p;
-        vid_text_center(120, 42, ok ? "YOU HELD THE COUNT" : "YOU LOST THE COUNT", ok ? C_GREEN : C_BLOOD);
+        vid_text_center(120, 34, ok ? "YOU HELD THE COUNT" : "YOU LOST THE COUNT", ok ? C_GREEN : C_BLOOD);
 
         p = str_cat(b, "YOU SAID  "); p = str_signed(p, answer);
-        vid_text(30, 56, b, C_MID);
+        vid_text(24, 48, b, C_MID);
         p = str_cat(b, "TRUTH     "); p = str_signed(p, correct);
-        vid_text(30, 66, b, C_WHITE);
+        vid_text(24, 58, b, C_WHITE);
 
         if (kind == CHK_TRUE) {
             p = str_cat(b, "RC "); p = str_signed(p, T.cnt.running);
@@ -532,15 +536,15 @@ static int pulse_check(int kind)
             int q4 = shoe_decks_left_x4(&T.shoe);
             p = str_int(p, q4 / 4); *p++ = '.'; p = str_uint_pad(p, (u32)((q4 % 4) * 25), 2, '0');
             p = str_cat(p, " DECKS = TC "); str_signed(p, correct);
-            vid_text(30, 80, b, C_AMBER);
-            vid_text_wrap(30, 92, 32, "TRUE COUNT = RUNNING COUNT DIVIDED BY DECKS LEFT.", C_DIM);
+            vid_text(24, 74, b, C_AMBER);
+            vid_text_wrap(24, 90, 32, "TRUE COUNT = RUNNING COUNT DIVIDED BY DECKS LEFT. DROP THE FRACTION.", C_MID);
         } else if (kind == CHK_RUNNING) {
             p = str_cat(b, "CARDS SEEN THIS SHOE: ");
             str_int(p, T.cnt.seen);
-            vid_text(30, 80, b, C_AMBER);
-            vid_text_wrap(30, 92, 32, "LOW CARDS 2-6 ADD ONE. 7-8-9 ADD NOTHING. TENS AND ACES SUBTRACT ONE.", C_DIM);
+            vid_text(24, 74, b, C_AMBER);
+            vid_text_wrap(24, 90, 32, "LOW CARDS 2-6 ADD ONE. 7-8-9 ADD NOTHING. TENS AND ACES SUBTRACT ONE.", C_MID);
         } else {
-            vid_text_wrap(30, 80, 32, "ESTIMATE BY THE DISCARD TRAY, NOT BY HOPE.", C_DIM);
+            vid_text_wrap(24, 74, 32, "ESTIMATE BY THE DISCARD TRAY, NOT BY HOPE.", C_MID);
         }
         ui_hint("\x13 CONTINUE");
         app_frame_end();
@@ -801,6 +805,7 @@ static int player_turn(void)
     }
     if (hand_total(h) == 21) { h->stood = 1; return 1; }
 
+    T.act_sel = 0;        /* never inherit DOUBLE or SPLIT from the last hand */
     build_actions();
     key_flush();
     for (;;) {
@@ -875,10 +880,11 @@ static int offer_insurance(void)
         if (key_down(KEY_A)) { sfx(SFX_SELECT); break; }
 
         draw_table(1);
+        vid_overlay();
         vid_rect(0, 108, 240, 42, C_BLACK);
         vid_hline(0, 108, 240, C_AMBER);
-        vid_text(4, 111, "INSURANCE: DEALER SHOWS AN ACE", C_AMBER);
-        vid_text(4, 122, "HALF YOUR BET. PAYS 2:1 ON A TEN.", C_MID);
+        vid_text(4, 111, "INSURANCE? THE DEALER SHOWS AN ACE.", C_AMBER);
+        vid_text(4, 122, "COSTS HALF YOUR BET. PAYS 2 TO 1.", C_MID);
         const char *o[2] = { "TAKE", "NO" };
         for (int i = 0; i < 2; i++) {
             int bx = 148 + i * 46;
@@ -893,7 +899,7 @@ static int offer_insurance(void)
             str_cat(p, dev_insurance(true_count()) ? " - TAKE IT" : " - DECLINE");
             vid_text(4, 135, b, dev_insurance(true_count()) ? C_GREEN : C_BLOOD);
         } else {
-            vid_text(4, 135, "WORTH IT ONLY AT TRUE COUNT +3", C_DIM);
+            vid_text(4, 135, "GOOD ONLY AT TC +3", C_MID);
         }
         ui_hint2("\x02\x01 CHOOSE  \x13 OK", "START RULES");
         app_frame_end();
@@ -909,6 +915,7 @@ static void epilogue(const char *title, const char *text, const char *hint, u8 c
     for (;;) {
         app_frame_begin();
         draw_table(0);
+        vid_overlay();
         for (int j = 0; j < 160; j += 2) vid_hline(0, j, 240, C_BLACK);
         ui_panel(14, 30, 212, 104, col, title);
         vid_text_wrap(21, 40, 33, text, C_TEXT);
@@ -1027,11 +1034,10 @@ int sc_table(int arg)
                 vid_text_center(120, 75, b, C_MID);
 
                 /* the stack sits beside the readout, clear of every label */
-                {
-                    int cols = (units > 30 ? 30 : units);
-                    cols = (cols + 5) / 6;
-                    draw_chips(58 - cols * 8, 43, T.bet, bet_unit(), T.v->accent);
-                }
+                /* the stake itself, on its own spot beside the readout */
+                vid_rect(4, 40, 54, 30, C_BLACK);
+                vid_frame_rect(4, 40, 54, 30, C_GRID);
+                draw_chips(31, 68, T.bet, bet_unit(), T.v->accent);
 
                 /* the advisory is the lesson: bet with the count */
                 if (run_has(IMP_ORACLE) || T.mode == TMODE_PRACTICE) {
@@ -1132,6 +1138,9 @@ hand_done:
         {
             int chance = 6 + g_run.night * 2;
             if (T.mode == TMODE_PRACTICE) chance = 14;
+#ifdef EC_HOST
+            { extern int host_no_pulse; if (host_no_pulse) chance = 0; }
+#endif
 #ifdef EC_DEBUG
             chance = 100;
 #endif

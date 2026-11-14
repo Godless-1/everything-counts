@@ -1,0 +1,99 @@
+# Scripted hands at the Golden Lotus with a stacked shoe.  Checks the money.
+set night 3
+set creds 900000
+set escrow 220000
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set started 1
+save
+wait 30
+press a
+wait 60
+press down
+press a
+wait 60
+# hub -> FIND A GAME -> Golden Lotus
+press a
+wait 60
+press down
+press down
+wait 10
+shot venue-lotus
+stack 8 6 8 10 3 10 9 7 10 1 9 13 1 9 13 7 10 10 6 8 10 7 6 10 10
+seed 4242
+nopulse 1
+press a
+wait 160
+dump start
+shot bet
+# hand 1: split eights, double the first, stand the second
+press a
+wait 90
+shot h1-pair
+press right
+press right
+press right
+press a
+wait 60
+shot h1-split
+press right
+press right
+press a
+wait 80
+press right
+shot h1-second
+press a
+wait 200
+shot h1-showdown
+dump h1
+press a
+wait 30
+# hand 2: insurance against a dealer blackjack
+press a
+wait 90
+shot h2-insurance
+press left
+press a
+wait 120
+shot h2-showdown
+dump h2
+press a
+wait 30
+# hand 3: player blackjack, dealer must not draw
+press a
+wait 200
+shot h3-showdown
+dump h3
+press a
+wait 30
+# hand 4: surrender 16 against a ten
+press a
+wait 90
+press right
+press right
+press right
+shot h4-fold
+press a
+wait 120
+shot h4-showdown
+dump h4
+press a
+wait 30
+# hand 5: hit 16 and bust
+press a
+wait 90
+press a
+wait 140
+shot h5-showdown
+dump h5
+press a
+wait 30
+shot bet-after
+press b
+wait 20
+shot leave-confirm
+press a
+wait 60
+dump left

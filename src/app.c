@@ -83,16 +83,17 @@ void app_flash(u8 colour, int frames)
 /* ---------------------------------------------------------------------- */
 void draw_chips(int x, int y, s32 amount, s32 unit, u8 accent)
 {
+    /* up to three stacks of eight, standing on the line y, centred on x */
     if (unit <= 0) unit = 1;
     int n = (int)(amount / unit);
-    if (n > 30) n = 30;
+    if (n > 24) n = 24;
     if (n < 1) return;
-    int per = 6;
+    int per = 8;
     int cols = (n + per - 1) / per;
-    x -= (cols * 16) / 2;
+    x -= (cols * 16 - 2) / 2;
     for (int i = 0; i < n; i++) {
         int col = i / per, row = i % per;
-        int cx = x + col * 16, cy = y + 24 - row * 4;
+        int cx = x + col * 16, cy = y - 4 - row * 3;
         u8 body = (i % 3 == 0) ? accent : ((i % 3 == 1) ? C_WHITE : C_BLACK);
         u8 edge = (body == C_BLACK) ? accent : C_BLACK;
         vid_rect(cx + 1, cy, 12, 4, body);
@@ -117,6 +118,7 @@ void toast(const char *line, u8 colour)
 {
     int w = vid_text_len(line) + 16;
     int x = 120 - w / 2;
+    vid_overlay();
     vid_rect(x, 66, w, 20, C_BLACK);
     vid_frame_rect(x, 66, w, 20, colour);
     ui_brackets(x - 2, 64, w + 4, 24, colour, 4);
