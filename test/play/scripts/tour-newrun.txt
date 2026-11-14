@@ -1,0 +1,44 @@
+# New run: prologue, the course menu, night one, the hub and everything on it
+autoshot nr
+wait 220
+press a
+wait 60
+# NEW RUN
+press a
+wait 40
+mash a 40 110
+# prologue choice -> DRY RUN course menu; leave it
+wait 60
+press b
+wait 60
+# night one
+mash a 20 110
+wait 80
+dump hub
+# hub: walk the menu
+mash down 7 30
+# call rui
+mash down 3 10
+press a
+mash a 6 110
+# codex from hub
+press select
+wait 60
+mash down 8 30
+press b
+wait 60
+# venue board
+press a
+wait 60
+mash down 6 40
+press b
+wait 60
+# clinic
+press down
+press a
+wait 60
+mash down 8 40
+press a
+wait 80
+press b
+wait 60

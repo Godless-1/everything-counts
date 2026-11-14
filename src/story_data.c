@@ -1,6 +1,10 @@
 /* EVERYTHING COUNTS - a card counting story for the Game Boy Advance
  * Copyright (C) 2026 Godless-1
- * SPDX-License-Identifier: AGPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later AND CC-BY-SA-4.0
+ *
+ * The program code in this file is AGPL-3.0-or-later.  The creative work
+ * it carries (the story text) is also offered on its own
+ * under CC-BY-SA-4.0.  See PROVENANCE.md.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Affero General Public License as published by
@@ -39,7 +43,7 @@ static const SLine b2[] = {
 { CH_MARA, "You've been watching my hands for twenty minutes. Say something or tip me." },
 { CH_KESTREL, "You're not cheating the house. You're cheating the shoe. Why?" },
 { CH_MARA, "My kid's on rented lungs. Halcyon Medical, forty thousand a month, and they meter the air. I move the deck for a syndicate two tables over and they pay the difference." },
-{ CH_MARA, "You can walk to the pit. There's a forty-thousand bounty on floor irregularities. It'd clear your month." },
+{ CH_MARA, "You can walk to the pit. There's a hundred and twenty thousand on floor irregularities. It'd clear your night twice over." },
 { CH_KESTREL, "And they'd take your hands off at the wrist for it." },
 { CH_MARA, "Yes. And my kid would breathe for eleven more days." },
 };
@@ -55,7 +59,7 @@ static const SLine b3[] = {
 { CH_GREY, "I've got something for you. Mnemonic Weave, second-hand, still warm enough that I had to keep it in the cooler." },
 { CH_KESTREL, "Warm." },
 { CH_GREY, "The donor is alive. She's in a ward on sublevel two with a hole in her temporal lobe and a payment plan. She consented. That's a real word with real paperwork behind it, and it means nothing, and we both know it means nothing." },
-{ CH_GREY, "It'll flag every index play at the table. It's worth two hundred thousand and I'll put it in you for free, because I taught you to count and I would like you to survive the week." },
+{ CH_GREY, "It'll flag every index play at the table. It lists at three hundred and thirty thousand and I'll put it in you for free, because I taught you to count and I would like you to survive the week." },
 { CH_KESTREL, "And the cost." },
 { CH_GREY, "Somebody else's reflexes wearing your hands. You'll stop noticing after a night. That's the cost. Not the pain. The not noticing." },
 };
@@ -157,7 +161,7 @@ const Beat BEATS[] = {
 { "COVER", BG_TERMINAL, RAMP_GOLD, b4, 7,
   "THROW THE HANDS?",
   { "THROW THEM", "REFUSE", 0 },
-  { "-350,000cr / no pit scans this week", "the pits start looking at you", 0 }, 2,
+  { "-350,000cr / no scans this week", "the pits start looking at you", 0 }, 2,
   { EFF_LAUNDER_YES, EFF_LAUNDER_NO, 0 }, { b4a, b4b, 0 } },
 
 /* 5 - Ozerov */
@@ -181,6 +185,36 @@ const Beat BEATS[] = {
   { EFF_VAULT, 0, 0 }, { 0, 0, 0 } },
 };
 const int NBEATS = (int)(sizeof(BEATS) / sizeof(Beat));
+
+/* ---- what the city remembers ------------------------------------------ */
+const Echo ECHOES[] = {
+/* Grey has heard about the Lotus */
+{ 3, 0, FLAG_MARA_SOLD,
+  { CH_GREY, "Before that. I heard about the dealer at the Lotus. News gets down here faster than blood does. I'm not judging you. I'm telling you I heard." } },
+{ 3, 0, FLAG_MARA_SPARED,
+  { CH_GREY, "Before that. A dealer at the Lotus is cutting deep for somebody. Be careful with it. Kindness leaves a pattern too, and patterns are what they scan for." } },
+
+/* Sable sees the Weave */
+{ 4, 0, FLAG_HOT_CHROME,
+  { CH_SABLE, "You look faster around the eyes. That's Grey's work, and I am not going to ask whose it was before it was yours." } },
+
+/* the night after the cover job, or after refusing it */
+{ 5, 0, FLAG_LAUNDERED,
+  { CH_KESTREL, "I lost three hundred and fifty thousand on camera last night and it was the easiest counting I have ever done. I knew every wrong play before I made it. That is the part I keep turning over." } },
+{ 5, 0, FLAG_REFUSED_SABLE,
+  { CH_KESTREL, "The pits have been reading me all night. Sable said they would. She did not say how it feels, being looked at by people who are paid to be patient." } },
+
+/* Vesk has the Ozerov file open */
+{ 6, 1, FLAG_OZEROV_TAKEN,
+  { CH_VESK, "Mr. Ozerov's balance failed to clear, as you know better than anyone. We resolved his wife on schedule. She is doing very well in freight." } },
+{ 6, 1, FLAG_OZEROV_SPARED,
+  { CH_VESK, "You left a great deal of money on Mr. Ozerov's side of the table. We noticed. Sentiment is a tell, Ms. Naem. It is the only one you have." } },
+
+/* the Vault, if there is not much of her left to sit down */
+{ 7, 1, ECHO_DRIFT,
+  { CH_VESK, "One observation before we start. The scanner finds more of our hardware in that chair than it finds of you. We are curious which of you will be playing." } },
+};
+const int NECHOES = (int)(sizeof(ECHOES) / sizeof(Echo));
 
 int story_beat_for_night(int night)
 {

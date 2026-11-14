@@ -78,7 +78,7 @@ static void play_lines(const Beat *b, const SLine *lines, int n)
 {
     u16 offs[8];
     for (int i = 0; i < n; i++) {
-        int np = vid_wrap_pages(lines[i].text, 28, 4, offs, 8);
+        int np = ui_dialogue_pages(lines[i].text, offs, 8);
         for (int pg = 0; pg < np; pg++) {
             const char *txt = lines[i].text + offs[pg];
             int total = (pg + 1 < np) ? (int)(offs[pg + 1] - offs[pg])
@@ -116,19 +116,19 @@ static int choose(const Beat *b)
 
         beat_bg(b);
         int h = 24 + b->nchoices * 26;
-        ui_panel(12, 152 - h, 216, h - 6, C_MAG, "DECIDE");
-        vid_text(18, 158 - h, b->prompt, C_WHITE);
+        ui_panel(6, 152 - h, 228, h - 6, C_MAG, "DECIDE");
+        vid_text(12, 158 - h, b->prompt, C_WHITE);
         for (int i = 0; i < b->nchoices; i++) {
             int y = 170 - h + i * 26;
             u8 c = (i == sel) ? C_MAG : C_GRID;
-            vid_rect(18, y, 204, 22, C_BLACK);
-            vid_frame_rect(18, y, 204, 22, c);
+            vid_rect(12, y, 216, 22, C_BLACK);
+            vid_frame_rect(12, y, 216, 22, c);
             if (i == sel) {
-                ui_brackets(16, y - 2, 208, 26, C_MAG, 4);
-                vid_text(22, y + 2, "\x01", C_MAG);
+                ui_brackets(10, y - 2, 220, 26, C_MAG, 4);
+                vid_text(16, y + 2, "\x01", C_MAG);
             }
-            vid_text(32, y + 2, b->choice[i], (i == sel) ? C_WHITE : C_MID);
-            if (b->note[i]) vid_text(32, y + 12, b->note[i], (i == sel) ? C_CANDY : C_DIM);
+            vid_text(25, y + 2, b->choice[i], (i == sel) ? C_WHITE : C_MID);
+            if (b->note[i]) vid_text(25, y + 12, b->note[i], (i == sel) ? C_CANDY : C_MID);
         }
         ui_hint("\x03\x04 WEIGH IT   \x13 COMMIT");
         app_frame_end();
@@ -144,7 +144,16 @@ int sc_story(int arg)
 
     mus_play(idx >= 6 ? MUS_ASHES : MUS_NEON_RAIN);
     app_fade_in(14);
-    play_lines(b, b->line, b->nlines);
+    for (int i = 0; i < b->nlines; i++) {
+        play_lines(b, &b->line[i], 1);
+        /* earlier choices come back as a line somebody now has to say */
+        for (int e = 0; e < NECHOES; e++) {
+            const Echo *ec = &ECHOES[e];
+            if (ec->beat != idx || ec->after != i) continue;
+            int on = (ec->flag == ECHO_DRIFT) ? (g_run.drift >= 55) : g_run.flag[ec->flag];
+            if (on) play_lines(b, &ec->line, 1);
+        }
+    }
 
     g_choice_made = 0;
     if (b->nchoices > 0) {

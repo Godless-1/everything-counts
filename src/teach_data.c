@@ -1,6 +1,10 @@
 /* EVERYTHING COUNTS - a card counting story for the Game Boy Advance
  * Copyright (C) 2026 Godless-1
- * SPDX-License-Identifier: AGPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later AND CC-BY-SA-4.0
+ *
+ * The program code in this file is AGPL-3.0-or-later.  The creative work
+ * it carries (the course text) is also offered on its own
+ * under CC-BY-SA-4.0.  See PROVENANCE.md.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Affero General Public License as published by
@@ -128,7 +132,7 @@ static const Page m1[] = {
   0,0 },
 
 { PT_TEXT, "WHAT YOU GET PAID",
-  "WIN     paid 1 to 1. Bet 100, get your 100 back plus 100.\nPUSH    a tie. Your bet comes back. Nothing lost.\nLOSE    the bet is gone.\nBLACKJACK  paid 3 to 2.\n\nIf a house pays 6 to 5 on blackjack, that one change costs you 1.4% - more than every other rule combined. Walk out.",
+  "WIN    pays 1 to 1: bet 100, win 100.\nPUSH   a tie. Your bet comes back.\nLOSE   the bet is gone.\nBLACKJACK  3 to 2: bet 100, win 150.\n\nIf a house pays 6 to 5 on blackjack, that one change costs you 1.4% - more than every other rule combined. Walk out.",
   0,0,{0},0,0,0,0,0 },
 
 { PT_HAND, "DOUBLE DOWN",
@@ -290,7 +294,7 @@ static const Page m3[] = {
   0,0,{0},0,0,0, CH_GREY, 0 },
 
 { PT_PRACTICE, "PUT IT TOGETHER",
-  "Live hands, coach on, counter on. Play until the pulse checks stop frightening you.\n\nThen switch the counter off and do it again.",
+  "Live hands, coach on, counter on. Play until the pulse checks stop frightening you.\n\nThen press SELECT at the table to switch both off, and do it again.",
   0,0,{0},0,0,0,0,0 },
 };
 

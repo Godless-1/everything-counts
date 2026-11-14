@@ -80,7 +80,7 @@ const Venue VENUES[NVENUES] = {
 
 { "HALCYON SKYDECK", "SPIRE / FLOOR 188",
   "The best game in the city. Run by the people who own you.",
-  6, 85, 0, 1, 1, 0, 1, 4,  20000,  1500000,  9, 14, RAMP_CYAN,   C_CYAN,   5, 27, 68 },
+  6, 85, 0, 1, 1, 0, 1, 4,  20000,  1500000,  9, 14, RAMP_CYAN,   C_CYAN,   5, 29, 72 },
 
 { "THE VAULT", "SPIRE / BELOW THE WATERLINE",
   "One deck. Heads up. No cameras, because no witnesses.",
@@ -120,6 +120,54 @@ void run_reset(void)
     g_run.drift = 0;
     g_run.wire  = 0;
     g_run.rui   = 100;
+}
+
+/* What the player has LEARNED belongs to the player, not to one run:
+ * finished DRY RUN modules and best drill scores survive a new run. */
+void run_new(void)
+{
+    u8 lessons = g_run.lessons_done;
+    u8 best[6];
+    for (int i = 0; i < 6; i++) best[i] = g_run.best_drill[i];
+    run_reset();
+    g_run.lessons_done = lessons;
+    for (int i = 0; i < 6; i++) g_run.best_drill[i] = best[i];
+}
+
+/* seen_intro marks a started run; the other tests recognise saves written
+ * before that marker existed */
+int run_started(void)
+{
+    return g_run.seen_intro || g_run.beat_done[0] || g_run.night > 1 ||
+           g_run.hands_played > 0;
+}
+
+/* The ending is read off the run as it stands: what was paid, what was
+ * sold to pay it, and how much of the counter is left to notice. */
+int run_ending(void)
+{
+    const u8 *f = g_run.flag;
+    int paid = g_run.escrow_paid >= ESCROW_TARGET;
+    int d = g_run.drift;
+
+    if (f[FLAG_SOLD_MIND]) return d >= 55 ? END_COPY : END_INSTANCE;
+    if (g_run.rui == 0)    return END_RESOLVED;
+
+    if (paid) {
+        if (d >= 75)             return END_HOLLOWED;
+        if (g_run.rui < 100)     return END_KEPT;
+        if (f[FLAG_OZEROV_TAKEN]) return END_WARD_NINE;
+        if (d >= 35)             return END_ASCENSION;
+        if (d < 15 && f[FLAG_MARA_SPARED] && f[FLAG_OZEROV_SPARED] &&
+            f[FLAG_REFUSED_SABLE] && !f[FLAG_HOT_CHROME])
+                                 return END_COUNTS;
+        return END_FLESH;
+    }
+    if (d >= 55) return END_REPOSSESSED;
+    if (d < 15 && f[FLAG_MARA_SPARED] && f[FLAG_OZEROV_SPARED] &&
+        f[FLAG_REFUSED_SABLE] && f[FLAG_REFUSED_HALCYON] && !f[FLAG_HOT_CHROME])
+        return END_CLEAN_HANDS;
+    return END_RESOLVED;
 }
 
 void run_add_drift(int d)

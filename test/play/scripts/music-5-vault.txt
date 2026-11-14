@@ -1,0 +1,9 @@
+# plays one song from the title screen so its PSG output can be logged
+waitfor 600 UNASSISTED
+press a
+waitfor 300 NEW RUN
+music 0
+wait 20
+music 5
+wait 1200
+quit

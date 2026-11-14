@@ -1,0 +1,29 @@
+# README screenshots, part 1: a fresh cartridge
+waitfor 600 UNASSISTED
+press a
+waitfor 300 NEW RUN
+wait 40
+shot 01-title
+press a
+waitfor 300 ESCROW NOTICE
+mashuntil a 50 12 Resolved into components
+wait 70
+shot 02-prologue
+mashuntil a 50 40 DECIDE
+wait 20
+shot 03-choice
+press a
+waitfor 400 TRAINING CONSTRUCT
+wait 30
+shot 04-dryrun
+press a
+mashuntil a 40 30 THE PICTURE CARDS
+wait 60
+shot 05-lesson_cards
+mashuntil a 40 60 YOUR TURN
+wait 60
+shot 06-lesson_hand
+mashuntil a 40 20 You hold 16. You HIT
+wait 20
+shot 07-quiz
+quit

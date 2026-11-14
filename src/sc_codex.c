@@ -1,6 +1,10 @@
 /* EVERYTHING COUNTS - a card counting story for the Game Boy Advance
  * Copyright (C) 2026 Godless-1
- * SPDX-License-Identifier: AGPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later AND CC-BY-SA-4.0
+ *
+ * The program code in this file is AGPL-3.0-or-later.  The creative work
+ * it carries (the codex text) is also offered on its own
+ * under CC-BY-SA-4.0.  See PROVENANCE.md.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Affero General Public License as published by
@@ -12,6 +16,7 @@
  * ===================================================================== */
 #include "app.h"
 #include "teach.h"
+#include "save.h"
 
 enum { CX_RULES, CX_GLOSS, CX_CHART, CX_COUNT, CX_INDEX, CX_ROOMS, CX_CHROME, CX_STATS, CX_N };
 
@@ -115,7 +120,7 @@ static void codex_list(const char **lines, int n, int stride, u8 col, const char
         if (key_down(KEY_B)) { sfx(SFX_BACK); return; }
         if (sel < 0) sel = n - 1;
         if (sel >= n) sel = 0;
-        int rows = stride == 2 ? 9 : 10;
+        int rows = stride == 2 ? 8 : 10;
         if (sel < top) top = sel;
         if (sel > top + rows - 1) top = sel - rows + 1;
 
@@ -129,9 +134,9 @@ static void codex_list(const char **lines, int n, int stride, u8 col, const char
             (void)c;
         }
         if (stride == 2) {
-            vid_rect(0, 118, 240, 32, C_BLACK);
-            vid_hline(0, 118, 240, col);
-            vid_text_wrap(4, 122, 38, lines[sel * stride + 1], C_TEXT);
+            vid_rect(0, 106, 240, 44, C_BLACK);
+            vid_hline(0, 106, 240, col);
+            vid_text_wrap(4, 110, 38, lines[sel * stride + 1], C_TEXT);
         }
         ui_hint("\x03\x04 SCROLL   \x14 BACK");
         app_frame_end();
@@ -201,14 +206,13 @@ static void codex_rooms(void)
             if (i == sel) vid_hgrad(0, y - 1, 240, 11, RAMP_VIOLET, 9, 0);
             vid_text(8, y, VENUES[i].name, i == sel ? C_WHITE : VENUES[i].accent);
             char b[16]; int e = venue_edge_x100(&VENUES[i]);
-            char *p = str_int(b, e / 100); *p++ = '.';
-            p = str_uint_pad(p, (u32)(e % 100), 2, '0'); str_cat(p, "%");
-            vid_text(200, y, b, e > 100 ? C_BLOOD : (e < 35 ? C_GREEN : C_AMBER));
+            str_pct100(b, e, 0);
+            vid_text(236 - vid_text_len(b), y, b, e > 100 ? C_BLOOD : (e < 35 ? C_GREEN : C_AMBER));
         }
         vid_rect(0, 86, 240, 64, C_BLACK);
         vid_hline(0, 86, 240, v->accent);
         char b[48], *p;
-        p = str_int(b, v->decks); p = str_cat(p, " DECKS   ");
+        p = str_int(b, v->decks); p = str_cat(p, v->decks == 1 ? " DECK   " : " DECKS   ");
         p = str_int(p, v->pen); str_cat(p, "% PENETRATION");
         vid_text(4, 90, b, C_TEXT);
         p = str_cat(b, v->h17 ? "H17  " : "S17  ");
@@ -321,11 +325,11 @@ int sc_codex(int arg)
             }
             vid_text(20, y, SECT[i], c);
         }
-        vid_rect(0, 136, 240, 24, C_BLACK);
-        vid_hline(0, 136, 240, C_GRID);
-        vid_text(4, 138, "ALL OF IT IS FREE, AND ALWAYS OPEN.", C_DIM);
-        vid_text(4, 147, "THE HOUSE HAS NO RULE AGAINST KNOWING.", C_DIM);
-        vid_text(4, 155, "AGPLv3 \x12 \x7F 2026 GODLESS-1 \x12 NO WARRANTY", C_GRID);
+        vid_rect(0, 129, 240, 31, C_BLACK);
+        vid_hline(0, 129, 240, C_GRID);
+        vid_text(4, 132, "ALL OF IT IS FREE, AND ALWAYS OPEN.", C_MID);
+        vid_text(4, 141, "THE HOUSE HAS NO RULE AGAINST KNOWING.", C_MID);
+        vid_text(4, 151, "AGPLv3 \x12 \x7F 2026 GODLESS-1 \x12 NO WARRANTY", C_DIM);
         app_frame_end();
     }
 }
@@ -346,7 +350,7 @@ int sc_teach(int arg)
         if (key_down(KEY_A)) {
             sfx(SFX_SELECT);
             if (sel < NLESSONS) {
-                if (teach_run_lesson(sel)) g_run.lessons_done |= (1 << sel);
+                if (teach_run_lesson(sel)) { g_run.lessons_done |= (1 << sel); save_write(); }
             } else {
                 teach_chart_browser();
             }
@@ -356,7 +360,11 @@ int sc_teach(int arg)
 
         ui_backdrop(BG_CLINIC, g_t, RAMP_GREEN);
         ui_titlebar("DRY RUN", "B: BACK", C_GREEN);
-        vid_text_center(120, 16, "GREY'S TRAINING CONSTRUCT", C_DIM);
+        /* the lamp cone is bright: the list gets its own dark plate */
+        vid_rect(0, 12, 240, 13, C_BLACK);
+        vid_hline(0, 24, 240, C_CYAND);
+        vid_text_center(120, 14, "GREY'S TRAINING CONSTRUCT", C_GREEN);
+        ui_panel(2, 29, 236, 88, C_GREEN, 0);
         for (int i = 0; i < NLESSONS; i++) {
             int y = 34 + i * 20;
             u8 c = C_GREEN;
@@ -384,8 +392,10 @@ int sc_teach(int arg)
             vid_text(58, y, "THE STRATEGY CHART", c);
             vid_text(58, y + 9, "browse every decision", C_DIM);
         }
-        vid_text(4, 138, "NEVER PLAYED CARDS? START AT MOD 1.", C_DIM);
-        vid_text(4, 148, "NOTHING HERE ASSUMES YOU HAVE.", C_DIM);
+        vid_rect(0, 132, 240, 28, C_BLACK);
+        vid_hline(0, 132, 240, C_GRID);
+        vid_text(4, 137, "NEVER PLAYED CARDS? START AT MOD 1.", C_MID);
+        vid_text(4, 148, "NOTHING HERE ASSUMES YOU HAVE.", C_MID);
         app_frame_end();
     }
 }

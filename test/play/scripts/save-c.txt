@@ -1,0 +1,11 @@
+# Part 3 (cold start again): CONTINUE must still offer the same campaign
+wait 30
+dump reboot
+press a
+wait 60
+press down
+press a
+wait 80
+dump hub
+shot hub-after
+quit

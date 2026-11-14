@@ -1,0 +1,48 @@
+# A counter who is mostly chrome: the flat hub lines, coming round after an
+# install, the ledger that did not dream, and Kestrel's own portrait.
+set night 4
+set creds 900000
+set escrow 500000
+set drift 82
+set wire 60
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set flag.3 1
+set started 1
+save
+waitfor 600 UNASSISTED
+press a
+waitfor 300 CONTINUE
+press down
+press a
+waitfor 300 FIND A GAME
+mash down 3 10
+wait 20
+shot hub-vacant
+mash up 2 10
+press a
+waitfor 300 SUBLEVEL 2
+mash down 6 10
+press a
+waitfor 200 CUT ME OPEN
+press a
+waitfor 300 INSTALLED
+wait 20
+shot installed
+press a
+press b
+waitfor 300 FIND A GAME
+mashuntil up 8 12 suspend. resume
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+wait 20
+shot ledger-vacant
+press a
+mashuntil a 40 30 I lost three hundred
+wait 80
+shot kestrel-vacant
+quit

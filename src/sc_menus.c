@@ -1,6 +1,10 @@
 /* EVERYTHING COUNTS - a card counting story for the Game Boy Advance
  * Copyright (C) 2026 Godless-1
- * SPDX-License-Identifier: AGPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later AND CC-BY-SA-4.0
+ *
+ * The program code in this file is AGPL-3.0-or-later.  The creative work
+ * it carries (the endings and Rui's lines) is also offered on its own
+ * under CC-BY-SA-4.0.  See PROVENANCE.md.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Affero General Public License as published by
@@ -23,14 +27,14 @@ int sc_title(int arg)
 {
     (void)arg;
     int sel = 0;
-    int has_save = save_exists();
-    if (!has_save) sel = 0;
+    int has_save = run_started();
     mus_play(MUS_NEON_RAIN);
     key_flush();
     app_fade_in(16);
 
     for (;;) {
         app_frame_begin();
+        has_save = run_started();
         MenuItem m[5] = {
             { "NEW RUN",  0, 1, C_MAG },
             { "CONTINUE", 0, (u8)has_save, C_CYAN },
@@ -46,14 +50,15 @@ int sc_title(int arg)
                 case 0:
                     if (!has_save || confirm_box("START A NEW RUN? THE SAVED ONE IS OVERWRITTEN.",
                                                  "NEW RUN", "CANCEL", C_MAG, BG_RAIN, RAMP_MAG)) {
-                        run_reset();
+                        run_new();
+                        g_run.seen_intro = 1;
                         save_write();
                         app_fade_out(16);
                         return SC_STORY;
                     }
                     key_flush();
                     break;
-                case 1: save_read(); app_fade_out(16); return SC_HUB;
+                case 1: app_fade_out(16); return SC_HUB;
                 case 2: app_fade_out(12); return SC_TEACH;
                 case 3: app_fade_out(12); return SC_DRILL;
                 case 4: app_fade_out(12); return SC_CODEX;
@@ -158,11 +163,30 @@ static void hub_rui_call(void)
       "Who is this? ... No. No, I have you. I have you. It just took a second and it shouldn't take a second.",
       "I'd like to talk to my sister. I'm told that's who I'm speaking to."
     };
+    /* the first call of each night is that night's call; after that she
+     * says what she says whenever you ring */
+    static const char *nightly[NIGHTS] = {
+      "They give me one sense at a time in here. Tonight it's hearing. So talk. Tell me what the rain is doing.",
+      "Is it the second night? They don't give me a clock. I count your calls instead. This is the second one, so: two.",
+      "I tried to remember our kitchen and it came back as a floor plan. Accurate. No smell. Bring me the smell when you come.",
+      "Somebody in the next partition has stopped answering to their name. I've been practising mine. Rui. Rui. Say it back to me.",
+      "You're tired. I can hear you being careful with me. Don't be careful. Be quick.",
+      "A man from Halcyon asked me today what you were like as a child. I told him you cheated at cards. He wrote it down.",
+      "Last night, then. Whatever walks out of that room tomorrow, make sure it's the one who used to let me win.",
+    };
     int lvl = run_drift_level();
-    const char *line = (lvl <= 1) ? warm[rng_below(3)] : cold[rng_below(3)];
-    g_run.flag[FLAG_RUI_CALLED] = 1;
+    int n = g_run.night;
+    const char *line;
+    if (n >= 1 && n <= NIGHTS && g_run.flag[FLAG_RUI_CALLED] != n) {
+        if (lvl <= 1)        line = nightly[n - 1];
+        else if (n == NIGHTS) line = "Last night. I have stopped being sure which of us is the one in escrow. Come and get me anyway.";
+        else                 line = cold[(n - 1) % 3];
+    } else {
+        line = (lvl <= 1) ? warm[rng_below(3)] : cold[rng_below(3)];
+    }
+    g_run.flag[FLAG_RUI_CALLED] = (u8)n;   /* the night of the latest call */
     u16 offs[8];
-    int np = vid_wrap_pages(line, 28, 4, offs, 8);
+    int np = ui_dialogue_pages(line, offs, 8);
     for (int pg = 0; pg < np; pg++) {
         const char *txt = line + offs[pg];
         int total = (pg + 1 < np) ? (int)(offs[pg + 1] - offs[pg]) : (int)ec_strlen(txt);
@@ -255,11 +279,13 @@ int sc_hub(int arg)
         ui_titlebar("KESTREL / SUBLET 14-C", "SELECT: CODEX", C_CYAN);
         hub_status();
 
+        /* the city is busy; the menu sits on its own plate */
+        ui_panel(2, 61, 136, 80, C_CYAND, 0);
         for (int i = 0; i < 7; i++) {
             int y = 64 + i * 11;
             u8 c = m[i].enabled ? m[i].colour : C_DIM;
             if (i == sel) {
-                vid_hgrad(4, y - 1, 150, 11, RAMP_VIOLET, 10, 0);
+                vid_hgrad(4, y - 1, 132, 11, RAMP_VIOLET, 10, 0);
                 vid_text(6, y, "\x01", c);
                 c = C_WHITE;
             }
@@ -276,9 +302,20 @@ int sc_hub(int arg)
             "tags, running count, true, indices.",
             "what you have is what you have.",
         };
+        /* past a certain drift the room stops talking like a person */
+        static const char *flat[7] = {
+            "select venue. variance is acceptable.",
+            "additional capacity is available.",
+            "obligation outstanding. remit.",
+            "contact: NAEM, RUI. relation: see file.",
+            "retraining is not required.",
+            "calibration is not required.",
+            "suspend. resume at next cycle.",
+        };
         vid_rect(0, 143, 240, 17, C_BLACK);
         vid_hline(0, 143, 240, C_GRID);
-        vid_text(4, 147, hint[sel], C_DIM);
+        vid_text(4, 147, run_drift_level() >= 3 ? flat[sel] : hint[sel],
+                 run_drift_level() >= 3 ? C_MAGD : C_DIM);
         app_frame_end();
     }
 }
@@ -299,7 +336,8 @@ int sc_venue(int arg)
         if (key_repeat(KEY_UP))   { sel = (sel + NVENUES - 1) % NVENUES; sfx(SFX_MOVE); }
         if (key_down(KEY_B)) { sfx(SFX_BACK); app_fade_out(10); return SC_HUB; }
         const Venue *v = &VENUES[sel];
-        int locked = g_run.night < v->night_min || sel == 5;
+        int barred = g_run.venue_locked[sel];
+        int locked = g_run.night < v->night_min || sel == 5 || barred;
         if (key_down(KEY_A)) {
             if (locked) { sfx(SFX_DENY); }
             else if (g_run.creds < v->min_bet) { sfx(SFX_DENY); }
@@ -321,7 +359,7 @@ int sc_venue(int arg)
         for (int i = 0; i < NVENUES; i++) {
             int y = 15 + i * 11;
             const Venue *w = &VENUES[i];
-            int lk = g_run.night < w->night_min || i == 5;
+            int lk = g_run.night < w->night_min || i == 5 || g_run.venue_locked[i];
             u8 c = lk ? C_DIM : w->accent;
             if (i == sel) {
                 vid_hgrad(0, y - 1, 240, 11, RAMP_VIOLET, 9, 0);
@@ -360,26 +398,23 @@ int sc_venue(int arg)
             int e = venue_edge_x100(v);
             int cc = venue_counter_x100(v);
             p = str_cat(b, "HOUSE ");
-            if (e < 0) { *p++ = '-'; e = -e; }
-            p = str_int(p, e / 100); *p++ = '.';
-            p = str_uint_pad(p, (u32)(e % 100), 2, '0'); str_cat(p, "%");
+            str_pct100(p, e, 0);
             vid_text(4, ry, b, e > 100 ? C_BLOOD : (e < 35 ? C_GREEN : C_AMBER));
 
             p = str_cat(b, "COUNTER ");
-            if (cc < 0) { *p++ = '-'; } else { *p++ = '+'; }
-            int ac = cc < 0 ? -cc : cc;
-            p = str_int(p, ac / 100); *p++ = '.';
-            p = str_uint_pad(p, (u32)(ac % 100), 2, '0'); str_cat(p, "%");
+            str_pct100(p, cc, 1);
             vid_text(100, ry, b, cc > 0 ? C_GREEN : C_BLOOD);
         }
 
         ry += 11;
         if (g_run.night < v->night_min) {
-            p = str_cat(b, "WORD OF THIS ROOM REACHES YOU ON NIGHT ");
+            p = str_cat(b, "WORD OF THIS ROOM COMES ON NIGHT ");
             str_int(p, v->night_min);
             vid_text(4, ry, b, C_DIM);
         } else if (sel == 5) {
             vid_text(4, ry, "BY INVITATION ONLY.", C_DIM);
+        } else if (barred) {
+            vid_text(4, ry, "BACKED OFF. NOT THIS ROOM, NOT TONIGHT.", C_BLOOD);
         } else {
             if (v->bj65) vid_text(4, ry, "6:5 - THIS ROOM IS A TAX", C_BLOOD);
             vid_text(236 - vid_text_len("\x13 SIT DOWN"), ry, "\x13 SIT DOWN", C_WHITE);
@@ -419,6 +454,20 @@ int sc_clinic(int arg)
                     sfx(SFX_IMPLANT);
                     app_flash(C_WHITE, 24);
                     save_write();
+                    if (im->drift > 0) {
+                        /* coming round */
+                        key_flush();
+                        for (;;) {
+                            app_frame_begin();
+                            if (key_down(KEY_A)) { sfx(SFX_SELECT); break; }
+                            ui_backdrop(BG_CLINIC, g_t, RAMP_GREEN);
+                            ui_panel(14, 34, 212, 92, im->colour, "INSTALLED");
+                            vid_text_wrap(21, 44, 33,
+                                "You come round on the table and count to ten, to check that you still can.\n\nYou can. Something counts along with you, half a beat ahead, and stops when you stop.", C_TEXT);
+                            ui_hint("\x13 GET UP");
+                            app_frame_end();
+                        }
+                    }
                 }
                 key_flush();
             }
@@ -428,10 +477,9 @@ int sc_clinic(int arg)
         vid_rect(0, 12, 240, 82, C_BLACK);
         vid_rect_dither(0, 12, 240, 82, C_BLACK, C_INDIGO);
         vid_hline(0, 93, 240, C_GREEN);
-        ui_titlebar("GREY / SUBLEVEL 2", "B: LEAVE", C_GREEN);
         {
             char b[24]; b[0] = 0x09; str_money(b + 1, g_run.creds);
-            vid_text(236 - vid_text_len(b), 2, b, C_WHITE);
+            ui_titlebar("GREY / SUBLEVEL 2", b, C_GREEN);
         }
 
         for (int i = 0; i < IMP_COUNT; i++) {
@@ -465,8 +513,8 @@ int sc_clinic(int arg)
         p = str_cat(b, "WIRE +"); p = str_int(p, v->wire);
         vid_text(4, 150, b, C_ICE);
         p = str_cat(b, "DRIFT +"); p = str_int(p, v->drift);
-        vid_text(70, 150, b, C_MAG);
-        if (v->drift == 0) vid_text(150, 150, "CLEAN CHROME", C_GREEN);
+        vid_text(64, 150, b, C_MAG);
+        vid_text(236 - vid_text_len("\x13 BUY  \x14 LEAVE"), 150, "\x13 BUY  \x14 LEAVE", C_DIM);
         app_frame_end();
     }
 }
@@ -505,6 +553,8 @@ int sc_night_end(int arg)
             if (g_run.rui == 0) { g_run.ending = 2; return SC_ENDING; }
             if (g_run.night >= NIGHTS) { g_run.ending = 0; return SC_ENDING; }
             g_run.night++;
+            /* a new night, a new shift in every pit */
+            for (int i = 0; i < NVENUES; i++) g_run.venue_locked[i] = 0;
             save_write();
             return SC_STORY;
         }
@@ -536,10 +586,16 @@ int sc_night_end(int arg)
         p = str_cat(p, "  "); str_cat(p, run_drift_name());
         vid_text(16, y, b, C_MAG);
 
+        vid_rect(0, 138, 240, 12, C_BLACK);
         if (lien) {
-            vid_rect(0, 138, 240, 12, C_BLACK);
             vid_text_center(120, 140, "LIEN APPLIED. THEY TOOK A PIECE OF HER.", C_BLOOD);
             ui_noise(0, 0, 240, 160, g_t, C_BLOOD, 30);
+        } else if (run_drift_level() >= 3) {
+            vid_text_center(120, 140, "YOU DID NOT DREAM. IT DEFRAGMENTED.", C_MAGD);
+        } else if (due > 0) {
+            vid_text_center(120, 140, "HALCYON THANKS YOU FOR YOUR PROMPTNESS.", C_DIM);
+        } else {
+            vid_text_center(120, 140, "NOTHING OWED TONIGHT. THEY WILL WAIT.", C_DIM);
         }
         ui_hint("\x13 SLEEP");
         app_frame_end();
@@ -556,33 +612,44 @@ static const Ending ENDINGS[] = {
   "You paid it in full with a head nobody touched.\n\nThey grow her a body in eleven days. She comes out of the tank furious about the haircut and she knows your voice on the first syllable.\n\nYou never play again. You keep the count anyway - it is yours, it was always the only thing that was.",
   C_GREEN, RAMP_GREEN },
 { "ASCENSION",
-  "You paid it in full, and there is less of you than there was.\n\nShe comes out of the tank. She looks at you for four seconds too long before she says your name, and she never once mentions the pause.\n\nYou tell yourself you would do it again. The part of you that would have argued was sold on night three.",
+  "You paid it in full, and there is less of you than there was.\n\nShe comes out of the tank. She looks at you for four seconds too long before she says your name, and she never once mentions the pause.\n\nYou tell yourself you would do it again. The part of you that would have argued went quiet nights ago. You did not hear it go.",
   C_MAG, RAMP_MAG },
 { "AN INSTANCE OF YOU",
-  "Rui walks out in the morning, exactly as promised.\n\nSomewhere under the Spire a description of you sits at nine hundred tables at once and never gets tired and never gets bored and never once wonders why it is doing this.\n\nIt is not you. That distinction is legally settled. She visits it on Sundays.",
+  "Rui walks out in the morning, exactly as promised.\n\nSomewhere under the Spire a description of you sits at nine hundred tables at once. It never gets tired, never gets bored and never wonders why it is doing this.\n\nIt is not you. That distinction is legally settled. She visits it on Sundays.",
   C_PALE, RAMP_CHROME },
 { "RESOLVED",
-  "The balance did not clear.\n\nThey do not make a ceremony of it. An adjudicator reads a number out, and the parts of her that were worth something go into a composite mind that manages freight scheduling on the orbital lift.\n\nSomewhere in that system, occasionally, a shipment is routed the long way past the window with the good view of the city.",
+  "The balance did not clear.\n\nThey do not make a ceremony of it. An adjudicator reads out a number, and what was worth something of her goes into a composite mind that schedules freight on the orbital lift.\n\nNow and then, in that system, a shipment is routed the long way, past the window with the good view of the city.",
   C_BLOOD, RAMP_ALERT },
 { "HOLLOWED",
   "You cleared the balance. You can no longer remember why it mattered.\n\nThe chrome counts. The chrome bets. The chrome smiles at the woman who comes out of the tank and calls her by her name because that is what the file says to do.\n\nShe stays for a year. Then she leaves, and you file it correctly.",
   C_PURPLE, RAMP_VIOLET },
+{ "EVERYTHING COUNTS",
+  "You paid it in full, and every credit was counted by hand.\n\nShe comes out of the tank swearing. A dealer at the Lotus still has both hands. A man at the Sutra is still losing slowly, for love.\n\nHalcyon sends a card. A chair number, and three words: WHEN YOU ARE READY.",
+  C_CYAN, RAMP_CYAN },
+{ "WARD NINE",
+  "You paid it in full. Part of it was his.\n\nRui walks out on new legs and stops at the next cradle, the empty one, still wet. She says the woman in it used to hum.\n\nThe freight on the orbital lift runs four seconds late that week. Nobody finds the fault. Rui hums in her sleep.",
+  C_ORANGE, RAMP_ALERT },
+{ "WHAT THEY KEPT",
+  "You cleared the balance. The liens were not refundable.\n\nShe thanks you by name, correctly, the way you would thank a driver. She does not laugh at the haircut. The laugh was a component.\n\nSome nights she stands in the kitchen with a cup, waiting for a habit to arrive. You count the seconds for her.",
+  C_CANDY, RAMP_MAG },
+{ "REPOSSESSED",
+  "The balance did not clear, and the chrome was never yours.\n\nHalcyon recovers its hardware under local anaesthetic. They are careful. They leave everything of you that was not load-bearing.\n\nIn the lobby you begin counting the floor tiles. You cannot stop, and you cannot say what comes after six.",
+  C_BLOOD, RAMP_ALERT },
+{ "CLEAN HANDS",
+  "The balance did not clear. You never sold anyone to make it clear.\n\nThey let you listen while they resolve her. It takes eleven minutes and sounds like a dial tone learning to breathe.\n\nYou walk home unassisted. Your count is perfect. There is nothing left in the city you would spend it on.",
+  C_ICE, RAMP_CYAN },
+{ "A COPY OF A COPY",
+  "Rui walks out in the morning, exactly as promised.\n\nWhat Halcyon imaged was mostly Halcyon. The instance plays nine hundred tables without error, and every four seconds it opens a ticket asking who Rui is.\n\nThe tickets close automatically. You know, because you are the one who closes them.",
+  C_PALE, RAMP_CHROME },
 };
 
 int sc_ending(int arg)
 {
     (void)arg;
-    int e;
-    if (g_run.flag[FLAG_SOLD_MIND])      e = 2;
-    else if (g_run.rui == 0)             e = 3;
-    else if (g_run.escrow_paid >= ESCROW_TARGET) {
-        if (g_run.drift >= 75)           e = 4;
-        else if (g_run.drift >= 35)      e = 1;
-        else                             e = 0;
-    } else                               e = 3;
+    int e = run_ending();      /* ENDINGS[] is in END_* order */
 
     const Ending *E = &ENDINGS[e];
-    mus_play(e == 0 ? MUS_NEON_RAIN : MUS_ASHES);
+    mus_play((e == END_FLESH || e == END_COUNTS) ? MUS_NEON_RAIN : MUS_ASHES);
     key_flush();
     app_fade_in(24);
     int chars = 0;
@@ -597,7 +664,7 @@ int sc_ending(int arg)
         ui_backdrop(BG_VOID, g_t, E->ramp);
         vid_hline(0, 26, 240, E->col);
         vid_text_center_s(120, 10, E->title, E->col, 2);
-        vid_text_wrap_n(10, 36, 37, E->body, C_TEXT, chars);
+        vid_text_wrap_n(10, 32, 37, E->body, C_TEXT, chars);   /* room for 12 lines */
         if (chars >= total) ui_hint("\x13");
         app_frame_end();
     }
@@ -606,7 +673,12 @@ int sc_ending(int arg)
     key_flush();
     for (;;) {
         app_frame_begin();
-        if (key_down(KEY_A)) { sfx(SFX_SELECT); app_fade_out(20); save_erase(); return SC_TITLE; }
+        if (key_down(KEY_A)) {
+            /* the run is over; what was learned along the way is kept */
+            sfx(SFX_SELECT); app_fade_out(20);
+            run_new(); save_write();
+            return SC_TITLE;
+        }
         ui_backdrop(BG_TERMINAL, g_t, E->ramp);
         ui_titlebar("RUN REPORT", 0, E->col);
         char b[48], *p;

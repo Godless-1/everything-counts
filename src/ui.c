@@ -1,6 +1,10 @@
 /* EVERYTHING COUNTS - a card counting story for the Game Boy Advance
  * Copyright (C) 2026 Godless-1
- * SPDX-License-Identifier: AGPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later AND CC-BY-SA-4.0
+ *
+ * The program code in this file is AGPL-3.0-or-later.  The creative work
+ * it carries (the backdrops and portraits) is also offered on its own
+ * under CC-BY-SA-4.0.  See PROVENANCE.md.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Affero General Public License as published by
@@ -109,21 +113,38 @@ static void bg_grid(u32 t, u8 ramp)
     }
 }
 
+/* how far in from each rail the three rings of the light pool begin on
+ * each scanline: parabolas, worked out once (division is dear here) */
+static u8 felt_edge[SCREEN_H][3];
+static u8 felt_ready;
+
 static void bg_felt(u32 t, u8 ramp)
 {
-    /* pool of light falling on green-black felt */
+    if (!felt_ready) {
+        for (int j = 0; j < SCREEN_H; j++) {
+            int d = j - 62;
+            int q = d * d;
+            int a = 2 + q / 70, b = 10 + q / 42, c = 20 + q / 28;
+            felt_edge[j][0] = (u8)(a > 119 ? 119 : a);
+            felt_edge[j][1] = (u8)(b > 119 ? 119 : b);
+            felt_edge[j][2] = (u8)(c > 119 ? 119 : c);
+        }
+        felt_ready = 1;
+    }
+    /* A pool of light on dark felt.  Brightness falls away from the
+     * middle of the table in every direction, and the scanline banding
+     * runs right out to the rail, so the edges read as shadow instead of
+     * as two flat bars painted over the picture. */
     for (int j = 0; j < 160; j++) {
         int d = j - 62; if (d < 0) d = -d;
         int v = 5 - d / 15;
         if (v < 0) v = 0;
-        int base = (j & 1) ? 0 : 1;
-        vid_hline(0, j, 240, (u8)(ramp + base + v));
-    }
-    /* vignette down the sides */
-    for (int i = 0; i < 18; i++) {
-        u8 c = (u8)(ramp + (i / 12));
-        vid_vline(i, 0, 160, c);
-        vid_vline(239 - i, 0, 160, c);
+        int scan = (j & 1) ? 0 : 1;
+        const u8 *e = felt_edge[j];
+        vid_hline(0, j, 240, (u8)(ramp + scan));
+        if (v > 1) vid_hline(e[0], j, 240 - 2 * e[0], (u8)(ramp + scan + v / 3));
+        if (v > 0) vid_hline(e[1], j, 240 - 2 * e[1], (u8)(ramp + scan + (v + 1) / 2));
+        vid_hline(e[2], j, 240 - 2 * e[2], (u8)(ramp + scan + v));
     }
     /* betting arc + insurance line */
     for (int x = 8; x < 232; x++) {
@@ -155,7 +176,9 @@ static void bg_terminal(u32 t, u8 ramp)
     for (int j = 0; j < 26; j++) {
         int yy = sy + j;
         if (yy < 0 || yy >= 160) continue;
-        int v = (j < 13) ? j : 26 - j;
+        /* a faint pass of light: text sits on this backdrop, so the head
+         * must never get bright enough to wash a line out */
+        int v = ((j < 13) ? j : 26 - j) / 3;
         vid_hline(0, yy, 240, (u8)(ramp + 2 + v));
     }
     ui_noise(0, 0, 240, 160, t, (u8)(ramp + 16), 26);
@@ -454,18 +477,42 @@ void ui_portrait(int x, int y, int id, u32 t)
             for (int i = 0; i < 4; i++)
                 vid_vline(cx - 7 + i * 5, ey - 1, 5, (u8)(rp + 10 + ((t / 8 + i) % 8)));
             break;
-        case 4:
-            vid_rect(cx - 8, ey, 3, 3, C_WHITE);
+        case 4: {
+            /* Kestrel's own face keeps the score.  The more of the
+             * counting the chrome does, the less the left eye is hers:
+             * it takes the implant's colour, then stops being an eye. */
+            int lvl = (id == CH_KESTREL) ? run_drift_level() : 0;
+            vid_rect(cx - 8, ey, 3, 3, lvl >= 2 ? c->accent : C_WHITE);
             vid_rect(cx + 4, ey, 3, 3, c->accent);
             vid_line(cx + 5, ey - 5, cx + 3, ey + 8, (u8)(rp + 13));
             vid_plot(cx + 4, ey + 4, c->accent);
+            if (lvl >= 3) {
+                vid_line(cx - 7, ey - 5, cx - 5, ey + 8, (u8)(rp + 13));
+                vid_plot(cx - 6, ey + 4, c->accent);
+            }
+            if (lvl >= 4) {
+                vid_rect(cx - 10, ey - 1, 20, 5, C_BLACK);
+                vid_hline(cx - 9, ey + 1, 18, (u8)(rp + 10 + ((t / 6) % 8)));
+            }
             break;
+        }
         default:
             vid_rect(cx - 8, ey, 3, 3, C_WHITE);
             vid_rect(cx + 4, ey, 3, 3, C_WHITE);
             vid_plot(cx - 7, ey + 1, C_BLACK);
             vid_plot(cx + 5, ey + 1, C_BLACK);
             break;
+    }
+    /* anyone with a bare eye blinks now and then; a feed that never
+     * blinks reads as a still picture */
+    if (c->visor != 1 && c->visor != 3 && ((t + (u32)id * 37u) % 190u) < 5u &&
+        !(id == CH_KESTREL && run_drift_level() >= 3)) {      /* she has stopped blinking */
+        vid_rect(cx - 8, ey, 3, 3, RAMP_CHROME + 8);
+        vid_hline(cx - 8, ey + 2, 3, RAMP_CHROME + 4);
+        if (c->visor == 0 || c->visor == 4) {
+            vid_rect(cx + 4, ey, 3, 3, RAMP_CHROME + 8);
+            vid_hline(cx + 4, ey + 2, 3, RAMP_CHROME + 4);
+        }
     }
 
     /* cheek / neck chrome */
@@ -495,6 +542,48 @@ void ui_portrait(int x, int y, int id, u32 t)
 
 int ui_dialogue_len(const char *text) { return (int)ec_strlen(text); }
 
+#define DLG_COLS 28
+#define DLG_ROWS 4
+#define DLG_MAX  420
+
+/* A speech longer than the box is shown a page at a time.  Pages end on
+ * the last whole sentence that fits, so nobody is left holding one word
+ * on a page of its own; a sentence too long for the box is cut where the
+ * lines run out, as before. */
+int ui_dialogue_pages(const char *s, u16 *offs, int maxp)
+{
+    char tmp[DLG_MAX];
+    int np = 0, start = 0, len = (int)ec_strlen(s);
+    while (start < len && np < maxp) {
+        offs[np++] = (u16)start;
+        int best = -1;
+        for (int e = start; e < len; e++) {
+            char c = s[e];
+            int end_of_sentence = (c == '.' || c == '?' || c == '!') &&
+                                  (s[e + 1] == ' ' || s[e + 1] == 0);
+            if (!end_of_sentence && e + 1 < len) continue;
+            int n = e + 1 - start;
+            if (n > DLG_MAX - 1) break;
+            for (int i = 0; i < n; i++) tmp[i] = s[start + i];
+            tmp[n] = 0;
+            if (vid_text_wrap_lines(DLG_COLS, tmp) > DLG_ROWS) break;
+            best = e + 1;
+        }
+        if (best < 0) {                 /* one sentence, taller than the box */
+            u16 sub[4];
+            int n = len - start;
+            if (n > DLG_MAX - 1) n = DLG_MAX - 1;
+            for (int i = 0; i < n; i++) tmp[i] = s[start + i];
+            tmp[n] = 0;
+            int k = vid_wrap_pages(tmp, DLG_COLS, DLG_ROWS, sub, 4);
+            best = (k > 1) ? start + sub[1] : len;
+        }
+        start = best;
+        while (s[start] == ' ') start++;
+    }
+    return np ? np : 1;
+}
+
 void ui_dialogue_box(int speaker, const char *text, int nchars, u32 t)
 {
     const CharDef *c = &CHARS[speaker % CH_COUNT];
@@ -512,7 +601,7 @@ void ui_dialogue_box(int speaker, const char *text, int nchars, u32 t)
     vid_frame_rect(bx + 5, by - 5, nw + 6, 10, c->accent);
     vid_text(bx + 8, by - 4, c->name, c->accent);
 
-    vid_text_wrap_n(bx + 5, by + 7, 28, text, C_TEXT, nchars);
+    vid_text_wrap_n(bx + 5, by + 7, DLG_COLS, text, C_TEXT, nchars);
 
     if (nchars >= (int)ec_strlen(text) && ((t / 16) & 1))
         vid_text(bx + bw - 11, by + bh - 11, "\x04", c->accent);

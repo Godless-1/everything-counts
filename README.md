@@ -60,7 +60,8 @@ off and letting the machine do the work is always available, always effective,
 and it permanently changes who walks out at the end. Rui can hear the latency
 in your voice over the escrow line. She will not mention it.
 
-There are five endings. Only one of them has you in it.
+There are eleven endings. They are decided by what you paid, who you sold to
+pay it, and how much of you is left to notice. Very few of them have you in them.
 
 | Night | What is asked of you |
 |:--:|---|
@@ -141,7 +142,7 @@ faces and the neon are all code.
 ## The maths is measured, not asserted
 
 `make test` builds the same `blackjack.c` / `cards.c` / `game.c` that ship in the
-ROM against host shims and runs **402 checks**:
+ROM against host shims and runs **451 checks**:
 
 - card values, soft/hard evaluation, blackjack vs. a 21 built from three cards,
   21 after a split
@@ -155,7 +156,13 @@ ROM against host shims and runs **402 checks**:
 - **decision EV probes** (dealer already peeked) that settle borderline
   surrender calls by measurement rather than memory — this caught a wrong cell
   in the chart during development
-- **4,000,000 hands per room** of Hi-Lo with a 1–12 spread
+- **4,000,000 hands per room** of Hi-Lo with a 1–12 spread, and that the
+  counter's edge printed on the venue board matches it
+- **settlement**: what every kind of round does to the bankroll (win, loss,
+  push, blackjack at 3:2 and 6:5, doubles, surrender, all four insurance
+  outcomes, split hands), and when the dealer must not draw
+- **every ending** is reached by the run it describes, and all eleven are reachable
+- a single deck cut deep enough to **run dry mid-round** never deals a blank
 
 ```
 THE SLAG PIT       house 0.55%   counter +1.11%   two decks, bad light, honest odds
@@ -167,6 +174,25 @@ THE VAULT          house -0.07%  counter +8.75%   one deck, cut to the felt
 ```
 
 Those are the numbers the game prints on its own venue board.
+
+### The whole game is played by the tests, too
+
+`make test` then builds **every source file of the game** for the build
+machine (address and undefined-behaviour sanitizers on) and plays scripted
+sessions through it — no emulator involved:
+
+- five hands from a stacked shoe at the Golden Lotus, checking the bankroll
+  to the credit after each one
+- a campaign in progress, the drills opened from the title screen, two cold
+  starts: the campaign must still be in the save
+- tours of every screen (all seven nights, both tables, the course, the
+  codex, the drills, all eleven endings) with a watcher on every glyph the renderer
+  draws: any text **clipped by the screen edge, drawn over other text, or
+  painted over before the frame is shown** fails the run
+
+`test/play/psg.py` renders the logged sound-chip registers to a WAV and
+lists the notes, and `make selftest` builds a ROM that measures the shuffle
+on the target CPU itself.
 
 ---
 
@@ -192,8 +218,9 @@ Needs a bare-metal `arm-none-eabi` GCC and Python 3. **devkitPro is not required
 
 ```bash
 make            # -> dist/everything-counts.gba
-make test       # host-side verification of the rules engine
-make debug      # late-run build used only by the test harness
+make test       # rules engine (millions of hands) + scripted play-throughs
+make debug      # late-run build used only by the emulator harness
+make selftest   # ROM that measures the shuffle on the target CPU
 make clean
 ```
 
@@ -232,6 +259,8 @@ tools/
   gbafix.py       header complement + ROM padding
 test/
   host/           rules verification (runs on the host, not the GBA)
+  play/           the whole game built for the host: scripted sessions,
+                  screenshots, text watcher, PSG-to-WAV renderer
   drive.py        emulator-driven screenshot harness
   soak.py         random-input soak test
 ```
@@ -242,7 +271,9 @@ test/
 
 Playable end to end and verified by simulation, but this is an **alpha**.
 The full seven-night arc has been driven by the automated harness rather than
-finished by a human, so balance across nights 5–7 is unproven. Bug reports,
+finished by a human, so balance across nights 5–7 is unproven. (Until the
+settlement fix in this revision, a won hand paid nothing and a lost one cost
+double; any impression of the balance formed before it is void.) Bug reports,
 especially "the game said my play was wrong and it wasn't", are very welcome —
 `make test` exists precisely so those can be settled by measurement.
 
@@ -258,6 +289,10 @@ Copyleft, as appropriate to each kind of work.
   freedoms you got, source included.
 - **Documentation, prose, story text and art assets** —
   [CC BY-SA 4.0](LICENSE-DOCS).
+
+The repository follows the [REUSE](https://reuse.software) layout (`reuse lint`
+passes). Who made each part, and where every asset came from, is in
+[PROVENANCE.md](PROVENANCE.md).
 
 Copyleft 🄯 2026 Godless-1 — all rights reversed.
 This program comes with **absolutely no warranty**.

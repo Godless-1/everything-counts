@@ -1,0 +1,60 @@
+# README screenshots, part 2: night three of a run
+set night 3
+set creds 412500
+set escrow 80000
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set drift 12
+set wire 6
+set implant.0 1
+set started 1
+save
+nopulse 1
+seed 7
+waitfor 600 UNASSISTED
+press a
+waitfor 300 CONTINUE
+press down
+press a
+waitfor 300 FIND A GAME
+wait 30
+shot 08-hub
+press a
+waitfor 300 THE STRIP
+press down
+press down
+wait 20
+shot 09-venues
+stack 10 6 6 13 5 12 1 13 9 7
+press a
+waitfor 600 PLACE YOUR BET
+press up
+press up
+wait 10
+shot 10-table
+press a
+waitfor 300 TAKE ONE MORE
+press select
+wait 10
+shot 11-table2
+press right
+press a
+waitfor 600 NEXT HAND
+press a
+waitfor 300 PLACE YOUR BET
+press b
+waitfor 200 CASH OUT
+press a
+waitfor 300 THE STRIP
+press b
+waitfor 300 FIND A GAME
+press down
+press a
+waitfor 300 SUBLEVEL 2
+press down
+press down
+wait 20
+shot 12-clinic
+quit

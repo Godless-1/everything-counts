@@ -1,6 +1,10 @@
 /* EVERYTHING COUNTS - a card counting story for the Game Boy Advance
  * Copyright (C) 2026 Godless-1
- * SPDX-License-Identifier: AGPL-3.0-or-later
+ * SPDX-License-Identifier: AGPL-3.0-or-later AND CC-BY-SA-4.0
+ *
+ * The program code in this file is AGPL-3.0-or-later.  The creative work
+ * it carries (the music and sound effects) is also offered on its own
+ * under CC-BY-SA-4.0.  See PROVENANCE.md.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Affero General Public License as published by
@@ -153,6 +157,14 @@ static const u8 nr_drum[64] = {
     2,R_,R_,R_, 4,R_,R_,2,  R_,R_,2,R_, 4,3,3,3,
 };
 
+/* second strain: the same four chords answered from the top down */
+static const u8 nr_lead_b[64] = {
+    N(6,En),R_,N(6,Dn),R_, N(6,Cn),R_,R_,R_,  N(5,An),R_,N(6,Cn),R_, R_,R_,R_X,R_,
+    N(6,Cn),R_,N(5,An),R_, N(5,Fn),R_,R_,R_,  N(5,An),R_,N(6,Cn),R_, R_,R_,R_X,R_,
+    N(5,Gn),R_,N(5,En),R_, N(5,Gn),R_,R_,R_,  N(6,Cn),R_,N(6,En),R_, R_,R_,R_X,R_,
+    N(6,Dn),R_,N(5,Bn),R_, N(5,Gn),R_,R_,R_,  N(5,Bn),R_,N(6,Dn),R_, N(6,En),R_,R_X,R_,
+};
+
 /* --- THE SHOE : sparse, tense, one note at a time ---------------------- */
 static const u8 ts_lead[64] = {
     N(6,An),R_,R_,R_, R_,R_,R_,R_, N(6,Gs),R_,R_,R_, R_,R_,R_,R_,
@@ -173,16 +185,27 @@ static const u8 ts_drum[64] = {
     2,R_,R_,R_, R_,R_,R_,R_, 3,R_,R_,R_, R_,R_,3,3,
 };
 
+/* second strain: the line climbs down through each chord instead */
+static const u8 ts_lead_b[64] = {
+    N(6,En),R_,R_,R_, R_,R_,R_,R_, N(6,Cn),R_,R_,R_, R_,R_,R_,R_,
+    R_,R_,R_,R_,      N(5,An),R_,R_,R_, N(6,Cn),R_,R_,R_, R_,R_,R_X,R_,
+    N(6,Fn),R_,R_,R_, R_,R_,R_,R_, N(6,Dn),R_,R_,R_, R_,R_,R_,R_,
+    R_,R_,N(5,Bn),R_, R_,R_,R_,R_, N(5,Gs),R_,R_,R_, R_,R_,R_X,R_,
+};
+
 /* --- OVERCLOCK : the count is hot, adrenaline ------------------------- */
 static const u8 oc_lead[64] = {
-    N(6,An),N(6,Cn),N(6,En),N(6,An), N(6,En),N(6,Cn),N(6,An),N(5,En),
-    N(6,An),N(6,Cn),N(6,En),N(7,An), N(6,En),N(6,Cn),N(6,An),R_,
-    N(6,Fn),N(6,An),N(6,Cn),N(6,Fn), N(6,Cn),N(6,An),N(6,Fn),N(5,Cn),
-    N(6,Fn),N(6,An),N(6,Cn),N(7,Fn), N(6,Cn),N(6,An),N(6,Fn),R_,
-    N(6,Gn),N(6,Bn),N(6,Dn),N(6,Gn), N(6,Dn),N(6,Bn),N(6,Gn),N(5,Dn),
-    N(6,Gn),N(6,Bn),N(6,Dn),N(7,Gn), N(6,Dn),N(6,Bn),N(6,Gn),R_,
-    N(6,En),N(6,Gs),N(6,Bn),N(6,En), N(6,Bn),N(6,Gs),N(6,En),N(5,Bn),
-    N(6,En),N(6,Gs),N(6,Bn),N(7,En), N(7,En),N(6,Bn),N(6,Gs),N(6,En),
+    /* true arpeggios, root to octave and back.  (They used to start on
+     * the top note and leap to octave 7, where the square wave is a
+     * whistle and the divider is too coarse to be in tune.) */
+    N(5,An),N(6,Cn),N(6,En),N(6,An), N(6,En),N(6,Cn),N(5,An),N(5,En),
+    N(5,An),N(6,Cn),N(6,En),N(6,An), N(6,En),N(6,Cn),N(5,An),R_,
+    N(5,Fn),N(5,An),N(6,Cn),N(6,Fn), N(6,Cn),N(5,An),N(5,Fn),N(5,Cn),
+    N(5,Fn),N(5,An),N(6,Cn),N(6,Fn), N(6,Cn),N(5,An),N(5,Fn),R_,
+    N(5,Gn),N(5,Bn),N(6,Dn),N(6,Gn), N(6,Dn),N(5,Bn),N(5,Gn),N(5,Dn),
+    N(5,Gn),N(5,Bn),N(6,Dn),N(6,Gn), N(6,Dn),N(5,Bn),N(5,Gn),R_,
+    N(5,En),N(5,Gs),N(5,Bn),N(6,En), N(5,Bn),N(5,Gs),N(5,En),N(4,Bn),
+    N(5,En),N(5,Gs),N(5,Bn),N(6,En), N(6,En),N(5,Bn),N(5,Gs),N(5,En),
 };
 static const u8 oc_bass[64] = {
     N(2,An),R_,N(2,An),R_, N(3,An),R_,N(2,An),R_, N(2,An),R_,N(2,An),R_, N(2,Gn),R_,N(2,En),R_,
@@ -234,25 +257,29 @@ static const u8 vt_drum[64] = {
 
 typedef struct {
     const u8 *lead, *bass, *drum;
+    const u8 *lead_b;  /* optional second strain; the form is A A B A */
     u8 speed;          /* frames per row */
     u8 lead_duty;      /* 0..3 */
     u8 lead_vol, bass_vol;
 } Song;
 
 static const Song songs[MUS_COUNT] = {
-    { 0, 0, 0, 0, 0, 0, 0 },
-    { nr_lead, nr_bass, nr_drum, 9,  2,  7,  9 },   /* NEON RAIN */
-    { ts_lead, ts_bass, ts_drum, 11, 1,  6,  8 },   /* THE SHOE  */
-    { oc_lead, oc_bass, oc_drum, 5,  2,  8, 10 },   /* OVERCLOCK */
-    { as_lead, as_bass, as_drum, 14, 0,  5,  7 },   /* ASHES     */
-    { vt_lead, vt_bass, vt_drum, 7,  3,  8, 10 },   /* VAULT     */
+    { 0, 0, 0, 0, 0, 0, 0, 0 },
+    { nr_lead, nr_bass, nr_drum, nr_lead_b, 9,  2,  7,  9 },   /* NEON RAIN */
+    { ts_lead, ts_bass, ts_drum, ts_lead_b, 11, 1,  6,  8 },   /* THE SHOE  */
+    { oc_lead, oc_bass, oc_drum, 0,         5,  2,  8, 10 },   /* OVERCLOCK */
+    { as_lead, as_bass, as_drum, 0,         14, 0,  5,  7 },   /* ASHES     */
+    { vt_lead, vt_bass, vt_drum, 0,         7,  3,  8, 10 },   /* VAULT     */
 };
 
 static struct {
     int  song;
     int  row, tick;
+    int  pass;          /* which time through the 64 rows: 0 1 2 3 = A A B A */
     int  intensity;
     int  on;
+    u8   echo_note;     /* last lead note, for the slap-back echo */
+    u8   echo_age;
 } mus;
 
 void snd_init(void)
@@ -262,9 +289,16 @@ void snd_init(void)
     REG_SNDDMGCNT = 0xFF77;               /* all channels, both sides, vol 7 */
     REG_SNDBIAS   = 0xC200;
 
-    /* wave RAM: a soft saw for effects */
+    /* wave RAM: one clean triangle cycle for the effects voice.  (The old
+     * table was meant as a saw but its nibbles ran out of order and the
+     * last word overflowed, which is why every blip sounded cracked.) */
+    static const u8 tri[16] = {
+        0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF,
+        0xFE, 0xDC, 0xBA, 0x98, 0x76, 0x54, 0x32, 0x10
+    };
     REG_SND3SEL = 0x40;                   /* select bank 1, write bank 0 */
-    for (int i = 0; i < 8; i++)  REG_WAVE_RAM[i] = 0x1133 + i * 0x2222;
+    for (int i = 0; i < 8; i++)
+        REG_WAVE_RAM[i] = (u16)(tri[i * 2] | (tri[i * 2 + 1] << 8));
     REG_SND3SEL = 0x80;                   /* enable, play bank 0 */
     REG_SND3CNT = (2 << 13);
     mus.song = MUS_NONE;
@@ -274,10 +308,10 @@ void mus_play(int song)
 {
     if (mus.song == song) return;
     mus.song = song;
-    mus.row = 0; mus.tick = 0; mus.on = (song != MUS_NONE);
-    if (!mus.on) {
-        REG_SND1CNT = 0; REG_SND2CNT = 0;
-    }
+    mus.row = 0; mus.tick = 0; mus.pass = 0; mus.on = (song != MUS_NONE);
+    mus.echo_note = 0;
+    /* the outgoing song's notes must not ring on under the new one */
+    REG_SND1CNT = 0; REG_SND2CNT = 0;
 }
 
 void mus_stop(void)
@@ -293,24 +327,33 @@ static void mus_tick(void)
     if (!mus.on || mus.song <= 0 || mus.song >= MUS_COUNT) return;
     const Song *s = &songs[mus.song];
     int speed = s->speed;
-    if (mus.intensity >= 2) speed = speed * 3 / 4;
     if (speed < 2) speed = 2;
 
     if (mus.tick++ < speed) return;
     mus.tick = 0;
 
-    u8 l = s->lead[mus.row];
+    const u8 *lead = (s->lead_b && mus.pass == 2) ? s->lead_b : s->lead;
+    u8 l = lead[mus.row];
     u8 b = s->bass[mus.row];
     u8 d = s->drum ? s->drum[mus.row] : 0;
 
     int lv = s->lead_vol + (mus.intensity ? 2 : 0);
     if (lv > 15) lv = 15;
 
-    if (l == R_X) { REG_SND1CNT = 0; }
+    if (l == R_X) { REG_SND1CNT = 0; mus.echo_note = 0; }
     else if (l >= 2) {
         REG_SND1SWEEP = 0;
         REG_SND1CNT   = (lv << 12) | (0 << 11) | (2 << 8) | (s->lead_duty << 6);
         REG_SND1FREQ  = sq_reg(l - 2) | 0x8000;
+        mus.echo_note = l; mus.echo_age = 0;
+    }
+    else if (mus.echo_note && ++mus.echo_age == 2) {
+        /* slap-back: the same note again two rows later at a third of the
+         * level, only where the line leaves room for it */
+        int ev = lv / 3; if (ev < 2) ev = 2;
+        REG_SND1SWEEP = 0;
+        REG_SND1CNT   = (ev << 12) | (0 << 11) | (2 << 8) | (s->lead_duty << 6);
+        REG_SND1FREQ  = sq_reg(mus.echo_note - 2) | 0x8000;
     }
 
     if (b == R_X) { REG_SND2CNT = 0; }
@@ -319,15 +362,19 @@ static void mus_tick(void)
         REG_SND2FREQ = sq_reg(b - 2) | 0x8000;
     }
 
+    /* a watchful pit adds a closed hat on the off-beats */
+    if (d < 2 && mus.intensity >= 1 && (mus.row & 3) == 2) d = 5;
+
     if (d >= 2 && !sfx_st.d) {
-        static const u8 dvol[5] = { 0, 0, 12, 7, 10 };
-        static const u8 dshift[5] = { 0, 0, 7, 3, 5 };
-        static const u8 dwidth[5] = { 0, 0, 0, 1, 0 };
+        static const u8 dvol[6] = { 0, 0, 12, 7, 10, 4 };
+        static const u8 dshift[6] = { 0, 0, 7, 3, 5, 1 };
+        static const u8 dwidth[6] = { 0, 0, 0, 1, 0, 0 };
         REG_SND4CNT  = (dvol[d] << 12) | (0 << 11) | (1 << 8);
         REG_SND4FREQ = (dshift[d] << 4) | (dwidth[d] << 3) | 6 | 0x8000;
     }
 
     mus.row = (mus.row + 1) & 63;
+    if (mus.row == 0) mus.pass = (mus.pass + 1) & 3;
 }
 
 void snd_update(void)

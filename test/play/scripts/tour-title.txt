@@ -1,0 +1,15 @@
+# boot, title, each title menu entry
+wait 30
+shot boot-partial
+wait 200
+shot boot-full
+press a
+wait 40
+shot title
+press down
+press down
+wait 5
+shot title-dryrun
+press a
+wait 40
+shot teach-menu

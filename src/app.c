@@ -20,36 +20,62 @@ void app_frame_begin(void)
 }
 
 int g_dbg_scene = -1;
-void app_frame_end(void) { vid_flip(); }
 
+/* Fade-in runs alongside the new scene's own drawing: the first frame the
+ * scene completes appears at full black and brightens from there.  (It
+ * used to block and flip pages before the scene had drawn anything, which
+ * faded the PREVIOUS screen back in and then cut to the new one.) */
+static int fade_total, fade_left;
+
+void app_frame_end(void)
+{
+    vid_flip();
+    if (fade_left > 0) {
+        fade_left--;
+        vid_fade((fade_left * 16) / fade_total);
+    }
+}
+
+/* Holding frames must not flip: the hidden page is two frames stale, so
+ * flipping without redrawing makes the picture shimmer between the two. */
+static void hold_frame(void)
+{
+    app_frame_begin();
+    vid_vsync();
+}
+
+/* shows whatever has just been drawn, then keeps it up for `frames` */
 void app_wait(int frames)
 {
-    while (frames-- > 0) { app_frame_begin(); app_frame_end(); }
+    if (frames <= 0) return;
+    app_frame_begin();
+    app_frame_end();
+    while (--frames > 0) hold_frame();
 }
 
 void app_fade_out(int frames)
 {
+    fade_left = 0;
     for (int i = 0; i <= frames; i++) {
         vid_fade((i * 16) / frames);
-        app_frame_begin(); app_frame_end();
+        hold_frame();
     }
 }
 
 void app_fade_in(int frames)
 {
-    for (int i = frames; i >= 0; i--) {
-        vid_fade((i * 16) / frames);
-        app_frame_begin(); app_frame_end();
-    }
-    vid_fade(0);
+    if (frames < 1) frames = 1;
+    fade_total = fade_left = frames;
+    vid_fade(16);
 }
 
 void app_flash(u8 colour, int frames)
 {
     (void)colour;
+    fade_left = 0;
     for (int i = frames; i > 0; i--) {
         vid_fade_white((i * 12) / frames);
-        app_frame_begin(); app_frame_end();
+        hold_frame();
     }
     vid_fade(0);
 }
@@ -57,16 +83,17 @@ void app_flash(u8 colour, int frames)
 /* ---------------------------------------------------------------------- */
 void draw_chips(int x, int y, s32 amount, s32 unit, u8 accent)
 {
+    /* up to three stacks of eight, standing on the line y, centred on x */
     if (unit <= 0) unit = 1;
     int n = (int)(amount / unit);
-    if (n > 30) n = 30;
+    if (n > 24) n = 24;
     if (n < 1) return;
-    int per = 6;
+    int per = 8;
     int cols = (n + per - 1) / per;
-    x -= (cols * 16) / 2;
+    x -= (cols * 16 - 2) / 2;
     for (int i = 0; i < n; i++) {
         int col = i / per, row = i % per;
-        int cx = x + col * 16, cy = y + 24 - row * 4;
+        int cx = x + col * 16, cy = y - 4 - row * 3;
         u8 body = (i % 3 == 0) ? accent : ((i % 3 == 1) ? C_WHITE : C_BLACK);
         u8 edge = (body == C_BLACK) ? accent : C_BLACK;
         vid_rect(cx + 1, cy, 12, 4, body);
@@ -91,6 +118,7 @@ void toast(const char *line, u8 colour)
 {
     int w = vid_text_len(line) + 16;
     int x = 120 - w / 2;
+    vid_overlay();
     vid_rect(x, 66, w, 20, C_BLACK);
     vid_frame_rect(x, 66, w, 20, colour);
     ui_brackets(x - 2, 64, w + 4, 24, colour, 4);
