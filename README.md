@@ -60,7 +60,8 @@ off and letting the machine do the work is always available, always effective,
 and it permanently changes who walks out at the end. Rui can hear the latency
 in your voice over the escrow line. She will not mention it.
 
-There are five endings. Only one of them has you in it.
+There are eleven endings. They are decided by what you paid, who you sold to
+pay it, and how much of you is left to notice. Very few of them have you in them.
 
 | Night | What is asked of you |
 |:--:|---|
@@ -141,7 +142,7 @@ faces and the neon are all code.
 ## The maths is measured, not asserted
 
 `make test` builds the same `blackjack.c` / `cards.c` / `game.c` that ship in the
-ROM against host shims and runs **436 checks**:
+ROM against host shims and runs **451 checks**:
 
 - card values, soft/hard evaluation, blackjack vs. a 21 built from three cards,
   21 after a split
@@ -160,6 +161,7 @@ ROM against host shims and runs **436 checks**:
 - **settlement**: what every kind of round does to the bankroll (win, loss,
   push, blackjack at 3:2 and 6:5, doubles, surrender, all four insurance
   outcomes, split hands), and when the dealer must not draw
+- **every ending** is reached by the run it describes, and all eleven are reachable
 - a single deck cut deep enough to **run dry mid-round** never deals a blank
 
 ```
@@ -184,7 +186,7 @@ sessions through it — no emulator involved:
 - a campaign in progress, the drills opened from the title screen, two cold
   starts: the campaign must still be in the save
 - tours of every screen (all seven nights, both tables, the course, the
-  codex, the drills, two endings) with a watcher on every glyph the renderer
+  codex, the drills, all eleven endings) with a watcher on every glyph the renderer
   draws: any text **clipped by the screen edge, drawn over other text, or
   painted over before the frame is shown** fails the run
 

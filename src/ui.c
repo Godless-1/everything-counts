@@ -477,12 +477,25 @@ void ui_portrait(int x, int y, int id, u32 t)
             for (int i = 0; i < 4; i++)
                 vid_vline(cx - 7 + i * 5, ey - 1, 5, (u8)(rp + 10 + ((t / 8 + i) % 8)));
             break;
-        case 4:
-            vid_rect(cx - 8, ey, 3, 3, C_WHITE);
+        case 4: {
+            /* Kestrel's own face keeps the score.  The more of the
+             * counting the chrome does, the less the left eye is hers:
+             * it takes the implant's colour, then stops being an eye. */
+            int lvl = (id == CH_KESTREL) ? run_drift_level() : 0;
+            vid_rect(cx - 8, ey, 3, 3, lvl >= 2 ? c->accent : C_WHITE);
             vid_rect(cx + 4, ey, 3, 3, c->accent);
             vid_line(cx + 5, ey - 5, cx + 3, ey + 8, (u8)(rp + 13));
             vid_plot(cx + 4, ey + 4, c->accent);
+            if (lvl >= 3) {
+                vid_line(cx - 7, ey - 5, cx - 5, ey + 8, (u8)(rp + 13));
+                vid_plot(cx - 6, ey + 4, c->accent);
+            }
+            if (lvl >= 4) {
+                vid_rect(cx - 10, ey - 1, 20, 5, C_BLACK);
+                vid_hline(cx - 9, ey + 1, 18, (u8)(rp + 10 + ((t / 6) % 8)));
+            }
             break;
+        }
         default:
             vid_rect(cx - 8, ey, 3, 3, C_WHITE);
             vid_rect(cx + 4, ey, 3, 3, C_WHITE);
@@ -492,7 +505,8 @@ void ui_portrait(int x, int y, int id, u32 t)
     }
     /* anyone with a bare eye blinks now and then; a feed that never
      * blinks reads as a still picture */
-    if (c->visor != 1 && c->visor != 3 && ((t + (u32)id * 37u) % 190u) < 5u) {
+    if (c->visor != 1 && c->visor != 3 && ((t + (u32)id * 37u) % 190u) < 5u &&
+        !(id == CH_KESTREL && run_drift_level() >= 3)) {      /* she has stopped blinking */
         vid_rect(cx - 8, ey, 3, 3, RAMP_CHROME + 8);
         vid_hline(cx - 8, ey + 2, 3, RAMP_CHROME + 4);
         if (c->visor == 0 || c->visor == 4) {

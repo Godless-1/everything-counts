@@ -110,6 +110,23 @@ typedef struct {
     u8  best_drill[6];
 } Run;
 
+/* ---- endings --------------------------------------------------------- */
+enum {
+    END_FLESH,        /* paid in full, head untouched                     */
+    END_ASCENSION,    /* paid, with less of you than there was            */
+    END_INSTANCE,     /* sold the count to Halcyon                        */
+    END_RESOLVED,     /* the balance did not clear                        */
+    END_HOLLOWED,     /* paid, and nobody is home                         */
+    END_COUNTS,       /* paid by hand, and nobody was sold to do it       */
+    END_WARD_NINE,    /* paid, partly with Ozerov's marker                */
+    END_KEPT,         /* paid, but the liens already took pieces of her   */
+    END_REPOSSESSED,  /* unpaid, and the chrome goes back                 */
+    END_CLEAN_HANDS,  /* unpaid, and nobody was sold                      */
+    END_COPY,         /* sold a mind that was mostly hardware already     */
+    END_COUNT
+};
+int run_ending(void);              /* which ending this run has earned */
+
 extern const s32 INSTALMENT[NIGHTS];
 s32 run_due_tonight(void);
 

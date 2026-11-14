@@ -142,6 +142,34 @@ int run_started(void)
            g_run.hands_played > 0;
 }
 
+/* The ending is read off the run as it stands: what was paid, what was
+ * sold to pay it, and how much of the counter is left to notice. */
+int run_ending(void)
+{
+    const u8 *f = g_run.flag;
+    int paid = g_run.escrow_paid >= ESCROW_TARGET;
+    int d = g_run.drift;
+
+    if (f[FLAG_SOLD_MIND]) return d >= 55 ? END_COPY : END_INSTANCE;
+    if (g_run.rui == 0)    return END_RESOLVED;
+
+    if (paid) {
+        if (d >= 75)             return END_HOLLOWED;
+        if (g_run.rui < 100)     return END_KEPT;
+        if (f[FLAG_OZEROV_TAKEN]) return END_WARD_NINE;
+        if (d >= 35)             return END_ASCENSION;
+        if (d < 15 && f[FLAG_MARA_SPARED] && f[FLAG_OZEROV_SPARED] &&
+            f[FLAG_REFUSED_SABLE] && !f[FLAG_HOT_CHROME])
+                                 return END_COUNTS;
+        return END_FLESH;
+    }
+    if (d >= 55) return END_REPOSSESSED;
+    if (d < 15 && f[FLAG_MARA_SPARED] && f[FLAG_OZEROV_SPARED] &&
+        f[FLAG_REFUSED_SABLE] && f[FLAG_REFUSED_HALCYON] && !f[FLAG_HOT_CHROME])
+        return END_CLEAN_HANDS;
+    return END_RESOLVED;
+}
+
 void run_add_drift(int d)
 {
     int v = g_run.drift + d;

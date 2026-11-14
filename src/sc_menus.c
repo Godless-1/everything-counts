@@ -34,6 +34,7 @@ int sc_title(int arg)
 
     for (;;) {
         app_frame_begin();
+        has_save = run_started();
         MenuItem m[5] = {
             { "NEW RUN",  0, 1, C_MAG },
             { "CONTINUE", 0, (u8)has_save, C_CYAN },
@@ -301,9 +302,20 @@ int sc_hub(int arg)
             "tags, running count, true, indices.",
             "what you have is what you have.",
         };
+        /* past a certain drift the room stops talking like a person */
+        static const char *flat[7] = {
+            "select venue. variance is acceptable.",
+            "additional capacity is available.",
+            "obligation outstanding. remit.",
+            "contact: NAEM, RUI. relation: see file.",
+            "retraining is not required.",
+            "calibration is not required.",
+            "suspend. resume at next cycle.",
+        };
         vid_rect(0, 143, 240, 17, C_BLACK);
         vid_hline(0, 143, 240, C_GRID);
-        vid_text(4, 147, hint[sel], C_DIM);
+        vid_text(4, 147, run_drift_level() >= 3 ? flat[sel] : hint[sel],
+                 run_drift_level() >= 3 ? C_MAGD : C_DIM);
         app_frame_end();
     }
 }
@@ -442,6 +454,20 @@ int sc_clinic(int arg)
                     sfx(SFX_IMPLANT);
                     app_flash(C_WHITE, 24);
                     save_write();
+                    if (im->drift > 0) {
+                        /* coming round */
+                        key_flush();
+                        for (;;) {
+                            app_frame_begin();
+                            if (key_down(KEY_A)) { sfx(SFX_SELECT); break; }
+                            ui_backdrop(BG_CLINIC, g_t, RAMP_GREEN);
+                            ui_panel(14, 34, 212, 92, im->colour, "INSTALLED");
+                            vid_text_wrap(21, 44, 33,
+                                "You come round on the table and count to ten, to check that you still can.\n\nYou can. Something counts along with you, half a beat ahead, and stops when you stop.", C_TEXT);
+                            ui_hint("\x13 GET UP");
+                            app_frame_end();
+                        }
+                    }
                 }
                 key_flush();
             }
@@ -564,6 +590,8 @@ int sc_night_end(int arg)
         if (lien) {
             vid_text_center(120, 140, "LIEN APPLIED. THEY TOOK A PIECE OF HER.", C_BLOOD);
             ui_noise(0, 0, 240, 160, g_t, C_BLOOD, 30);
+        } else if (run_drift_level() >= 3) {
+            vid_text_center(120, 140, "YOU DID NOT DREAM. IT DEFRAGMENTED.", C_MAGD);
         } else if (due > 0) {
             vid_text_center(120, 140, "HALCYON THANKS YOU FOR YOUR PROMPTNESS.", C_DIM);
         } else {
@@ -584,33 +612,44 @@ static const Ending ENDINGS[] = {
   "You paid it in full with a head nobody touched.\n\nThey grow her a body in eleven days. She comes out of the tank furious about the haircut and she knows your voice on the first syllable.\n\nYou never play again. You keep the count anyway - it is yours, it was always the only thing that was.",
   C_GREEN, RAMP_GREEN },
 { "ASCENSION",
-  "You paid it in full, and there is less of you than there was.\n\nShe comes out of the tank. She looks at you for four seconds too long before she says your name, and she never once mentions the pause.\n\nYou tell yourself you would do it again. The part of you that would have argued went quiet some nights ago, and you did not hear it go.",
+  "You paid it in full, and there is less of you than there was.\n\nShe comes out of the tank. She looks at you for four seconds too long before she says your name, and she never once mentions the pause.\n\nYou tell yourself you would do it again. The part of you that would have argued went quiet nights ago. You did not hear it go.",
   C_MAG, RAMP_MAG },
 { "AN INSTANCE OF YOU",
-  "Rui walks out in the morning, exactly as promised.\n\nSomewhere under the Spire a description of you sits at nine hundred tables at once and never gets tired and never gets bored and never once wonders why it is doing this.\n\nIt is not you. That distinction is legally settled. She visits it on Sundays.",
+  "Rui walks out in the morning, exactly as promised.\n\nSomewhere under the Spire a description of you sits at nine hundred tables at once. It never gets tired, never gets bored and never wonders why it is doing this.\n\nIt is not you. That distinction is legally settled. She visits it on Sundays.",
   C_PALE, RAMP_CHROME },
 { "RESOLVED",
-  "The balance did not clear.\n\nThey do not make a ceremony of it. An adjudicator reads a number out, and the parts of her that were worth something go into a composite mind that manages freight scheduling on the orbital lift.\n\nSomewhere in that system, occasionally, a shipment is routed the long way past the window with the good view of the city.",
+  "The balance did not clear.\n\nThey do not make a ceremony of it. An adjudicator reads out a number, and what was worth something of her goes into a composite mind that schedules freight on the orbital lift.\n\nNow and then, in that system, a shipment is routed the long way, past the window with the good view of the city.",
   C_BLOOD, RAMP_ALERT },
 { "HOLLOWED",
   "You cleared the balance. You can no longer remember why it mattered.\n\nThe chrome counts. The chrome bets. The chrome smiles at the woman who comes out of the tank and calls her by her name because that is what the file says to do.\n\nShe stays for a year. Then she leaves, and you file it correctly.",
   C_PURPLE, RAMP_VIOLET },
+{ "EVERYTHING COUNTS",
+  "You paid it in full, and every credit was counted by hand.\n\nShe comes out of the tank swearing. A dealer at the Lotus still has both hands. A man at the Sutra is still losing slowly, for love.\n\nHalcyon sends a card. A chair number, and three words: WHEN YOU ARE READY.",
+  C_CYAN, RAMP_CYAN },
+{ "WARD NINE",
+  "You paid it in full. Part of it was his.\n\nRui walks out on new legs and stops at the next cradle, the empty one, still wet. She says the woman in it used to hum.\n\nThe freight on the orbital lift runs four seconds late that week. Nobody finds the fault. Rui hums in her sleep.",
+  C_ORANGE, RAMP_ALERT },
+{ "WHAT THEY KEPT",
+  "You cleared the balance. The liens were not refundable.\n\nShe thanks you by name, correctly, the way you would thank a driver. She does not laugh at the haircut. The laugh was a component.\n\nSome nights she stands in the kitchen with a cup, waiting for a habit to arrive. You count the seconds for her.",
+  C_CANDY, RAMP_MAG },
+{ "REPOSSESSED",
+  "The balance did not clear, and the chrome was never yours.\n\nHalcyon recovers its hardware under local anaesthetic. They are careful. They leave everything of you that was not load-bearing.\n\nIn the lobby you begin counting the floor tiles. You cannot stop, and you cannot say what comes after six.",
+  C_BLOOD, RAMP_ALERT },
+{ "CLEAN HANDS",
+  "The balance did not clear. You never sold anyone to make it clear.\n\nThey let you listen while they resolve her. It takes eleven minutes and sounds like a dial tone learning to breathe.\n\nYou walk home unassisted. Your count is perfect. There is nothing left in the city you would spend it on.",
+  C_ICE, RAMP_CYAN },
+{ "A COPY OF A COPY",
+  "Rui walks out in the morning, exactly as promised.\n\nWhat Halcyon imaged was mostly Halcyon. The instance plays nine hundred tables without error, and every four seconds it opens a ticket asking who Rui is.\n\nThe tickets close automatically. You know, because you are the one who closes them.",
+  C_PALE, RAMP_CHROME },
 };
 
 int sc_ending(int arg)
 {
     (void)arg;
-    int e;
-    if (g_run.flag[FLAG_SOLD_MIND])      e = 2;
-    else if (g_run.rui == 0)             e = 3;
-    else if (g_run.escrow_paid >= ESCROW_TARGET) {
-        if (g_run.drift >= 75)           e = 4;
-        else if (g_run.drift >= 35)      e = 1;
-        else                             e = 0;
-    } else                               e = 3;
+    int e = run_ending();      /* ENDINGS[] is in END_* order */
 
     const Ending *E = &ENDINGS[e];
-    mus_play(e == 0 ? MUS_NEON_RAIN : MUS_ASHES);
+    mus_play((e == END_FLESH || e == END_COUNTS) ? MUS_NEON_RAIN : MUS_ASHES);
     key_flush();
     app_fade_in(24);
     int chars = 0;
@@ -625,7 +664,7 @@ int sc_ending(int arg)
         ui_backdrop(BG_VOID, g_t, E->ramp);
         vid_hline(0, 26, 240, E->col);
         vid_text_center_s(120, 10, E->title, E->col, 2);
-        vid_text_wrap_n(10, 36, 37, E->body, C_TEXT, chars);
+        vid_text_wrap_n(10, 32, 37, E->body, C_TEXT, chars);   /* room for 12 lines */
         if (chars >= total) ui_hint("\x13");
         app_frame_end();
     }

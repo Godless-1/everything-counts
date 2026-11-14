@@ -22,7 +22,7 @@ press down
 press a
 waitfor 300 FIND A GAME
 autoshot sv
-mashuntil up 8 12 what you have is what
+mashuntil up 8 12 suspend. resume
 press a
 waitfor 200 SLEEP
 press a

@@ -252,6 +252,52 @@ static void test_settle(void)
       CHECK(!table_dealer_must_play(&t), "dealer does not draw against a folded hand"); }
 }
 
+/* every ending must be reachable, and by the run it describes */
+static void run_set(s32 paid, int drift, int rui, const char *flags)
+{
+    run_reset();
+    g_run.escrow_paid = paid; g_run.drift = (u8)drift; g_run.rui = (u8)rui;
+    for (const char *p = flags; *p; p++)
+        switch (*p) {
+            case 'M': g_run.flag[FLAG_MARA_SPARED] = 1; break;
+            case 'm': g_run.flag[FLAG_MARA_SOLD] = 1; break;
+            case 'H': g_run.flag[FLAG_HOT_CHROME] = 1; break;
+            case 'S': g_run.flag[FLAG_REFUSED_SABLE] = 1; break;
+            case 'O': g_run.flag[FLAG_OZEROV_SPARED] = 1; break;
+            case 'o': g_run.flag[FLAG_OZEROV_TAKEN] = 1; break;
+            case 'V': g_run.flag[FLAG_REFUSED_HALCYON] = 1; break;
+            case 'v': g_run.flag[FLAG_SOLD_MIND] = 1; break;
+        }
+}
+
+static void test_endings(void)
+{
+    puts("-- endings");
+    const s32 FULL = ESCROW_TARGET, SHORT = ESCROW_TARGET - 1;
+    run_set(FULL, 0, 100, "MSOV");   CHECK(run_ending() == END_COUNTS, "paid by hand, nobody sold: EVERYTHING COUNTS");
+    run_set(FULL, 0, 100, "mSOV");   CHECK(run_ending() == END_FLESH, "paid clean but Mara was sold: FLESH AND BLOOD");
+    run_set(FULL, 20, 100, "MSOV");  CHECK(run_ending() == END_FLESH, "paid with a little chrome: FLESH AND BLOOD");
+    run_set(FULL, 40, 100, "MSOV");  CHECK(run_ending() == END_ASCENSION, "paid at drift 40: ASCENSION");
+    run_set(FULL, 80, 100, "MSOV");  CHECK(run_ending() == END_HOLLOWED, "paid at drift 80: HOLLOWED");
+    run_set(FULL, 10, 100, "MSoV");  CHECK(run_ending() == END_WARD_NINE, "paid with Ozerov's marker: WARD NINE");
+    run_set(FULL, 10, 83, "MSOV");   CHECK(run_ending() == END_KEPT, "paid after a lien: WHAT THEY KEPT");
+    run_set(FULL, 80, 83, "MSoV");   CHECK(run_ending() == END_HOLLOWED, "hollow outranks everything else that was paid for");
+    run_set(SHORT, 0, 100, "MSOV");  CHECK(run_ending() == END_CLEAN_HANDS, "unpaid, nobody sold: CLEAN HANDS");
+    run_set(SHORT, 0, 100, "mSOV");  CHECK(run_ending() == END_RESOLVED, "unpaid and not clean: RESOLVED");
+    run_set(SHORT, 60, 100, "MSOV"); CHECK(run_ending() == END_REPOSSESSED, "unpaid with a head full of chrome: REPOSSESSED");
+    run_set(FULL, 10, 0, "MSOV");    CHECK(run_ending() == END_RESOLVED, "nothing of her left: RESOLVED even if paid");
+    run_set(0, 10, 100, "v");        CHECK(run_ending() == END_INSTANCE, "sold the count: AN INSTANCE OF YOU");
+    run_set(0, 60, 100, "v");        CHECK(run_ending() == END_COPY, "sold a mind that was mostly hardware: A COPY OF A COPY");
+    int seen[END_COUNT] = {0}, all = 1;
+    static const struct { s32 p; int d, r; const char *f; } R[] = {
+        {ESCROW_TARGET,0,100,"MSOV"},{ESCROW_TARGET,20,100,""},{ESCROW_TARGET,40,100,""},{ESCROW_TARGET,80,100,""},
+        {ESCROW_TARGET,10,100,"o"},{ESCROW_TARGET,10,83,""},{0,0,100,"MSOV"},{0,0,100,""},{0,60,100,""},{0,10,100,"v"},{0,60,100,"v"} };
+    for (unsigned i = 0; i < sizeof R / sizeof R[0]; i++) { run_set(R[i].p, R[i].d, R[i].r, R[i].f); seen[run_ending()] = 1; }
+    for (int i = 0; i < END_COUNT; i++) if (!seen[i]) all = 0;
+    CHECK(all, "all eleven endings are reachable");
+    run_reset();
+}
+
 /* a deeply cut single deck must never deal a blank card mid-round */
 static void test_shoe_dry(void)
 {
@@ -702,6 +748,7 @@ int main(void)
     test_deviations();
     test_settle();
     test_shoe_dry();
+    test_endings();
 
     puts("-- monte carlo (flat bets, perfect basic strategy)");
     long long rounds = 3000000;
