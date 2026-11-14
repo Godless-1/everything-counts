@@ -19,3 +19,4 @@ __pycache__/
 # emulator config/state accidentally captured by the harness
 mgbacfg/
 mgba.log
+build-host/

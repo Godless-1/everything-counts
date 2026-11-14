@@ -13,6 +13,22 @@
  * ===================================================================== */
 #include "video.h"
 
+/* The host harness (test/play) watches every pixel and glyph to catch
+ * clipped and overlapping text.  On the GBA these compile to nothing. */
+#ifdef EC_HOST
+void host_text(const char *s);
+void host_glyph_begin(int x, int y, u8 ch, int scale);
+void host_glyph_end(void);
+void host_px(int x, int y, int w, int h);
+void host_clip(int x, int y);
+#else
+#define host_text(s)                 ((void)0)
+#define host_glyph_begin(x, y, c, s) ((void)0)
+#define host_glyph_end()             ((void)0)
+#define host_px(x, y, w, h)          ((void)0)
+#define host_clip(x, y)              ((void)0)
+#endif
+
 u8 *vid_back;
 u32 vid_frame;
 static u32 dispcnt_base;
@@ -30,7 +46,7 @@ void vid_init(void)
     dispcnt_base = DCNT_MODE4 | DCNT_BG2 | DCNT_OAM_1D;
 
     /* clear both pages */
-    ec_memset((void *)0x06000000, 0, 0xA000 * 2);
+    ec_memset((void *)MEM_VRAM, 0, 0xA000 * 2);
 
     vid_back = (u8 *)MEM_VRAM_PAGE1;   /* page 1 hidden while page 0 shows */
     vid_frame = 0;
@@ -92,6 +108,11 @@ void vid_fade_white(int amount)
 
 IWRAM_CODE void vid_clear(u8 c)
 {
+#ifdef EC_HOST
+    ec_memset(vid_back, c, SCREEN_W * SCREEN_H);
+    host_px(0, 0, SCREEN_W, SCREEN_H);
+    return;
+#endif
     u32 w = c | (c << 8) | (c << 16) | (c << 24);
     static volatile u32 src;
     src = w;
@@ -102,7 +123,8 @@ IWRAM_CODE void vid_clear(u8 c)
 
 IWRAM_CODE void vid_plot(int x, int y, u8 c)
 {
-    if ((unsigned)x >= SCREEN_W || (unsigned)y >= SCREEN_H) return;
+    if ((unsigned)x >= SCREEN_W || (unsigned)y >= SCREEN_H) { host_clip(x, y); return; }
+    host_px(x, y, 1, 1);
     u16 *p = (u16 *)(vid_back + ((y * SCREEN_W + x) & ~1));
     if (x & 1) *p = (*p & 0x00FF) | (c << 8);
     else       *p = (*p & 0xFF00) | c;
@@ -114,6 +136,7 @@ IWRAM_CODE void vid_hline(int x, int y, int w, u8 c)
     if (x < 0) { w += x; x = 0; }
     if (x + w > SCREEN_W) w = SCREEN_W - x;
     if (w <= 0) return;
+    host_px(x, y, w, 1);
 
     u8 *base = vid_back + y * SCREEN_W;
     if (x & 1) {
@@ -132,6 +155,8 @@ IWRAM_CODE void vid_vline(int x, int y, int h, u8 c)
     if ((unsigned)x >= SCREEN_W) return;
     if (y < 0) { h += y; y = 0; }
     if (y + h > SCREEN_H) h = SCREEN_H - y;
+    if (h <= 0) return;
+    host_px(x, y, 1, h);
     u8 *base = vid_back + y * SCREEN_W + (x & ~1);
     int hi = x & 1;
     while (h-- > 0) {
@@ -272,20 +297,22 @@ void vid_blit4_scaled(int x, int y, int w, int h, const u8 *src, const u8 *lut, 
 IWRAM_CODE static void glyph(int x, int y, u8 ch, u8 c)
 {
     const u8 *g = &g_font6x8[(ch & 0x7F) * 8];
+    host_glyph_begin(x, y, ch, 1);
     for (int j = 0; j < 8; j++) {
         u8 row = g[j];
         if (!row) continue;
         int yy = y + j;
-        if ((unsigned)yy >= SCREEN_H) continue;
         for (int i = 0; i < 6; i++)
             if (row & (0x80 >> i)) vid_plot(x + i, yy, c);
     }
+    host_glyph_end();
 }
 
 static void glyph_s(int x, int y, u8 ch, u8 c, int s)
 {
     if (s == 1) { glyph(x, y, ch, c); return; }
     const u8 *g = &g_font6x8[(ch & 0x7F) * 8];
+    host_glyph_begin(x, y, ch, s);
     for (int j = 0; j < 8; j++) {
         u8 row = g[j];
         if (!row) continue;
@@ -294,16 +321,19 @@ static void glyph_s(int x, int y, u8 ch, u8 c, int s)
                 for (int b = 0; b < s; b++)
                     vid_hline(x + i * s, y + j * s + b, s, c);
     }
+    host_glyph_end();
 }
 
 int vid_text(int x, int y, const char *s, u8 c)
 {
+    host_text(s);
     while (*s) { glyph(x, y, (u8)*s++, c); x += FONT_W; }
     return x;
 }
 
 int vid_text_s(int x, int y, const char *s, u8 c, int scale)
 {
+    host_text(s);
     while (*s) { glyph_s(x, y, (u8)*s++, c, scale); x += FONT_W * scale; }
     return x;
 }
@@ -341,6 +371,7 @@ int vid_text_wrap_n(int x, int y, int cols, const char *s, u8 c, int nchars)
 {
     int line = 0, col = 0, shown = 0;
     const char *p = s;
+    host_text(s);
     while (*p) {
         if (nchars >= 0 && shown >= nchars) break;
         if (*p == '\n') { p++; line++; col = 0; shown++; continue; }

@@ -57,6 +57,12 @@ void shoe_build(Shoe *s, int decks, int pen_percent)
         int j = (int)rng_below((u32)(i + 1));
         u8 t = s->cards[i]; s->cards[i] = s->cards[j]; s->cards[j] = t;
     }
+#ifdef EC_HOST
+    {   /* test harness only: lets a script put chosen cards on top */
+        void host_shoe(Shoe *sh);
+        host_shoe(s);
+    }
+#endif
     s->pos = 0;
     s->cut = (u16)((s->n * pen_percent) / 100);
     if (s->cut > s->n - 4) s->cut = s->n - 4;

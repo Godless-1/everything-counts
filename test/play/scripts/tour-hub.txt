@@ -1,0 +1,180 @@
+# Mid-game save: hub, escrow line, codex, venue board, clinic, drills, night end
+set night 3
+set creds 900000
+set escrow 80000
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set drift 40
+set wire 30
+set started 1
+save
+wait 30
+press a
+wait 60
+press down
+press a
+wait 60
+autoshot hub
+wait 30
+mash down 7 30
+# CALL RUI (4th entry)
+mash down 3 10
+press a
+mash a 8 110
+wait 30
+# PAY ESCROW (3rd)
+press up
+press a
+wait 30
+press a
+wait 120
+# CODEX
+press select
+wait 60
+press a
+mash right 10 30
+press b
+press down
+press a
+mash down 30 20
+press b
+press down
+press a
+mash r 3 30
+mash down 12 14
+mash right 9 14
+press b
+press down
+press a
+mash right 3 40
+press b
+press down
+press a
+mash down 20 20
+press b
+press down
+press a
+mash down 6 30
+press b
+press down
+press a
+mash down 8 30
+press b
+press down
+press a
+wait 40
+press b
+wait 20
+press b
+wait 60
+# VENUES
+mash up 2 10
+press a
+wait 60
+mash down 6 40
+press b
+wait 60
+# CLINIC
+press down
+press a
+wait 60
+mash down 8 40
+press a
+wait 60
+press a
+wait 80
+press down
+press a
+wait 40
+press right
+press a
+wait 40
+press b
+wait 60
+# DRILLS
+mash down 4 10
+press a
+wait 60
+mash down 5 40
+press a
+wait 40
+press r
+wait 60
+press a
+wait 20
+press down
+wait 60
+press a
+wait 20
+press start
+wait 30
+press a
+wait 30
+press down
+press a
+wait 40
+press r 200
+wait 60
+press a
+wait 60
+press a
+wait 60
+press start
+wait 30
+press a
+wait 20
+press down
+press a
+wait 60
+press a
+wait 60
+press a
+wait 30
+press start
+wait 30
+press a
+wait 20
+press down
+press a
+wait 60
+press a
+wait 60
+press a
+wait 30
+press start
+wait 30
+press a
+wait 20
+press down
+press a
+wait 60
+press a
+wait 60
+press a
+wait 30
+press start
+wait 30
+press a
+wait 30
+press b
+wait 60
+dump afterdrills
+# END THE NIGHT
+press down
+press a
+wait 30
+press a
+wait 80
+dump nightend
+press a
+wait 80
+mash a 14 110
+wait 40
+press down
+wait 40
+press a
+mash a 3 110
+wait 80
+dump after-beat4
