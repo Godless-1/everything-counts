@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 # EVERYTHING COUNTS - a card counting story for the Game Boy Advance
 # Copyright (C) 2026 Godless-1
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: AGPL-3.0-or-later AND CC-BY-SA-4.0
+#
+# The program code in this file is AGPL-3.0-or-later.  The creative work
+# it carries (the palette, pips and sigils) is also offered on its own
+# under CC-BY-SA-4.0.  See PROVENANCE.md.
 """
 Generates src/gen/gen_art.c -- master 256-colour palette plus the small
 bitmaps that are awkward to draw procedurally (suit pips, corp sigils).

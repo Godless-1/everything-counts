@@ -288,6 +288,10 @@ Copyleft, as appropriate to each kind of work.
 - **Documentation, prose, story text and art assets** —
   [CC BY-SA 4.0](LICENSE-DOCS).
 
+The repository follows the [REUSE](https://reuse.software) layout (`reuse lint`
+passes). Who made each part, and where every asset came from, is in
+[PROVENANCE.md](PROVENANCE.md).
+
 Copyleft 🄯 2026 Godless-1 — all rights reversed.
 This program comes with **absolutely no warranty**.
 

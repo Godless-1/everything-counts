@@ -1,4 +1,7 @@
-/* SPDX-License-Identifier: AGPL-3.0-or-later */
+/* EVERYTHING COUNTS - a card counting story for the Game Boy Advance
+ * Copyright (C) 2026 Godless-1
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
 OUTPUT_FORMAT("elf32-littlearm", "elf32-bigarm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
 ENTRY(_start)

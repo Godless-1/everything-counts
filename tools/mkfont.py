@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 # EVERYTHING COUNTS - a card counting story for the Game Boy Advance
 # Copyright (C) 2026 Godless-1
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: AGPL-3.0-or-later AND CC-BY-SA-4.0
+#
+# The program code in this file is AGPL-3.0-or-later.  The creative work
+# it carries (the typeface) is also offered on its own
+# under CC-BY-SA-4.0.  See PROVENANCE.md.
 """
 Generates src/gen/gen_font.c  --  a 6x8 monospaced terminal face.
 

@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: 2026 Godless-1
+# SPDX-License-Identifier: AGPL-3.0-or-later
+version = 1
+
+# Documentation, screenshots and cover art: the author's prose and pictures.
+[[annotations]]
+path = ["README.md", "PROVENANCE.md", "doc/**"]
+SPDX-FileCopyrightText = "2026 Godless-1"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
+# Test scripts and repository plumbing that cannot carry a header of their own.
+[[annotations]]
+path = ["test/play/scripts/**", ".gitignore"]
+SPDX-FileCopyrightText = "2026 Godless-1"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
