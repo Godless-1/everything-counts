@@ -71,3 +71,50 @@ int hand_can_surrender(const Hand *h)
 {
     return h->n == 2 && !h->from_split && !h->doubled;
 }
+
+s32 table_settle(Table *t, int bj65)
+{
+    Hand *d = &t->dealer;
+    int dt = hand_total(d);
+    int dbj = hand_is_bj(d);
+    int dbust = dt > 21;
+    s32 net = 0, back = 0;
+
+    if (t->ins_taken) {
+        if (dbj) { net += t->ins_bet * 2; back += t->ins_bet * 3; }
+        else     { net -= t->ins_bet; }
+    }
+
+    for (int i = 0; i < t->nhands; i++) {
+        Hand *h = &t->hand[i];
+        int pt = hand_total(h);
+        if (h->surrendered)      { h->result = -1; h->payout = -(h->bet / 2); }
+        else if (h->busted)      { h->result = -1; h->payout = -h->bet; }
+        else if (hand_is_bj(h)) {
+            if (dbj)             { h->result = 0;  h->payout = 0; }
+            else                 { h->result = 2;
+                                   h->payout = bj65 ? (h->bet * 6) / 5 : (h->bet * 3) / 2; }
+        }
+        else if (dbj)            { h->result = -1; h->payout = -h->bet; }
+        else if (dbust)          { h->result = 1;  h->payout = h->bet; }
+        else if (pt > dt)        { h->result = 1;  h->payout = h->bet; }
+        else if (pt < dt)        { h->result = -1; h->payout = -h->bet; }
+        else                     { h->result = 0;  h->payout = 0; }
+        net  += h->payout;
+        back += h->bet + h->payout;
+        h->resolved = 1;
+    }
+    t->net = net;
+    return back;
+}
+
+/* The dealer only draws when some hand is still waiting on the result:
+ * not busted, not folded, and not a blackjack that has already won. */
+int table_dealer_must_play(const Table *t)
+{
+    for (int i = 0; i < t->nhands; i++) {
+        const Hand *h = &t->hand[i];
+        if (!h->busted && !h->surrendered && !hand_is_bj(h)) return 1;
+    }
+    return 0;
+}

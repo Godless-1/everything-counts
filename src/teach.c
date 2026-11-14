@@ -146,11 +146,11 @@ void teach_chart_browser(void)
         /* legend + plain english for the selected cell */
         vid_rect(0, 122, 240, 28, C_BLACK);
         vid_hline(0, 122, 240, C_GRID);
-        vid_text(4, 125, "H HIT", C_ICE);
-        vid_text(46, 125, "S STAND", C_BLOOD);
-        vid_text(100, 125, "D DOUBLE", C_GREEN);
-        vid_text(160, 125, "P SPLIT", C_AMBER);
-        vid_text(208, 125, "F FOLD", C_PURPLE);
+        vid_text(2, 125, "H HIT", C_ICE);
+        vid_text(38, 125, "S STAND", C_BLOOD);
+        vid_text(86, 125, "D DOUBLE", C_GREEN);
+        vid_text(140, 125, "P SPLIT", C_AMBER);
+        vid_text(188, 125, "F FOLD", C_PURPLE);
 
         {
             Hand h; chart_build_hand(tab, row, &h);
@@ -208,53 +208,68 @@ static void draw_card_row(const u8 *cards, int y, int show_value)
     }
 }
 
+/* Text pages never run under the cards or off the screen: the body is
+ * cut into as many screens as its layout needs, and A walks through them
+ * before moving on to the next page. */
 static int page_text(const Lesson *L, int idx, const Page *p)
 {
-    key_flush();
-    int chars = 0;
-    int total = (int)ec_strlen(p->body);
+    u16 offs[8];
+    int rows = (p->kind == PT_CARDS) ? 5 : (p->kind == PT_HAND ? 3 : 11);
+    int np = vid_wrap_pages(p->body, 38, rows, offs, 8);
+    int pg = 0;
+
     for (;;) {
-        app_frame_begin();
-        chars += 3;
-        if (key_is(KEY_A) || key_is(KEY_B)) chars = total;
-        if (chars > total) chars = total;
-        if (key_down(KEY_A) && chars >= total) { sfx(SFX_SELECT); return 1; }
-        if (key_down(KEY_B)) { sfx(SFX_BACK); return -1; }
-        if (key_down(KEY_SELECT)) { sfx(SFX_BACK); return -2; }
+        const char *txt = p->body + offs[pg];
+        int total = (pg + 1 < np) ? (int)(offs[pg + 1] - offs[pg]) : (int)ec_strlen(txt);
+        while (*txt == '\n' && total > 0) { txt++; total--; }   /* no blank line on top */
+        int chars = 0, go = 0;
+        key_flush();
+        while (!go) {
+            app_frame_begin();
+            chars += 3;
+            if (key_is(KEY_A) || key_is(KEY_B)) chars = total;
+            if (chars > total) chars = total;
+            if (key_down(KEY_A) && chars >= total) { sfx(SFX_SELECT); go = 1; }
+            if (key_down(KEY_B)) { sfx(SFX_BACK); go = -1; }
+            if (key_down(KEY_SELECT)) { sfx(SFX_BACK); return -2; }
 
-        ui_backdrop(BG_TERMINAL, g_t, RAMP_CYAN);
-        page_header(L, idx, p->head);
+            ui_backdrop(BG_TERMINAL, g_t, RAMP_CYAN);
+            page_header(L, idx, p->head);
 
-        int ny = 30;
-        if (p->kind == PT_CARDS) {
-            vid_text_wrap_n(6, 30, 38, p->body, C_TEXT, chars);
-            draw_card_row(p->cards, 92, 1);
-        } else if (p->kind == PT_HAND) {
-            vid_text(6, 28, "DEALER SHOWS", C_DIM);
-            if (p->dealer) {
-                int n = card_count(p->dealer);
-                for (int i = 0; i < n; i++) card_draw(92 + i * 34, 26, p->dealer[i], TAG_HIDE);
-                card_draw_back(92 + n * 34, 26);
+            if (p->kind == PT_CARDS) {
+                vid_text_wrap_n(6, 30, 38, txt, C_TEXT, chars);
+                draw_card_row(p->cards, 92, 1);
+            } else if (p->kind == PT_HAND) {
+                vid_text(6, 28, "DEALER SHOWS", C_DIM);
+                if (p->dealer) {
+                    int n = card_count(p->dealer);
+                    for (int i = 0; i < n; i++) card_draw(92 + i * 34, 26, p->dealer[i], TAG_HIDE);
+                    card_draw_back(92 + n * 34, 26);
+                }
+                vid_text(6, 74, "YOU HOLD", C_DIM);
+                if (p->cards) {
+                    int n = card_count(p->cards);
+                    for (int i = 0; i < n; i++) card_draw(92 + i * 34, 72, p->cards[i], TAG_HIDE);
+                    Hand h; hand_clear(&h);
+                    for (int i = 0; i < n; i++) hand_add(&h, p->cards[i]);
+                    char b[20]; char *q = b;
+                    if (hand_is_soft(&h)) q = str_cat(q, "SOFT ");
+                    str_int(q, hand_total(&h));
+                    vid_text(6, 86, b, C_WHITE);
+                }
+                vid_rect(0, 116, 240, 34, C_BLACK);
+                vid_hline(0, 116, 240, C_GRID);
+                vid_text_wrap_n(4, 119, 38, txt, C_TEXT, chars);
+            } else {
+                vid_text_wrap_n(6, 30, 38, txt, C_TEXT, chars);
             }
-            vid_text(6, 74, "YOU HOLD", C_DIM);
-            if (p->cards) {
-                int n = card_count(p->cards);
-                for (int i = 0; i < n; i++) card_draw(92 + i * 34, 72, p->cards[i], TAG_HIDE);
-                Hand h; hand_clear(&h);
-                for (int i = 0; i < n; i++) hand_add(&h, p->cards[i]);
-                char b[20]; char *q = b;
-                if (hand_is_soft(&h)) q = str_cat(q, "SOFT ");
-                str_int(q, hand_total(&h));
-                vid_text(6, 86, b, C_WHITE);
-            }
-            vid_rect(0, 116, 240, 34, C_BLACK);
-            vid_hline(0, 116, 240, C_GRID);
-            vid_text_wrap_n(4, 119, 38, p->body, C_TEXT, chars);
-        } else {
-            vid_text_wrap_n(6, ny, 38, p->body, C_TEXT, chars);
+            if (chars < total)    ui_hint2("\x13 SKIP", "SELECT: LEAVE");
+            else if (pg + 1 < np) ui_hint2("\x13 MORE   \x14 BACK", "SELECT: LEAVE");
+            else                  ui_hint2("\x13 NEXT   \x14 BACK", "SELECT: LEAVE");
+            app_frame_end();
         }
-        ui_hint2(chars >= total ? "\x13 NEXT   \x14 BACK" : "\x13 SKIP", "SELECT: LEAVE");
-        app_frame_end();
+        if (go > 0) { if (++pg >= np) return 1; }
+        else        { if (--pg < 0)   return -1; }
     }
 }
 
@@ -289,6 +304,8 @@ static int page_speak(const Lesson *L, int idx, const Page *p)
     return 1;
 }
 
+#define QUIZ_COLS 31
+
 static int page_quiz(const Lesson *L, int idx, const Page *p)
 {
     int sel = 0, answered = -1;
@@ -315,18 +332,20 @@ static int page_quiz(const Lesson *L, int idx, const Page *p)
 
         if (answered < 0) {
             vid_text_wrap(6, 30, 38, p->body, C_TEXT);
-            int oy = 30 + vid_text_wrap_lines(38, p->body) * 10 + 6;
-            if (oy > 74) oy = 74;
+            /* answers start under the question, however long it runs, and
+             * a long answer gets a taller box instead of being cut off */
+            int by = 30 + vid_text_wrap_lines(38, p->body) * 10 + 4;
             for (int i = 0; i < p->nopt; i++) {
-                int by = oy + i * 15;
+                int bh = 3 + vid_text_wrap_lines(QUIZ_COLS, p->opt[i]) * 10;
                 u8 c = (i == sel) ? C_CYAN : C_GRID;
                 u8 tc = (i == sel) ? C_WHITE : C_MID;
-                vid_rect(10, by, 220, 13, C_BLACK);
-                vid_frame_rect(10, by, 220, 13, c);
+                vid_rect(10, by, 220, bh, C_BLACK);
+                vid_frame_rect(10, by, 220, bh, c);
                 char lab[2] = { (char)('A' + i), 0 };
                 vid_text(15, by + 2, lab, c);
-                vid_text(30, by + 2, p->opt[i], tc);
-                if (i == sel) vid_text(218, by + 2, "\x01", C_CYAN);
+                vid_text_wrap(30, by + 2, QUIZ_COLS, p->opt[i], tc);
+                if (i == sel) vid_text(221, by + 2, "\x01", C_CYAN);
+                by += bh + 2;
             }
             ui_hint("\x03\x04 CHOOSE   \x13 ANSWER");
         } else {
@@ -337,14 +356,13 @@ static int page_quiz(const Lesson *L, int idx, const Page *p)
             vid_hline(0, 45, 240, col);
             vid_text_center(120, 33, ok ? "\x10  RIGHT" : "\x11  NOT QUITE", col);
 
+            int wy = 52;
             if (!ok) {
-                vid_text(6, 52, "YOU SAID", C_DIM);
-                vid_text(60, 52, p->opt[answered], C_BLOOD);
+                vid_text(6, wy, "YOU SAID", C_DIM);
+                wy += vid_text_wrap(60, wy, 29, p->opt[answered], C_BLOOD) * 10 + 2;
             }
-            vid_text(6, !ok ? 64 : 56, "ANSWER", C_DIM);
-            vid_text(60, !ok ? 64 : 56, p->opt[p->correct], C_GREEN);
-
-            int wy = !ok ? 80 : 72;
+            vid_text(6, wy, "ANSWER", C_DIM);
+            wy += vid_text_wrap(60, wy, 29, p->opt[p->correct], C_GREEN) * 10 + 8;
             vid_hline(6, wy - 6, 228, C_GRID);
             vid_text_wrap(6, wy, 38, p->why, C_TEXT);
             ui_hint2("\x14 TRY AGAIN", "\x13 CONTINUE");
@@ -431,11 +449,12 @@ static int page_chart(const Lesson *L, int idx, const Page *p)
         if (key_down(KEY_SELECT)) { sfx(SFX_BACK); return -2; }
         ui_backdrop(BG_TERMINAL, g_t, RAMP_CYAN);
         page_header(L, idx, p->head);
-        vid_text_wrap(6, 30, 38, p->body, C_TEXT);
-        vid_rect(40, 86, 160, 22, C_BLACK);
-        vid_frame_rect(40, 86, 160, 22, C_CYAN);
-        ui_brackets(39, 85, 162, 24, C_CYAN, 5);
-        vid_text_center(120, 92, "\x13  OPEN THE CHART", C_WHITE);
+        int by = 30 + vid_text_wrap(6, 30, 38, p->body, C_TEXT) * 10 + 6;
+        if (by < 86) by = 86;
+        vid_rect(40, by, 160, 22, C_BLACK);
+        vid_frame_rect(40, by, 160, 22, C_CYAN);
+        ui_brackets(39, by - 1, 162, 24, C_CYAN, 5);
+        vid_text_center(120, by + 6, "\x13  OPEN THE CHART", C_WHITE);
         ui_hint2("\x13 OPEN CHART", "\x16 CONTINUE");
         app_frame_end();
     }
@@ -459,11 +478,16 @@ static int page_practice(const Lesson *L, int idx, const Page *p)
         if (key_down(KEY_SELECT)) { sfx(SFX_BACK); return -2; }
         ui_backdrop(BG_FELT, g_t, RAMP_GREEN);
         page_header(L, idx, p->head);
+        /* the felt is busy; the words get a plate, the button sits below them */
+        int lines = vid_text_wrap_lines(38, p->body);
+        vid_rect(0, 25, 240, lines * 10 + 8, C_BLACK);
         vid_text_wrap(6, 30, 38, p->body, C_TEXT);
-        vid_rect(30, 92, 180, 24, C_BLACK);
-        vid_frame_rect(30, 92, 180, 24, C_GREEN);
-        ui_brackets(29, 91, 182, 26, C_GREEN, 5);
-        vid_text_center(120, 99, "\x13  SIT DOWN AT THE SIM", C_WHITE);
+        int by = 30 + lines * 10 + 8;
+        if (by < 92) by = 92;
+        vid_rect(30, by, 180, 24, C_BLACK);
+        vid_frame_rect(30, by, 180, 24, C_GREEN);
+        ui_brackets(29, by - 1, 182, 26, C_GREEN, 5);
+        vid_text_center(120, by + 7, "\x13  SIT DOWN AT THE SIM", C_WHITE);
         ui_hint2("\x13 PLAY", "\x16 SKIP");
         app_frame_end();
     }

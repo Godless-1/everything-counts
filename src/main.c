@@ -90,7 +90,11 @@ int main(void)
     snd_init();
     key_flush();
     REG_TM2CNT = 0x0080;          /* free-running timer for entropy */
+    /* The saved state is live from the first frame.  DRY RUN and the
+     * drills are open from the title and write their progress back; when
+     * they wrote a blank run instead, they erased the player's campaign. */
     run_reset();
+    save_read();
 
     boot_screen();
 

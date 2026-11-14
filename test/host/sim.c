@@ -153,6 +153,131 @@ static void test_true_count(void)
 }
 
 /* the reference chart: 6 decks, S17, DAS, late surrender */
+/* ---------------------------------------------------------------------- */
+/*  money: a round must move the bankroll by exactly the round's result   */
+/* ---------------------------------------------------------------------- */
+/* plays the bookkeeping the table scene does: stakes leave the bankroll
+ * when they go down, table_settle() says what comes back */
+static s32 round_delta(Table *t, int bj65)
+{
+    s32 bank = 1000000, start = bank;
+    for (int i = 0; i < t->nhands; i++) bank -= t->hand[i].bet;   /* incl. doubles, splits */
+    if (t->ins_taken) bank -= t->ins_bet;
+    bank += table_settle(t, bj65);
+    return bank - start;
+}
+
+static Table tbl1(Hand player, Hand dealer, s32 bet)
+{
+    Table t; memset(&t, 0, sizeof t);
+    t.nhands = 1; t.hand[0] = player; t.hand[0].bet = bet; t.dealer = dealer;
+    return t;
+}
+
+static void test_settle(void)
+{
+    puts("-- settlement (what a round does to the bankroll)");
+    Table t;
+
+    t = tbl1(h2(T_, N(9)), h2(T_, N(8)), 100);
+    CHECK(round_delta(&t, 0) == 100 && t.net == 100, "a win pays even money: +bet");
+    t = tbl1(h2(T_, N(7)), h2(T_, N(8)), 100);
+    CHECK(round_delta(&t, 0) == -100 && t.net == -100, "a loss costs the bet once: -bet");
+    t = tbl1(h2(T_, N(8)), h2(K_, N(8)), 100);
+    CHECK(round_delta(&t, 0) == 0 && t.net == 0, "a push costs nothing");
+    t = tbl1(h2(A_, K_), h2(T_, N(8)), 100);
+    CHECK(round_delta(&t, 0) == 150, "blackjack pays 3 to 2");
+    t = tbl1(h2(A_, K_), h2(T_, N(8)), 100);
+    CHECK(round_delta(&t, 1) == 120, "a 6:5 house pays 6 to 5");
+    t = tbl1(h2(A_, K_), h2(A_, Q_), 100);
+    CHECK(round_delta(&t, 0) == 0, "blackjack against blackjack pushes");
+    t = tbl1(h2(T_, N(9)), h2(A_, Q_), 100);
+    CHECK(round_delta(&t, 0) == -100, "dealer blackjack beats 19");
+    t = tbl1(h3(N(7), N(7), N(7)), h2(A_, Q_), 100);
+    CHECK(round_delta(&t, 0) == -100, "dealer blackjack beats a three-card 21");
+
+    {   /* bust loses even when the dealer busts too */
+        Hand p = h3(T_, N(6), N(9)); p.busted = 1;
+        Hand d = h3(T_, N(6), K_);
+        t = tbl1(p, d, 100);
+        CHECK(round_delta(&t, 0) == -100, "a busted hand loses even if the dealer busts");
+    }
+    {   /* dealer bust pays a standing hand */
+        Hand d = h3(T_, N(6), K_);
+        t = tbl1(h2(T_, N(2)), d, 100);
+        CHECK(round_delta(&t, 0) == 100, "dealer bust pays every live hand");
+    }
+    {   /* double: the stake on the felt is already 2x */
+        Hand p = h3(N(5), N(6), T_); p.doubled = 1;
+        t = tbl1(p, h2(T_, N(8)), 200);
+        CHECK(round_delta(&t, 0) == 200, "a won double pays twice the original bet");
+        p = h3(N(5), N(6), N(2)); p.doubled = 1;
+        t = tbl1(p, h2(T_, N(8)), 200);
+        CHECK(round_delta(&t, 0) == -200, "a lost double costs twice the original bet");
+    }
+    {   /* surrender */
+        Hand p = h2(T_, N(6)); p.surrendered = 1;
+        t = tbl1(p, h2(T_, N(9)), 100);
+        CHECK(round_delta(&t, 0) == -50, "surrender costs exactly half");
+    }
+    {   /* insurance, all four corners */
+        t = tbl1(h2(T_, N(9)), h2(A_, Q_), 100); t.ins_taken = 1; t.ins_bet = 50;
+        CHECK(round_delta(&t, 0) == 0, "insured hand vs dealer blackjack breaks even");
+        t = tbl1(h2(T_, N(9)), h2(A_, N(7)), 100); t.ins_taken = 1; t.ins_bet = 50;
+        CHECK(round_delta(&t, 0) == 50, "insurance lost, hand won: +bet - half");
+        t = tbl1(h2(T_, N(6)), h2(A_, N(7)), 100); t.ins_taken = 1; t.ins_bet = 50;
+        CHECK(round_delta(&t, 0) == -150, "insurance lost, hand lost: -bet - half");
+        t = tbl1(h2(A_, K_), h2(A_, Q_), 100); t.ins_taken = 1; t.ins_bet = 50;
+        CHECK(round_delta(&t, 0) == 100, "insured blackjack vs blackjack is even money");
+    }
+    {   /* split: two hands, one wins, one loses; 21 after split is not a blackjack */
+        memset(&t, 0, sizeof t);
+        t.nhands = 2; t.dealer = h2(T_, N(8));
+        t.hand[0] = h2(N(8), T_); t.hand[0].bet = 100; t.hand[0].from_split = 1;   /* 18: push */
+        t.hand[1] = h2(N(8), N(3)); t.hand[1].bet = 100; t.hand[1].from_split = 1; /* 11: lose */
+        CHECK(round_delta(&t, 0) == -100, "split: a push and a loss cost one bet");
+        t.hand[0] = h2(A_, K_); t.hand[0].bet = 100; t.hand[0].from_split = 1;
+        t.hand[1] = h2(A_, N(9)); t.hand[1].bet = 100; t.hand[1].from_split = 1;
+        CHECK(round_delta(&t, 0) == 200, "split aces to 21 and 20 pay even money each, not 3:2");
+    }
+
+    /* the dealer draws only when a hand is still waiting on the result */
+    t = tbl1(h2(A_, K_), h2(T_, N(6)), 100);
+    CHECK(!table_dealer_must_play(&t), "dealer does not draw against a lone blackjack");
+    t = tbl1(h2(T_, N(9)), h2(T_, N(6)), 100);
+    CHECK(table_dealer_must_play(&t), "dealer draws against a standing 19");
+    { Hand p = h3(T_, N(6), N(9)); p.busted = 1; t = tbl1(p, h2(T_, N(6)), 100);
+      CHECK(!table_dealer_must_play(&t), "dealer does not draw when every hand is bust"); }
+    { Hand p = h2(T_, N(6)); p.surrendered = 1; t = tbl1(p, h2(T_, N(6)), 100);
+      CHECK(!table_dealer_must_play(&t), "dealer does not draw against a folded hand"); }
+}
+
+/* a deeply cut single deck must never deal a blank card mid-round */
+static void test_shoe_dry(void)
+{
+    puts("-- a shoe that runs dry mid-round");
+    Shoe s; rng_seed(99); shoe_build(&s, 1, 90);
+    int seen[52] = {0};
+    for (int i = 0; i < 40; i++) seen[shoe_draw(&s)]++;       /* earlier rounds */
+    shoe_round_begin(&s);
+    u8 inplay[20]; int blanks = 0, dup_inplay = 0;
+    int live[52] = {0};
+    for (int i = 0; i < 20; i++) {                             /* one huge round */
+        inplay[i] = shoe_draw(&s);
+        if (inplay[i] == NO_CARD) { blanks++; continue; }
+        if (i >= 12) { if (!seen[inplay[i]]) dup_inplay++; }   /* must come from the discards */
+        live[inplay[i]]++;
+    }
+    CHECK(blanks == 0, "no blank card is ever dealt");
+    CHECK(s.recycled == 1, "the shoe reports that it recycled its discards");
+    CHECK(dup_inplay == 0, "recycled cards come from earlier rounds, not from the felt");
+    int twice = 0;
+    for (int c = 0; c < 52; c++) if (live[c] > 1) twice = 1;
+    CHECK(!twice, "no card is on the felt twice in the recycled round");
+    CHECK(shoe_exhausted(&s), "a recycled shoe is finished after the round");
+}
+
+/* ---------------------------------------------------------------------- */
 static const char *REF_HARD[17] = {
 /*  5 */ "HHHHHHHHHH",
 /*  6 */ "HHHHHHHHHH",
@@ -575,6 +700,8 @@ int main(void)
     test_true_count();
     test_chart();
     test_deviations();
+    test_settle();
+    test_shoe_dry();
 
     puts("-- monte carlo (flat bets, perfect basic strategy)");
     long long rounds = 3000000;
@@ -586,8 +713,8 @@ int main(void)
         int model = venue_edge_x100(v);
         printf("  %-18s simulated %6.3f%%   model %5.2f%%   %s\n",
                v->name, edge, model / 100.0,
-               (edge - model / 100.0 < 0.30 && edge - model / 100.0 > -0.30) ? "ok" : "CHECK");
-        if (!(edge - model / 100.0 < 0.35 && edge - model / 100.0 > -0.35)) fails++;
+               (edge - model / 100.0 < 0.06 && edge - model / 100.0 > -0.06) ? "ok" : "BOARD IS WRONG");
+        if (!(edge - model / 100.0 < 0.06 && edge - model / 100.0 > -0.06)) fails++;
         checks++;
     }
 
@@ -604,8 +731,11 @@ int main(void)
         const Venue *v = &VENUES[vi];
         rng_seed(777 + vi);
         double ev = counter_ev(v, 4000000, 12);
-        printf("  %-18s counter EV %+.4f units/hand   %s\n", v->name, ev,
-               ev > 0 ? "beatable" : "still a loser");
+        double board = venue_counter_x100(v) / 10000.0;
+        int close = ev - board < 0.0015 && ev - board > -0.0015;
+        printf("  %-18s counter EV %+.4f units/hand   board %+.4f   %s%s\n", v->name, ev, board,
+               ev > 0 ? "beatable" : "still a loser", close ? "" : "   BOARD IS WRONG");
+        CHECK(close, "the counter edge on the venue board matches the measurement");
     }
     {
         rng_seed(31337);

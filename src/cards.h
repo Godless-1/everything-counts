@@ -38,10 +38,13 @@ typedef struct {
     u16 n;
     u16 pos;
     u16 cut;         /* index at which the cut card appears */
+    u16 round;       /* pos when the current round began    */
     u8  decks;
+    u8  recycled;    /* ran dry mid-round and reshuffled its discards */
 } Shoe;
 
 void shoe_build(Shoe *s, int decks, int pen_percent);
+void shoe_round_begin(Shoe *s);   /* call before each deal */
 u8   shoe_draw(Shoe *s);
 int  shoe_exhausted(const Shoe *s);
 int  shoe_cards_left(const Shoe *s);

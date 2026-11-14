@@ -64,13 +64,33 @@ void shoe_build(Shoe *s, int decks, int pen_percent)
     }
 #endif
     s->pos = 0;
+    s->round = 0;
+    s->recycled = 0;
     s->cut = (u16)((s->n * pen_percent) / 100);
     if (s->cut > s->n - 4) s->cut = s->n - 4;
 }
 
+void shoe_round_begin(Shoe *s) { s->round = s->pos; }
+
+/* A deeply cut single deck can run out in the middle of a big round.  A
+ * real dealer shuffles the discards (everything from earlier rounds, not
+ * the cards on the felt) and carries on; so do we.  The shoe is then
+ * finished: the cut card is treated as already out. */
 u8 shoe_draw(Shoe *s)
 {
-    if (s->pos >= s->n) return NO_CARD;
+    if (s->pos >= s->n) {
+        int m = s->round;
+        if (m <= 0) return NO_CARD;
+        for (int i = m - 1; i > 0; i--) {
+            int j = (int)rng_below((u32)(i + 1));
+            u8 t = s->cards[i]; s->cards[i] = s->cards[j]; s->cards[j] = t;
+        }
+        s->n = (u16)m;
+        s->pos = 0;
+        s->round = 0;
+        s->cut = 0;
+        s->recycled = 1;
+    }
     return s->cards[s->pos++];
 }
 
@@ -169,7 +189,7 @@ void card_draw(int x, int y, u8 card, int tagmode)
     const char *rn = rank_names[r];
     vid_text(x + 5, y + 2, rn, C_WHITE);
     vid_text(x + 4, y + 1, rn, sc);
-    vid_text(x + 5, y + CARD_H - 10, rn, sc);
+    if (tagmode != TAG_SHOW) vid_text(x + 5, y + CARD_H - 10, rn, sc);
     /* suit tick, top right */
     vid_rect(x + CARD_W - 8, y + 4, 3, 3, sc);
     vid_plot(x + CARD_W - 9, y + 5, rp + 12);
@@ -180,9 +200,10 @@ void card_draw(int x, int y, u8 card, int tagmode)
         int t = card_tag(card);
         u8 tc = (t > 0) ? C_GREEN : (t < 0 ? C_BLOOD : C_ICE);
         const char *tg = (t > 0) ? "+" : (t < 0 ? "-" : "0");
-        vid_rect(x + 18, y + CARD_H - 12, 8, 9, C_BLACK);
-        vid_frame_rect(x + 18, y + CARD_H - 12, 8, 9, tc);
-        vid_text(x + 19, y + CARD_H - 11, tg, tc);
+        /* bottom LEFT, where a fanned hand never covers it */
+        vid_rect(x + 4, y + CARD_H - 12, 8, 9, C_BLACK);
+        vid_frame_rect(x + 4, y + CARD_H - 12, 8, 9, tc);
+        vid_text(x + 5, y + CARD_H - 11, tg, tc);
     }
 
     bevel(x, y, sc, C_BLACK);

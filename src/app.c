@@ -20,36 +20,62 @@ void app_frame_begin(void)
 }
 
 int g_dbg_scene = -1;
-void app_frame_end(void) { vid_flip(); }
 
+/* Fade-in runs alongside the new scene's own drawing: the first frame the
+ * scene completes appears at full black and brightens from there.  (It
+ * used to block and flip pages before the scene had drawn anything, which
+ * faded the PREVIOUS screen back in and then cut to the new one.) */
+static int fade_total, fade_left;
+
+void app_frame_end(void)
+{
+    vid_flip();
+    if (fade_left > 0) {
+        fade_left--;
+        vid_fade((fade_left * 16) / fade_total);
+    }
+}
+
+/* Holding frames must not flip: the hidden page is two frames stale, so
+ * flipping without redrawing makes the picture shimmer between the two. */
+static void hold_frame(void)
+{
+    app_frame_begin();
+    vid_vsync();
+}
+
+/* shows whatever has just been drawn, then keeps it up for `frames` */
 void app_wait(int frames)
 {
-    while (frames-- > 0) { app_frame_begin(); app_frame_end(); }
+    if (frames <= 0) return;
+    app_frame_begin();
+    app_frame_end();
+    while (--frames > 0) hold_frame();
 }
 
 void app_fade_out(int frames)
 {
+    fade_left = 0;
     for (int i = 0; i <= frames; i++) {
         vid_fade((i * 16) / frames);
-        app_frame_begin(); app_frame_end();
+        hold_frame();
     }
 }
 
 void app_fade_in(int frames)
 {
-    for (int i = frames; i >= 0; i--) {
-        vid_fade((i * 16) / frames);
-        app_frame_begin(); app_frame_end();
-    }
-    vid_fade(0);
+    if (frames < 1) frames = 1;
+    fade_total = fade_left = frames;
+    vid_fade(16);
 }
 
 void app_flash(u8 colour, int frames)
 {
     (void)colour;
+    fade_left = 0;
     for (int i = frames; i > 0; i--) {
         vid_fade_white((i * 12) / frames);
-        app_frame_begin(); app_frame_end();
+        hold_frame();
     }
     vid_fade(0);
 }

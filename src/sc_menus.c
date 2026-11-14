@@ -23,8 +23,7 @@ int sc_title(int arg)
 {
     (void)arg;
     int sel = 0;
-    int has_save = save_exists();
-    if (!has_save) sel = 0;
+    int has_save = run_started();
     mus_play(MUS_NEON_RAIN);
     key_flush();
     app_fade_in(16);
@@ -46,14 +45,15 @@ int sc_title(int arg)
                 case 0:
                     if (!has_save || confirm_box("START A NEW RUN? THE SAVED ONE IS OVERWRITTEN.",
                                                  "NEW RUN", "CANCEL", C_MAG, BG_RAIN, RAMP_MAG)) {
-                        run_reset();
+                        run_new();
+                        g_run.seen_intro = 1;
                         save_write();
                         app_fade_out(16);
                         return SC_STORY;
                     }
                     key_flush();
                     break;
-                case 1: save_read(); app_fade_out(16); return SC_HUB;
+                case 1: app_fade_out(16); return SC_HUB;
                 case 2: app_fade_out(12); return SC_TEACH;
                 case 3: app_fade_out(12); return SC_DRILL;
                 case 4: app_fade_out(12); return SC_CODEX;
@@ -255,11 +255,13 @@ int sc_hub(int arg)
         ui_titlebar("KESTREL / SUBLET 14-C", "SELECT: CODEX", C_CYAN);
         hub_status();
 
+        /* the city is busy; the menu sits on its own plate */
+        ui_panel(2, 61, 136, 80, C_CYAND, 0);
         for (int i = 0; i < 7; i++) {
             int y = 64 + i * 11;
             u8 c = m[i].enabled ? m[i].colour : C_DIM;
             if (i == sel) {
-                vid_hgrad(4, y - 1, 150, 11, RAMP_VIOLET, 10, 0);
+                vid_hgrad(4, y - 1, 132, 11, RAMP_VIOLET, 10, 0);
                 vid_text(6, y, "\x01", c);
                 c = C_WHITE;
             }
@@ -299,7 +301,8 @@ int sc_venue(int arg)
         if (key_repeat(KEY_UP))   { sel = (sel + NVENUES - 1) % NVENUES; sfx(SFX_MOVE); }
         if (key_down(KEY_B)) { sfx(SFX_BACK); app_fade_out(10); return SC_HUB; }
         const Venue *v = &VENUES[sel];
-        int locked = g_run.night < v->night_min || sel == 5;
+        int barred = g_run.venue_locked[sel];
+        int locked = g_run.night < v->night_min || sel == 5 || barred;
         if (key_down(KEY_A)) {
             if (locked) { sfx(SFX_DENY); }
             else if (g_run.creds < v->min_bet) { sfx(SFX_DENY); }
@@ -321,7 +324,7 @@ int sc_venue(int arg)
         for (int i = 0; i < NVENUES; i++) {
             int y = 15 + i * 11;
             const Venue *w = &VENUES[i];
-            int lk = g_run.night < w->night_min || i == 5;
+            int lk = g_run.night < w->night_min || i == 5 || g_run.venue_locked[i];
             u8 c = lk ? C_DIM : w->accent;
             if (i == sel) {
                 vid_hgrad(0, y - 1, 240, 11, RAMP_VIOLET, 9, 0);
@@ -360,26 +363,23 @@ int sc_venue(int arg)
             int e = venue_edge_x100(v);
             int cc = venue_counter_x100(v);
             p = str_cat(b, "HOUSE ");
-            if (e < 0) { *p++ = '-'; e = -e; }
-            p = str_int(p, e / 100); *p++ = '.';
-            p = str_uint_pad(p, (u32)(e % 100), 2, '0'); str_cat(p, "%");
+            str_pct100(p, e, 0);
             vid_text(4, ry, b, e > 100 ? C_BLOOD : (e < 35 ? C_GREEN : C_AMBER));
 
             p = str_cat(b, "COUNTER ");
-            if (cc < 0) { *p++ = '-'; } else { *p++ = '+'; }
-            int ac = cc < 0 ? -cc : cc;
-            p = str_int(p, ac / 100); *p++ = '.';
-            p = str_uint_pad(p, (u32)(ac % 100), 2, '0'); str_cat(p, "%");
+            str_pct100(p, cc, 1);
             vid_text(100, ry, b, cc > 0 ? C_GREEN : C_BLOOD);
         }
 
         ry += 11;
         if (g_run.night < v->night_min) {
-            p = str_cat(b, "WORD OF THIS ROOM REACHES YOU ON NIGHT ");
+            p = str_cat(b, "WORD OF THIS ROOM COMES ON NIGHT ");
             str_int(p, v->night_min);
             vid_text(4, ry, b, C_DIM);
         } else if (sel == 5) {
             vid_text(4, ry, "BY INVITATION ONLY.", C_DIM);
+        } else if (barred) {
+            vid_text(4, ry, "BACKED OFF. NOT THIS ROOM, NOT TONIGHT.", C_BLOOD);
         } else {
             if (v->bj65) vid_text(4, ry, "6:5 - THIS ROOM IS A TAX", C_BLOOD);
             vid_text(236 - vid_text_len("\x13 SIT DOWN"), ry, "\x13 SIT DOWN", C_WHITE);
@@ -428,10 +428,9 @@ int sc_clinic(int arg)
         vid_rect(0, 12, 240, 82, C_BLACK);
         vid_rect_dither(0, 12, 240, 82, C_BLACK, C_INDIGO);
         vid_hline(0, 93, 240, C_GREEN);
-        ui_titlebar("GREY / SUBLEVEL 2", "B: LEAVE", C_GREEN);
         {
             char b[24]; b[0] = 0x09; str_money(b + 1, g_run.creds);
-            vid_text(236 - vid_text_len(b), 2, b, C_WHITE);
+            ui_titlebar("GREY / SUBLEVEL 2", b, C_GREEN);
         }
 
         for (int i = 0; i < IMP_COUNT; i++) {
@@ -465,8 +464,8 @@ int sc_clinic(int arg)
         p = str_cat(b, "WIRE +"); p = str_int(p, v->wire);
         vid_text(4, 150, b, C_ICE);
         p = str_cat(b, "DRIFT +"); p = str_int(p, v->drift);
-        vid_text(70, 150, b, C_MAG);
-        if (v->drift == 0) vid_text(150, 150, "CLEAN CHROME", C_GREEN);
+        vid_text(64, 150, b, C_MAG);
+        vid_text(236 - vid_text_len("\x13 BUY  \x14 LEAVE"), 150, "\x13 BUY  \x14 LEAVE", C_DIM);
         app_frame_end();
     }
 }
@@ -505,6 +504,8 @@ int sc_night_end(int arg)
             if (g_run.rui == 0) { g_run.ending = 2; return SC_ENDING; }
             if (g_run.night >= NIGHTS) { g_run.ending = 0; return SC_ENDING; }
             g_run.night++;
+            /* a new night, a new shift in every pit */
+            for (int i = 0; i < NVENUES; i++) g_run.venue_locked[i] = 0;
             save_write();
             return SC_STORY;
         }
@@ -606,7 +607,12 @@ int sc_ending(int arg)
     key_flush();
     for (;;) {
         app_frame_begin();
-        if (key_down(KEY_A)) { sfx(SFX_SELECT); app_fade_out(20); save_erase(); return SC_TITLE; }
+        if (key_down(KEY_A)) {
+            /* the run is over; what was learned along the way is kept */
+            sfx(SFX_SELECT); app_fade_out(20);
+            run_new(); save_write();
+            return SC_TITLE;
+        }
         ui_backdrop(BG_TERMINAL, g_t, E->ramp);
         ui_titlebar("RUN REPORT", 0, E->col);
         char b[48], *p;

@@ -93,70 +93,64 @@ press a
 wait 40
 press b
 wait 60
-# DRILLS
+# DRILLS: open each, answer once, quit with START
 mash down 4 10
 press a
 wait 60
 mash down 5 40
+# tag drill
 press a
 wait 40
 press r
-wait 60
-press a
-wait 20
-press down
-wait 60
+wait 50
 press a
 wait 20
 press start
 wait 30
-press a
-wait 30
 press down
+# speed count
 press a
 wait 40
-press r 200
+press r 240
 wait 60
+press up
 press a
 wait 60
-press a
-wait 60
-press start
-wait 30
 press a
 wait 20
-press down
-press a
-wait 60
-press a
-wait 60
-press a
-wait 30
 press start
 wait 30
+press down
+# true count
+press a
+wait 40
+press up
+press a
+wait 60
 press a
 wait 20
-press down
-press a
-wait 60
-press a
-wait 60
-press a
-wait 30
 press start
 wait 30
+press down
+# basic strategy
+press a
+wait 40
+press a
+wait 60
 press a
 wait 20
-press down
-press a
-wait 60
-press a
-wait 60
-press a
-wait 30
 press start
 wait 30
+press down
+# index plays
 press a
+wait 40
+press right
+press a
+wait 60
+press a
+wait 20
+press start
 wait 30
 press b
 wait 60

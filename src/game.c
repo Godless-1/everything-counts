@@ -80,7 +80,7 @@ const Venue VENUES[NVENUES] = {
 
 { "HALCYON SKYDECK", "SPIRE / FLOOR 188",
   "The best game in the city. Run by the people who own you.",
-  6, 85, 0, 1, 1, 0, 1, 4,  20000,  1500000,  9, 14, RAMP_CYAN,   C_CYAN,   5, 27, 68 },
+  6, 85, 0, 1, 1, 0, 1, 4,  20000,  1500000,  9, 14, RAMP_CYAN,   C_CYAN,   5, 29, 72 },
 
 { "THE VAULT", "SPIRE / BELOW THE WATERLINE",
   "One deck. Heads up. No cameras, because no witnesses.",
@@ -120,6 +120,26 @@ void run_reset(void)
     g_run.drift = 0;
     g_run.wire  = 0;
     g_run.rui   = 100;
+}
+
+/* What the player has LEARNED belongs to the player, not to one run:
+ * finished DRY RUN modules and best drill scores survive a new run. */
+void run_new(void)
+{
+    u8 lessons = g_run.lessons_done;
+    u8 best[6];
+    for (int i = 0; i < 6; i++) best[i] = g_run.best_drill[i];
+    run_reset();
+    g_run.lessons_done = lessons;
+    for (int i = 0; i < 6; i++) g_run.best_drill[i] = best[i];
+}
+
+/* seen_intro marks a started run; the other tests recognise saves written
+ * before that marker existed */
+int run_started(void)
+{
+    return g_run.seen_intro || g_run.beat_done[0] || g_run.night > 1 ||
+           g_run.hands_played > 0;
 }
 
 void run_add_drift(int d)

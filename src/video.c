@@ -510,6 +510,18 @@ char *str_signed(char *dst, int v)
     return str_int(dst, v);
 }
 
+/* hundredths of a percent, sign handled once and correctly */
+char *str_pct100(char *dst, int v, int plus)
+{
+    if (v < 0) { *dst++ = '-'; v = -v; }
+    else if (plus) *dst++ = '+';
+    dst = str_int(dst, v / 100);
+    *dst++ = '.';
+    dst = str_uint_pad(dst, (u32)(v % 100), 2, '0');
+    *dst++ = '%'; *dst = 0;
+    return dst;
+}
+
 char *str_uint_pad(char *dst, u32 v, int width, char pad)
 {
     char tmp[12];

@@ -70,6 +70,7 @@ typedef struct {
 } Venue;
 
 #define NVENUES 6
+enum { VENUE_SLAG, VENUE_NINE, VENUE_LOTUS, VENUE_SUTRA, VENUE_SKYDECK, VENUE_VAULT };
 extern const Venue VENUES[NVENUES];
 
 int venue_edge_x100(const Venue *v);     /* house edge, hundredths of a % */
@@ -100,7 +101,7 @@ typedef struct {
     u16 streak;
     s32 biggest_win;
     u8  venue_locked[NVENUES];
-    u8  seen_intro;
+    u8  seen_intro;       /* 1 once NEW RUN has been chosen: a run is in progress */
     u8  ending;
     u8  rui;              /* Rui's engram integrity, 0..100 */
     u8  liens;            /* missed escrow instalments      */
@@ -114,7 +115,9 @@ s32 run_due_tonight(void);
 
 extern Run g_run;
 
-void run_reset(void);
+void run_reset(void);              /* wipes everything                        */
+void run_new(void);                /* fresh run; keeps lessons and drill bests */
+int  run_started(void);            /* is there a run to CONTINUE?             */
 int  run_drift_level(void);        /* 0..4 */
 const char *run_drift_name(void);
 int  run_bs_accuracy(void);        /* percent */

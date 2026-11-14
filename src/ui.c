@@ -155,7 +155,9 @@ static void bg_terminal(u32 t, u8 ramp)
     for (int j = 0; j < 26; j++) {
         int yy = sy + j;
         if (yy < 0 || yy >= 160) continue;
-        int v = (j < 13) ? j : 26 - j;
+        /* a faint pass of light: text sits on this backdrop, so the head
+         * must never get bright enough to wash a line out */
+        int v = ((j < 13) ? j : 26 - j) / 3;
         vid_hline(0, yy, 240, (u8)(ramp + 2 + v));
     }
     ui_noise(0, 0, 240, 160, t, (u8)(ramp + 16), 26);

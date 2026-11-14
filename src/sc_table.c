@@ -56,6 +56,7 @@ typedef struct {
 
     int   tc_at_bet;
     int   last_action_ok;
+    int   vi;               /* index of this room in VENUES */
 } Tbl;
 
 static Tbl T;
@@ -66,6 +67,14 @@ static void say(const char *s, u8 col)
     str_copy(T.msg, s, sizeof(T.msg));
     T.msg_col = col;
     T.msg_t = 150;
+}
+
+/* "+c1,500" / "-c500": the sign goes outside the currency mark */
+static char *str_money_signed(char *p, s32 v)
+{
+    *p++ = (v < 0) ? '-' : '+';
+    *p++ = 0x09;
+    return str_money(p, v < 0 ? -v : v);
 }
 
 static s32 bet_unit(void)       { return T.v->min_bet; }
@@ -97,10 +106,12 @@ static int advised_units(void)
 
 static void draw_hud(void)
 {
-    ui_titlebar(T.v->name, 0, T.v->accent);
+    ui_titlebar(T.mode == TMODE_PRACTICE ? "GREY'S SIM" : T.v->name, 0, T.v->accent);
     char b[32];
     b[0] = 0x09; str_money(b + 1, g_run.creds);
     vid_text(236 - vid_text_len(b), 2, b, C_WHITE);
+    if (T.mode == TMODE_PRACTICE)
+        vid_text(230 - vid_text_len(b) - vid_text_len("PLAY MONEY"), 2, "PLAY MONEY", C_DIM);
 
     /* shoe penetration */
     int left = shoe_cards_left(&T.shoe);
@@ -311,11 +322,11 @@ static void draw_table(int hide_hole)
         }
         if (T.tbl.hand[0].bet || T.bet) {
             char b[20];
-            vid_text(3, 92, "BET", C_DIM);
+            if (T.tbl.hand[0].doubled) vid_text(3, 91, "BET x2", C_AMBER);
+            else                       vid_text(3, 91, "BET", C_DIM);
             b[0] = 0x09;
             str_money(b + 1, T.tbl.hand[0].bet ? T.tbl.hand[0].bet : T.bet);
-            vid_text(3, 101, b, T.v->accent);
-            if (T.tbl.hand[0].doubled) vid_text(3, 110, "DOUBLED", C_AMBER);
+            vid_text(3, 100, b, T.v->accent);
         }
     } else {
         for (int i = 0; i < T.tbl.nhands; i++)
@@ -382,10 +393,7 @@ static void rules_book(void)
             p = str_cat(p, "\nSURRENDER: ");
             p = str_cat(p, T.v->surrender ? "YES" : "NO");
             p = str_cat(p, "\nHOUSE EDGE vs PERFECT PLAY: ");
-            int e = venue_edge_x100(T.v);
-            p = str_int(p, e / 100); *p++ = '.';
-            p = str_uint_pad(p, (u32)(e % 100), 2, '0');
-            str_cat(p, "%");
+            str_pct100(p, venue_edge_x100(T.v), 0);
             body = dyn;
         }
         vid_text_wrap(14, 32, 36, body, C_TEXT);
@@ -545,9 +553,29 @@ static int pulse_check(int kind)
 /*  flow                                                                  */
 /* ====================================================================== */
 
+/* The shoe ran dry mid-round and the discards went back in.  Whatever
+ * was counted is gone except the cards still face up on the felt. */
+static void recount_after_recycle(void)
+{
+    count_reset(&T.cnt, T.v->decks);
+    for (int i = 0; i < T.tbl.nhands; i++)
+        for (int k = 0; k < T.tbl.hand[i].n; k++) count_card(&T.cnt, T.tbl.hand[i].card[k]);
+    for (int k = 0; k < T.tbl.dealer.n; k++)
+        if (k != 1 || T.tbl.hole_shown) count_card(&T.cnt, T.tbl.dealer.card[k]);
+    say("SHOE DRY: DISCARDS RESHUFFLED", C_AMBER);
+}
+
+static u8 draw_card(void)
+{
+    int was = T.shoe.recycled;
+    u8 c = shoe_draw(&T.shoe);
+    if (T.shoe.recycled && !was) recount_after_recycle();
+    return c;
+}
+
 static void deal_one(Hand *h, int faceup)
 {
-    u8 c = shoe_draw(&T.shoe);
+    u8 c = draw_card();
     hand_add(h, c);
     if (faceup) count_card(&T.cnt, c);
     sfx(SFX_DEAL);
@@ -560,7 +588,10 @@ static void deal_one(Hand *h, int faceup)
 
 static void new_shoe(void)
 {
-    shoe_build(&T.shoe, T.v->decks, T.v->pen);
+    /* the dealer you did not sell out cuts you a deeper shoe at her room */
+    int pen = T.v->pen;
+    if (T.vi == VENUE_LOTUS && T.mode == TMODE_PLAY && g_run.flag[FLAG_MARA_SPARED]) pen += 10;
+    shoe_build(&T.shoe, T.v->decks, pen);
     count_reset(&T.cnt, T.v->decks);
     T.hands_this_shoe = 0;
 
@@ -608,8 +639,11 @@ static void build_actions(void)
 static void grade_action(int chosen)
 {
     Hand *h = &T.tbl.hand[T.tbl.active];
-    int cds = hand_can_double(h, T.v->das);
-    int cs  = hand_can_split(h, T.tbl.nhands, T.v->max_hands, T.v->rsa);
+    /* grade against what was actually on offer: no marks lost for a
+     * double or split the bankroll could not cover */
+    int afford = g_run.creds >= h->bet;
+    int cds = afford && hand_can_double(h, T.v->das);
+    int cs  = afford && hand_can_split(h, T.tbl.nhands, T.v->max_hands, T.v->rsa);
     int csu = T.v->surrender && hand_can_surrender(h) && T.tbl.nhands == 1;
     int dev = 0;
     int right = dev_action(h, T.tbl.dealer.card[0], true_count(), T.v,
@@ -633,37 +667,11 @@ static void grade_action(int chosen)
 
 static void settle(void)
 {
-    Hand *d = &T.tbl.dealer;
-    int dt = hand_total(d);
-    int dbj = hand_is_bj(d);
-    int dbust = dt > 21;
-    s32 net = 0;
+    /* every stake left the bankroll when it was put down; this hands back
+     * the surviving stakes plus winnings */
+    g_run.creds += table_settle(&T.tbl, T.v->bj65);
+    s32 net = T.tbl.net;
 
-    if (T.tbl.ins_taken) {
-        if (dbj) { net += T.tbl.ins_bet * 2; }
-        else     { net -= T.tbl.ins_bet; }
-    }
-
-    for (int i = 0; i < T.tbl.nhands; i++) {
-        Hand *h = &T.tbl.hand[i];
-        int pt = hand_total(h);
-        if (h->surrendered)      { h->result = -1; h->payout = -h->bet / 2; }
-        else if (h->busted)      { h->result = -1; h->payout = -h->bet; }
-        else if (hand_is_bj(h)) {
-            if (dbj)             { h->result = 0;  h->payout = 0; }
-            else                 { h->result = 2;
-                                   h->payout = T.v->bj65 ? (h->bet * 6) / 5 : (h->bet * 3) / 2; }
-        }
-        else if (dbj)            { h->result = -1; h->payout = -h->bet; }
-        else if (dbust)          { h->result = 1;  h->payout = h->bet; }
-        else if (pt > dt)        { h->result = 1;  h->payout = h->bet; }
-        else if (pt < dt)        { h->result = -1; h->payout = -h->bet; }
-        else                     { h->result = 0;  h->payout = 0; }
-        net += h->payout;
-        h->resolved = 1;
-    }
-
-    g_run.creds += net;
     g_table_net += net;
     if (net > g_run.biggest_win) g_run.biggest_win = net;
     if (net > 0) { g_run.streak++; if (g_run.streak > g_run.best_streak) g_run.best_streak = g_run.streak; }
@@ -672,7 +680,12 @@ static void settle(void)
     /* heat: the pit watches the spread, not the wins */
     int units = (int)(T.bet / bet_unit());
     int last_units = (int)(T.last_bet / bet_unit());
-    T.heat += T.v->heat_rate / 2 + 1;
+    int watch = T.v->heat_rate / 2 + 1;
+    /* the Lotus pit owes you one; the Kuroda people do not, if you refused */
+    if (T.vi == VENUE_LOTUS && g_run.flag[FLAG_MARA_SOLD]) watch -= 2;
+    if (g_run.flag[FLAG_REFUSED_SABLE]) watch += 1;
+    if (watch < 0) watch = 0;
+    T.heat += watch;
     if (last_units > 0 && units >= last_units * 4) T.heat += 7;
     if (units >= 8) T.heat += 3;
     if (net > bet_unit() * 20) T.heat += 4;
@@ -706,14 +719,17 @@ static void settle(void)
         if (net > 0)      { head = "YOU TAKE IT"; col = C_GREEN; }
         else if (net < 0) { head = "HOUSE TAKES IT"; col = C_BLOOD; }
         else              { head = "PUSH"; col = C_AMBER; }
-        int w = 150;
-        vid_rect(120 - w / 2, 110, w, 24, C_BLACK);
-        vid_frame_rect(120 - w / 2, 110, w, 24, col);
-        ui_brackets(119 - w / 2, 109, w + 2, 26, col, 4);
-        vid_text_center(120, 113, head, col);
-        p = b; if (net >= 0) *p++ = '+';
-        *p++ = 0x09; str_money(p, net);
-        vid_text_center(120, 123, b, C_WHITE);
+        /* one line in the action-bar row: the message strip above it
+         * keeps showing the grade for the last decision */
+        vid_rect(0, 121, 240, 15, C_BLACK);
+        vid_frame_rect(2, 122, 236, 13, col);
+        if (net) str_money_signed(b, net);
+        else { p = b; *p++ = 0x09; *p++ = '0'; *p = 0; }
+        {
+            int tw = vid_text_len(head) + 12 + vid_text_len(b);
+            int tx = vid_text(120 - tw / 2, 125, head, col);
+            vid_text(tx + 12, 125, b, C_WHITE);
+        }
         ui_hint("\x13 NEXT HAND");
         app_frame_end();
         if (key_down(KEY_A) || key_down(KEY_B) || key_down(KEY_START)) break;
@@ -727,11 +743,9 @@ static void dealer_play(void)
     sfx(SFX_FLIP);
     for (int f = 0; f < 30; f++) { app_frame_begin(); draw_table(0); app_frame_end(); }
 
-    /* if every hand is dead the dealer does not draw */
-    int live = 0;
-    for (int i = 0; i < T.tbl.nhands; i++)
-        if (!T.tbl.hand[i].busted && !T.tbl.hand[i].surrendered) live = 1;
-    if (!live) return;
+    /* nobody left to beat (all bust, folded, or paid as blackjack):
+     * the dealer shows the hole card and draws nothing */
+    if (!table_dealer_must_play(&T.tbl)) return;
 
     for (;;) {
         int t = hand_total(&T.tbl.dealer);
@@ -888,11 +902,58 @@ static int offer_insurance(void)
 }
 
 /* ====================================================================== */
+/* a boxed paragraph over the dimmed felt; A to go on */
+static void epilogue(const char *title, const char *text, const char *hint, u8 col)
+{
+    key_flush();
+    for (;;) {
+        app_frame_begin();
+        draw_table(0);
+        for (int j = 0; j < 160; j += 2) vid_hline(0, j, 240, C_BLACK);
+        ui_panel(14, 30, 212, 104, col, title);
+        vid_text_wrap(21, 40, 33, text, C_TEXT);
+        ui_hint(hint);
+        app_frame_end();
+        if (key_down(KEY_A)) { sfx(SFX_SELECT); break; }
+    }
+}
+
+/* Chrome talks.  Every room has a wire level it tolerates; above it, any
+ * hand may be the one where a wand passes behind your chair. */
+static void scan_check(void)
+{
+    if (T.mode != TMODE_PLAY) return;
+    if (g_run.flag[FLAG_LAUNDERED]) return;        /* the Kuroda hand is over you */
+    int over = (int)g_run.wire - (int)T.v->scan_floor;
+    if (over <= 0) return;
+    if (!rng_chance(3 + over / 3)) return;
+
+    g_run.flag[FLAG_SCANNED] = 1;
+    T.heat += 10 + over / 3;
+    sfx(SFX_GLITCH);
+    epilogue("SCANNED",
+        "A floor runner drifts past with a wand held low against his leg. "
+        "It chirps once at the back of your skull.\n\n"
+        "He does not look at you. He looks at the pit, and the pit looks at you.\n\n"
+        "Your chrome is louder than this room allows.",
+        "\x13 KEEP PLAYING", C_MAG);
+    say("WIRE OVER THIS ROOM'S LIMIT", C_MAG);
+}
+
 int sc_table(int arg)
 {
     int vi = arg & 0xFF;
     T.mode = (arg >> 8) & 0xFF;
     T.v = &VENUES[vi];
+    T.vi = vi;
+
+    /* Grey's construct runs on play money: nothing that happens in it
+     * touches the real bankroll, the stats or the save */
+    Run real = g_run;
+    if (T.mode == TMODE_PRACTICE) g_run.creds = 50000;
+    int song = T.mode == TMODE_PRACTICE    ? MUS_NEON_RAIN
+             : T.mode == TMODE_STORY_VAULT ? MUS_VAULT : MUS_THE_SHOE;
+
     T.trust = 50;
     T.heat = 0;
     T.bet = T.v->min_bet;
@@ -904,19 +965,23 @@ int sc_table(int arg)
     g_table_hands = 0;
     g_table_end = TEND_LEFT;
 
-    mus_play(T.mode == TMODE_PRACTICE ? MUS_NEON_RAIN : MUS_THE_SHOE);
-    vid_fade(0);
+    mus_play(song);
+    app_fade_in(10);
     key_flush();
     new_shoe();
 
     for (;;) {
         /* ---- shoe boundary ------------------------------------------ */
         if (shoe_exhausted(&T.shoe)) {
-            pulse_check(T.hands_total > 6 ? CHK_TRUE : CHK_RUNNING);
+            /* a recycled shoe has no honest count left to be asked about */
+            if (!T.shoe.recycled)
+                pulse_check(T.hands_total > 6 ? CHK_TRUE : CHK_RUNNING);
             new_shoe();
         }
 
         if (g_run.creds < T.v->min_bet) { g_table_end = TEND_BROKE; break; }
+        /* at the Vault they want to watch you count; nobody is thrown out */
+        if (T.mode == TMODE_STORY_VAULT) T.heat = 0;
         if (T.heat >= 100) { g_table_end = TEND_BACKED_OFF; break; }
 
         /* ---- betting ------------------------------------------------ */
@@ -959,28 +1024,29 @@ int sc_table(int arg)
 
                 char *p = str_int(b, units);
                 str_cat(p, units == 1 ? " UNIT" : " UNITS");
-                vid_text_center(120, 74, b, C_MID);
+                vid_text_center(120, 75, b, C_MID);
 
-                draw_chips(120, 80, T.bet, bet_unit(), T.v->accent);
+                /* the stack sits beside the readout, clear of every label */
+                {
+                    int cols = (units > 30 ? 30 : units);
+                    cols = (cols + 5) / 6;
+                    draw_chips(58 - cols * 8, 43, T.bet, bet_unit(), T.v->accent);
+                }
 
                 /* the advisory is the lesson: bet with the count */
                 if (run_has(IMP_ORACLE) || T.mode == TMODE_PRACTICE) {
                     char a[40]; char *q = str_cat(a, "ORACLE SAYS ");
                     q = str_int(q, advised_units());
                     str_cat(q, advised_units() == 1 ? " UNIT" : " UNITS");
-                    vid_text_center(120, 100, a, C_MAG);
+                    vid_text_center(120, 92, a, C_MAG);
                 } else if (T.hands_total > 0) {
-                    vid_text_center(120, 100, "SMALL WHEN COLD. BIG WHEN RICH.", C_DIM);
+                    vid_text_center(120, 92, "SMALL WHEN COLD. BIG WHEN RICH.", C_DIM);
                 }
 
                 draw_count_hud();
                 draw_message();
-                p = str_int(b, mu);
-                vid_text(4, 122, "CEILING", C_DIM);
-                vid_text(52, 122, b, C_CYAN);
-                vid_text(64 + (mu > 9 ? 6 : 0), 122, "U", C_DIM);
-                vid_text(236 - vid_text_len("HOLD THE COUNT TO RAISE IT"), 122,
-                         "HOLD THE COUNT TO RAISE IT", C_DIM);
+                vid_rect(0, 121, 240, 15, C_BLACK);
+                vid_text_center(120, 125, "HOLD THE COUNT AND THE CEILING RISES", C_DIM);
                 ui_hint2("\x03\x04 BET   \x13 DEAL", "\x14 LEAVE   START RULES");
                 app_frame_end();
             }
@@ -995,12 +1061,14 @@ int sc_table(int arg)
         T.tbl.hand[0].bet = T.bet;
         g_run.creds -= T.bet;
         T.grade[0] = 0;
+        T.msg_t = 0;                  /* last hand's result is not this hand's */
+        shoe_round_begin(&T.shoe);
 
         deal_one(&T.tbl.hand[0], 1);
         deal_one(&T.tbl.dealer, 1);
         deal_one(&T.tbl.hand[0], 1);
         {   /* hole card stays dark and uncounted */
-            u8 c = shoe_draw(&T.shoe);
+            u8 c = draw_card();
             hand_add(&T.tbl.dealer, c);
             sfx(SFX_DEAL);
             for (int f = 0; f < 10; f++) { app_frame_begin(); draw_table(1); app_frame_end(); }
@@ -1008,7 +1076,9 @@ int sc_table(int arg)
 
         /* ---- insurance ---------------------------------------------- */
         if (CARD_RANK(T.tbl.dealer.card[0]) == 0) {
-            if (offer_insurance()) {
+            if (g_run.creds < T.bet / 2) {
+                say("NO CREDIT LEFT FOR INSURANCE", C_DIM);
+            } else if (offer_insurance()) {
                 T.tbl.ins_taken = 1;
                 T.tbl.ins_bet = T.bet / 2;
                 g_run.creds -= T.tbl.ins_bet;
@@ -1052,8 +1122,11 @@ int sc_table(int arg)
 hand_done:
         T.hands_total++;
         T.hands_this_shoe++;
+        T.last_bet = T.bet;
         g_table_hands++;
         g_run.hands_played++;
+
+        scan_check();
 
         /* random pulse check - the pit is not the only thing watching */
         {
@@ -1062,30 +1135,38 @@ hand_done:
 #ifdef EC_DEBUG
             chance = 100;
 #endif
-            if (T.hands_this_shoe >= 3 && rng_chance(chance))
+            if (T.hands_this_shoe >= 3 && !T.shoe.recycled && rng_chance(chance))
                 pulse_check(rng_chance(45) ? CHK_TRUE : CHK_RUNNING);
         }
 
-        mus_set_intensity(true_count() >= 3 ? 2 : (T.heat > 60 ? 1 : 0));
+        /* a rich shoe changes the music; a watchful pit sharpens it */
+        mus_play(true_count() >= 3 ? MUS_OVERCLOCK : song);
+        mus_set_intensity(T.heat > 60 ? 1 : 0);
     }
 
     mus_set_intensity(0);
+    if (T.mode == TMODE_PRACTICE) {
+        g_run = real;
+        return SC_HUB;
+    }
+
     /* out-of-the-chair epilogue */
     if (g_table_end == TEND_BACKED_OFF) {
         g_run.flag[FLAG_BACKED_OFF] = 1;
+        g_run.venue_locked[T.vi] = 1;          /* until tomorrow night */
         sfx(SFX_ALERT);
-        key_flush();
-        for (int f = 0; f < 600; f++) {
-            app_frame_begin();
-            draw_table(0);
-            for (int j = 0; j < 160; j += 2) vid_hline(0, j, 240, C_BLACK);
-            ui_panel(22, 46, 196, 62, C_BLOOD, "BACKED OFF");
-            vid_text_wrap(28, 56, 32,
-              "A hand on your shoulder. No scene, no police. Your chips are counted for you and the pit never breaks eye contact.\n\"You're welcome at any of our other games. Not this one.\"", C_TEXT);
-            ui_hint("\x13 WALK");
-            app_frame_end();
-            if (key_down(KEY_A)) break;
-        }
+        epilogue("BACKED OFF",
+            "A hand on your shoulder. No scene, no police. Your chips are counted "
+            "for you and the pit never breaks eye contact.\n\n"
+            "\"You're welcome at any of our other games. Not this one. Not tonight.\"",
+            "\x13 WALK", C_BLOOD);
+    } else if (g_table_end == TEND_BROKE) {
+        sfx(SFX_BAD);
+        epilogue("TAPPED OUT",
+            T.mode == TMODE_STORY_VAULT
+            ? "The felt in front of you is empty. Vesk squares the deck with one finger and does not deal.\n\n\"That is the session, Ms. Naem.\""
+            : "What is left would not cover the minimum here. The dealer waits one polite second, then deals around you as if the chair were empty.",
+            "\x13 GET UP", C_AMBER);
     }
     return SC_HUB;
 }

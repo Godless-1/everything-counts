@@ -378,18 +378,20 @@ int sc_drill(int arg)
 
         ui_backdrop(BG_GRID, g_t, RAMP_CYAN);
         ui_titlebar("THE RANGE", "B: BACK", C_ICE);
+        /* list on a plate at the left; the sun keeps the right */
+        ui_panel(2, 17, 140, 74, C_ICE, 0);
         for (int i = 0; i < DR_COUNT_; i++) {
             int y = 22 + i * 14;
             u8 c = DR_COL[i];
             if (i == sel) {
-                vid_hgrad(0, y - 2, 240, 14, RAMP_VIOLET, 10, 0);
-                vid_text(4, y, "\x01", c);
+                vid_hgrad(4, y - 2, 136, 12, RAMP_VIOLET, 10, 0);
+                vid_text(6, y, "\x01", c);
                 c = C_WHITE;
             }
             vid_text(16, y, DR_NAME[i], c);
             if (g_run.best_drill[i]) {
                 char b[12]; char *p = str_int(b, g_run.best_drill[i]); str_cat(p, "%");
-                vid_text(210, y, b, C_DIM);
+                vid_text(138 - vid_text_len(b), y, b, C_MID);
             }
         }
         vid_rect(0, 96, 240, 54, C_BLACK);

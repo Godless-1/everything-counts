@@ -41,7 +41,7 @@ typedef struct {
     u8   ins_offered;
     u8   ins_taken;
     s32  ins_bet;
-    s32  total_wagered;
+    s32  net;          /* set by table_settle(): the round's profit or loss */
 } Table;
 
 void hand_clear(Hand *h);
@@ -52,5 +52,14 @@ int  hand_is_bj(const Hand *h);
 int  hand_can_split(const Hand *h, int nhands, int max_hands, int rsa);
 int  hand_can_double(const Hand *h, int das_ok);
 int  hand_can_surrender(const Hand *h);
+
+/* Stakes leave the bankroll when they are put down (deal, double, split,
+ * insurance).  table_settle() grades every hand, sets t->net to the
+ * round's profit or loss, and returns what goes BACK to the bankroll:
+ * the surviving stakes plus winnings.  A lost bet returns nothing. */
+s32  table_settle(Table *t, int bj65);
+
+/* nonzero while the dealer still has a reason to draw cards */
+int  table_dealer_must_play(const Table *t);
 
 #endif

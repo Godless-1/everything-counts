@@ -64,6 +64,7 @@ char *str_int(char *dst, int v);
 char *str_uint_pad(char *dst, u32 v, int width, char pad);
 char *str_money(char *dst, s32 v);       /* 12500 -> "12,500" */
 char *str_signed(char *dst, int v);      /* 3 -> "+3" */
+char *str_pct100(char *dst, int v, int plus);  /* -7 -> "-0.07%", 55 -> "0.55%" */
 char *str_cat(char *dst, const char *s);
 void  str_copy(char *dst, const char *s, int max);
 
