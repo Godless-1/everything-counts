@@ -109,21 +109,38 @@ static void bg_grid(u32 t, u8 ramp)
     }
 }
 
+/* how far in from each rail the three rings of the light pool begin on
+ * each scanline: parabolas, worked out once (division is dear here) */
+static u8 felt_edge[SCREEN_H][3];
+static u8 felt_ready;
+
 static void bg_felt(u32 t, u8 ramp)
 {
-    /* pool of light falling on green-black felt */
+    if (!felt_ready) {
+        for (int j = 0; j < SCREEN_H; j++) {
+            int d = j - 62;
+            int q = d * d;
+            int a = 2 + q / 70, b = 10 + q / 42, c = 20 + q / 28;
+            felt_edge[j][0] = (u8)(a > 119 ? 119 : a);
+            felt_edge[j][1] = (u8)(b > 119 ? 119 : b);
+            felt_edge[j][2] = (u8)(c > 119 ? 119 : c);
+        }
+        felt_ready = 1;
+    }
+    /* A pool of light on dark felt.  Brightness falls away from the
+     * middle of the table in every direction, and the scanline banding
+     * runs right out to the rail, so the edges read as shadow instead of
+     * as two flat bars painted over the picture. */
     for (int j = 0; j < 160; j++) {
         int d = j - 62; if (d < 0) d = -d;
         int v = 5 - d / 15;
         if (v < 0) v = 0;
-        int base = (j & 1) ? 0 : 1;
-        vid_hline(0, j, 240, (u8)(ramp + base + v));
-    }
-    /* vignette down the sides */
-    for (int i = 0; i < 18; i++) {
-        u8 c = (u8)(ramp + (i / 12));
-        vid_vline(i, 0, 160, c);
-        vid_vline(239 - i, 0, 160, c);
+        int scan = (j & 1) ? 0 : 1;
+        const u8 *e = felt_edge[j];
+        vid_hline(0, j, 240, (u8)(ramp + scan));
+        if (v > 1) vid_hline(e[0], j, 240 - 2 * e[0], (u8)(ramp + scan + v / 3));
+        if (v > 0) vid_hline(e[1], j, 240 - 2 * e[1], (u8)(ramp + scan + (v + 1) / 2));
+        vid_hline(e[2], j, 240 - 2 * e[2], (u8)(ramp + scan + v));
     }
     /* betting arc + insurance line */
     for (int x = 8; x < 232; x++) {
@@ -468,6 +485,16 @@ void ui_portrait(int x, int y, int id, u32 t)
             vid_plot(cx - 7, ey + 1, C_BLACK);
             vid_plot(cx + 5, ey + 1, C_BLACK);
             break;
+    }
+    /* anyone with a bare eye blinks now and then; a feed that never
+     * blinks reads as a still picture */
+    if (c->visor != 1 && c->visor != 3 && ((t + (u32)id * 37u) % 190u) < 5u) {
+        vid_rect(cx - 8, ey, 3, 3, RAMP_CHROME + 8);
+        vid_hline(cx - 8, ey + 2, 3, RAMP_CHROME + 4);
+        if (c->visor == 0 || c->visor == 4) {
+            vid_rect(cx + 4, ey, 3, 3, RAMP_CHROME + 8);
+            vid_hline(cx + 4, ey + 2, 3, RAMP_CHROME + 4);
+        }
     }
 
     /* cheek / neck chrome */

@@ -84,12 +84,58 @@ static void debug_preset(void)
 }
 #endif
 
+#ifdef EC_SELFTEST
+/* `make selftest` builds a ROM that does nothing but this: shuffle a few
+ * thousand two-deck shoes ON THE TARGET CPU and print how the shuffle
+ * behaves.  It exists because the host tests cannot see a miscompiled
+ * 64-bit multiply or a bad entropy source on the real machine. */
+static void selftest(void)
+{
+    static Shoe s;
+    u32 n = 0, ten = 0, ace = 0, bj = 0, q[4] = { 0, 0, 0, 0 };
+    char b[48], *p;
+    for (;;) {
+        for (int k = 0; k < 40; k++) {
+            rng_stir();
+            shoe_build(&s, 2, 65);
+            int v0 = card_value(s.cards[0]), v2 = card_value(s.cards[2]);
+            if (v0 == 10) ten++;
+            if (v0 == 11) ace++;
+            if ((v0 == 11 && v2 == 10) || (v0 == 10 && v2 == 11)) bj++;
+            /* which quarter of the shoe holds the FIRST of its two aces
+             * of spikes: the smaller of two uniform positions */
+            for (int i = 0; i < s.n; i++)
+                if (s.cards[i] == CARD(0, 0)) { q[i / 26]++; break; }
+            n++;
+        }
+        app_frame_begin();
+        vid_clear(C_BLACK);
+        vid_text(8, 8, "SHUFFLE SELF-TEST (PER 10000)", C_CYAN);
+        p = str_cat(b, "SHOES      "); str_int(p, (int)n);                 vid_text(8, 28, b, C_WHITE);
+        p = str_cat(b, "FIRST TEN  "); p = str_int(p, (int)(ten * 10000 / n)); str_cat(p, "  WANT 3077"); vid_text(8, 40, b, C_TEXT);
+        p = str_cat(b, "FIRST ACE  "); p = str_int(p, (int)(ace * 10000 / n)); str_cat(p, "  WANT 769");  vid_text(8, 52, b, C_TEXT);
+        p = str_cat(b, "BLACKJACK  "); p = str_int(p, (int)(bj * 10000 / n));  str_cat(p, "  WANT 478");  vid_text(8, 64, b, C_TEXT);
+        static const char *want[4] = { "  WANT 4375", "  WANT 3125", "  WANT 1875", "  WANT 625" };
+        for (int i = 0; i < 4; i++) {
+            p = str_cat(b, "QUARTER "); p = str_int(p, i + 1); p = str_cat(p, "  ");
+            p = str_int(p, (int)(q[i] * 10000 / n)); str_cat(p, want[i]);
+            vid_text(8, 82 + i * 12, b, C_AMBER);
+        }
+        app_frame_end();
+    }
+}
+#endif
+
 int main(void)
 {
     vid_init();
     snd_init();
     key_flush();
     REG_TM2CNT = 0x0080;          /* free-running timer for entropy */
+#ifdef EC_SELFTEST
+    rng_seed(0xC0FFEE);
+    selftest();
+#endif
     /* The saved state is live from the first frame.  DRY RUN and the
      * drills are open from the title and write their progress back; when
      * they wrote a blank run instead, they erased the player's campaign. */

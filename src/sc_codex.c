@@ -208,7 +208,7 @@ static void codex_rooms(void)
         vid_rect(0, 86, 240, 64, C_BLACK);
         vid_hline(0, 86, 240, v->accent);
         char b[48], *p;
-        p = str_int(b, v->decks); p = str_cat(p, " DECKS   ");
+        p = str_int(b, v->decks); p = str_cat(p, v->decks == 1 ? " DECK   " : " DECKS   ");
         p = str_int(p, v->pen); str_cat(p, "% PENETRATION");
         vid_text(4, 90, b, C_TEXT);
         p = str_cat(b, v->h17 ? "H17  " : "S17  ");

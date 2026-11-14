@@ -42,7 +42,7 @@ OBJ       := $(patsubst %.c,$(BUILD)/%.o,$(notdir $(CSRC))) \
 
 VPATH     := $(SRC) $(GEN)
 
-.PHONY: all clean run debug test gen
+.PHONY: all clean run debug selftest test gen
 .SUFFIXES:
 
 all: $(DIST)/$(TARGET).gba
@@ -92,6 +92,12 @@ debug: gen
 
 # rules engine (millions of simulated hands), then scripted sessions through
 # a host build of the whole game: money, save file, and every screen's text
+# a ROM that only measures the shuffle on the target CPU (run it in an
+# emulator and read the numbers off the screen)
+selftest: gen
+	@$(MAKE) -s BUILD=build-st TARGET=$(TARGET)-selftest \
+	       CFLAGS='$(CFLAGS) -DEC_SELFTEST' all
+
 test:
 	@bash test/host/run.sh
 	@bash test/play/run.sh build
@@ -101,4 +107,4 @@ run: all
 	@bash test/run.sh
 
 clean:
-	@rm -rf $(BUILD) build-dbg build-host $(DIST) $(GEN)
+	@rm -rf $(BUILD) build-dbg build-st build-host $(DIST) $(GEN)

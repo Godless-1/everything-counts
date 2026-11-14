@@ -57,6 +57,7 @@ typedef struct {
     int   tc_at_bet;
     int   last_action_ok;
     int   vi;               /* index of this room in VENUES */
+    int   in_turn;          /* the player is choosing an action right now */
 } Tbl;
 
 static Tbl T;
@@ -198,6 +199,8 @@ static void draw_hand_mini(int x, int y, const Hand *h, int active, int idx)
     if (h->stood && !h->busted) vid_text(x + 100, y + 5, "\x10", C_GREEN);
 }
 
+static int coach_available(void);
+
 static void draw_count_hud(void)
 {
     int y = 136;
@@ -226,7 +229,8 @@ static void draw_count_hud(void)
         vid_text(x, y + 3, b, C_WHITE); x += 34;
     }
     if (x < 8) vid_text(4, y + 3, "UNAIDED - YOU COUNT IT", C_DIM);
-    /* earned bet ceiling */
+    /* earned bet ceiling; during a decision the coach has this corner */
+    if (T.in_turn && T.coach && coach_available()) return;
     vid_text(160, y + 3, "MAX", C_DIM);
     str_int(b, max_units());
     vid_text(184, y + 3, b, C_CYAN);
@@ -433,10 +437,11 @@ static void draw_coach(void)
     char b[32];
     char *p = str_cat(b, dev ? "INDEX \x01 " : "OPTIC \x01 ");
     str_cat(p, act_label(act));
+    /* right end of the count row: clear of all five action buttons */
     int w = vid_text_len(b) + 8;
-    vid_rect(236 - w, 122, w, 12, C_BLACK);
-    vid_frame_rect(236 - w, 122, w, 12, dev ? C_MAG : C_CYAN);
-    vid_text(240 - w, 124, b, dev ? C_MAG : C_CYAN);
+    vid_rect(238 - w, 137, w, 12, C_BLACK);
+    vid_frame_rect(238 - w, 137, w, 12, dev ? C_MAG : C_CYAN);
+    vid_text(242 - w, 139, b, dev ? C_MAG : C_CYAN);
 }
 
 /* ====================================================================== */
@@ -869,7 +874,9 @@ static int player_turn(void)
             }
         }
 
+        T.in_turn = 1;
         draw_table(1);
+        T.in_turn = 0;
         draw_action_bar();
         draw_coach();
         draw_situation();

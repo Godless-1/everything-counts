@@ -181,6 +181,13 @@ void card_draw(int x, int y, u8 card, int tagmode)
         vid_vline(x + 22, y + 25, 4, RAMP_CHROME + 16);
         vid_plot(x +  8, y + 21, sc);
         vid_plot(x + 22, y + 21, sc);
+        /* rank pips on the top bracket: one for the jack, two for the
+         * queen, three for the king, so a face card reads at a glance */
+        for (int i = 0; i < r - 9; i++) {
+            int px = x + 15 - (r - 10) * 2 + i * 4;
+            vid_vline(px, y + 13, 2, sc);
+            vid_plot(px, y + 12, C_WHITE);
+        }
     } else {
         suit_pip(x + 7, y + 13, su, 2, sc, rp + 15, rp + 7);
     }
