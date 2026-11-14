@@ -1,0 +1,50 @@
+# Night seven with a hollowed-out counter: the Vault, the last ledger, an ending.
+set night 6
+set creds 900000
+set escrow 1450000
+set drift 80
+set wire 70
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set beat.4 1
+set beat.5 1
+set beat.6 1
+set flag.8 1
+set started 1
+save
+nopulse 1
+waitfor 600 UNASSISTED
+press a
+waitfor 300 CONTINUE
+press down
+press a
+waitfor 300 FIND A GAME
+autoshot sv
+mashuntil up 8 12 what you have is what
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+dump ledger6
+press a
+mashuntil a 60 40 DECIDE
+stack 1 9 13 7 10 6 9 10
+wait 30
+press a
+waitfor 600 PLACE YOUR BET
+dump vault-sit
+press a
+waitfor 600 NEXT HAND
+dump vault-bj
+press a
+waitfor 300 PLACE YOUR BET
+press b
+waitfor 200 CASH OUT
+press a
+waitfor 600 LEDGER
+dump ledger7
+press a
+mashuntil a 200 12 RUN REPORT
+dump end

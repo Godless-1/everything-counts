@@ -1,0 +1,86 @@
+# Nights two to six, always taking the first option; ends in a sold mind.
+set night 1
+set creds 3000000
+set beat.0 1
+set beat.1 1
+set started 1
+save
+nopulse 1
+waitfor 600 UNASSISTED
+press a
+waitfor 300 CONTINUE
+press down
+press a
+waitfor 300 FIND A GAME
+autoshot st
+# call Rui on night one, twice
+mash down 3 10
+press a
+mashuntil a 60 20 FIND A GAME
+press a
+mashuntil a 60 20 FIND A GAME
+mash up 3 10
+mashuntil up 8 12 what you have is what
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+dump ledger2
+press a
+mashuntil a 60 60 DECIDE
+wait 30
+press a
+mashuntil a 60 30 FIND A GAME
+dump night2
+mashuntil up 8 12 what you have is what
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+dump ledger3
+press a
+mashuntil a 60 60 DECIDE
+wait 30
+press a
+mashuntil a 60 30 FIND A GAME
+dump night3
+mashuntil up 8 12 what you have is what
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+dump ledger4
+press a
+mashuntil a 60 60 DECIDE
+wait 30
+press a
+mashuntil a 60 30 FIND A GAME
+dump night4
+mashuntil up 8 12 what you have is what
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+dump ledger5
+press a
+mashuntil a 60 60 DECIDE
+wait 30
+press a
+mashuntil a 60 30 FIND A GAME
+dump night5
+mashuntil up 8 12 what you have is what
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+dump ledger6
+press a
+mashuntil a 60 60 DECIDE
+wait 30
+press a
+mashuntil a 120 20 RUN REPORT
+dump end
+wait 60
+press a
+waitfor 400 NEW RUN
+dump title

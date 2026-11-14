@@ -209,9 +209,17 @@ static void autoshot_frame(void)
     shot(name);
 }
 
+/* scripts can wait for a piece of text to be on screen */
+static char want_text[96];
+static int  want_hit;
+
 static void text_frame_end(void)
 {
     if (auto_on) autoshot_frame();
+    want_hit = 0;
+    if (want_text[0])
+        for (int i = 0; i < ngl && !want_hit; i++)
+            if (strstr(gl[i].text, want_text)) want_hit = 1;
     for (int i = 0; i < ngl; i++) {
         Glyph *g = &gl[i];
         char d[300];
@@ -263,6 +271,9 @@ static int   mash_left, mash_hold, mash_gap;
 static u16   mash_key;
 static int   rnd_left;
 static u32   rnd_state;
+static int   wf_left;                  /* waitfor: frames before giving up */
+static int   mu_left, mu_gap, mu_hold, mu_cool;   /* mashuntil */
+static u16   mu_key;
 
 /* cards the next shoe must start with (ranks 1..13, 1 = ace) */
 static u8  stack[64];
@@ -351,7 +362,7 @@ static void finish(int code)
 static void script_step(void)
 {
     char line[512], a[128], b[128];
-    while (!wait_frames && !release_in && !mash_left && !rnd_left) {
+    while (!wait_frames && !release_in && !mash_left && !rnd_left && !wf_left && !mu_left) {
         if (!script || !fgets(line, sizeof line, script)) finish(0);
         a[0] = b[0] = 0;
         int n = 0, m = 0;
@@ -366,6 +377,19 @@ static void script_step(void)
         } else if (!strcmp(cmd, "mash")) {             /* mash <key> <count> [gap] */
             n = 1; m = 5; sscanf(line, "%*s %127s %d %d", a, &n, &m);
             mash_key = key_by_name(a); mash_left = n; mash_hold = 0; mash_gap = m;
+        } else if (!strcmp(cmd, "waitfor")) {          /* waitfor <maxframes> <text> */
+            int off = 0;
+            sscanf(line, "%*s %d %n", &wf_left, &off);
+            strncpy(want_text, line + off, sizeof want_text - 1);
+            want_text[strcspn(want_text, "\r\n")] = 0;
+            want_hit = 0;
+        } else if (!strcmp(cmd, "mashuntil")) {        /* mashuntil <key> <gap> <max> <text> */
+            int off = 0;
+            sscanf(line, "%*s %127s %d %d %n", a, &mu_gap, &mu_left, &off);
+            mu_key = key_by_name(a); mu_hold = 0; mu_cool = 0;
+            strncpy(want_text, line + off, sizeof want_text - 1);
+            want_text[strcspn(want_text, "\r\n")] = 0;
+            want_hit = 0;
         } else if (!strcmp(cmd, "random")) {           /* random <presses> <seed> */
             n = 100; m = 1; sscanf(line, "%*s %d %d", &n, &m);
             rnd_left = n; rnd_state = (u32)m * 2654435761u + 1;
@@ -426,6 +450,24 @@ void host_frame(void)
     if (mash_left > 0) {
         if (mash_hold > 0) { if (--mash_hold == 0) { keys_held = 0; mash_left--; wait_frames = mash_gap; } }
         else if (!wait_frames) { keys_held = mash_key; mash_hold = 3; }
+    }
+    if (wf_left > 0) {
+        if (want_hit) { wf_left = 0; want_text[0] = 0; wait_frames = 2; }
+        else if (--wf_left == 0) {
+            fprintf(stderr, "script: gave up waiting for \"%s\" at frame %ld\n", want_text, frame_no);
+            shot("waitfor-timeout");
+            finish(3);
+        }
+    }
+    if (mu_left > 0) {
+        if (want_hit && !mu_hold) { mu_left = 0; want_text[0] = 0; keys_held = 0; wait_frames = 2; }
+        else if (mu_hold > 0) { if (--mu_hold == 0) { keys_held = 0; mu_cool = mu_gap; } }
+        else if (mu_cool > 0) mu_cool--;
+        else if (--mu_left == 0) {
+            fprintf(stderr, "script: mashed without ever seeing \"%s\" (frame %ld)\n", want_text, frame_no);
+            shot("mashuntil-timeout");
+            finish(3);
+        } else { keys_held = mu_key; mu_hold = 3; }
     }
     if (rnd_left > 0 && !wait_frames && !release_in) {
         static const u16 K[] = { KEY_A, KEY_A, KEY_A, KEY_A, KEY_A, KEY_A, KEY_DOWN, KEY_DOWN,

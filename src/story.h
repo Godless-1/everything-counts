@@ -39,6 +39,13 @@ typedef struct {
 extern const Beat BEATS[];
 extern const int NBEATS;
 
+/* A line that is only spoken if an earlier choice went a certain way.
+ * It is slipped in after line `after` of its beat. */
+#define ECHO_DRIFT 0xFF            /* instead of a flag: drift is 55 or more */
+typedef struct { u8 beat, after, flag; SLine line; } Echo;
+extern const Echo ECHOES[];
+extern const int NECHOES;
+
 int  story_beat_for_night(int night);
 void story_apply(int effect);
 

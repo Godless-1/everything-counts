@@ -161,7 +161,8 @@ static void hand_label(int x, int y, const Hand *h, int hide_hole, u8 col)
 
 static int tag_mode(void)
 {
-    return (T.mode == TMODE_PRACTICE || run_has(IMP_ABACUS)) ? TAG_SHOW : TAG_HIDE;
+    /* in the sim the coach brings the counter with it; SELECT drops both */
+    return ((T.mode == TMODE_PRACTICE && T.coach) || run_has(IMP_ABACUS)) ? TAG_SHOW : TAG_HIDE;
 }
 
 static void draw_hand_full(int cx, int y, const Hand *h, int hide_hole)
@@ -203,7 +204,7 @@ static void draw_count_hud(void)
     vid_rect(0, y, 240, 13, C_BLACK);
     vid_hline(0, y, 240, C_GRID);
 
-    int practice = (T.mode == TMODE_PRACTICE);
+    int practice = (T.mode == TMODE_PRACTICE && T.coach);
     int x = 4;
     char b[24];
 
@@ -614,7 +615,10 @@ static void new_shoe(void)
         vid_text_center(120, 120, "THE COUNT GOES BACK TO ZERO", C_AMBER);
         app_frame_end();
     }
-    say("NEW SHOE. COUNT = 0", C_AMBER);
+    if (T.mode == TMODE_PRACTICE && T.hands_total == 0)
+        say("SELECT: COACH AND COUNTER ON/OFF", C_CYAN);
+    else
+        say("NEW SHOE. COUNT = 0", C_AMBER);
 }
 
 static void build_actions(void)
@@ -816,7 +820,11 @@ static int player_turn(void)
         if (key_repeat(KEY_LEFT))  { T.act_sel = (T.act_sel + T.nacts - 1) % T.nacts; sfx(SFX_MOVE); }
         if (key_down(KEY_START))   { rules_book(); key_flush(); }
         if (key_down(KEY_SELECT)) {
-            if (coach_available()) { T.coach = !T.coach; sfx(SFX_SELECT); }
+            if (coach_available()) {
+                T.coach = !T.coach; sfx(SFX_SELECT);
+                if (T.mode == TMODE_PRACTICE)
+                    say(T.coach ? "COACH ON" : "COACH OFF. YOU COUNT IT.", C_CYAN);
+            }
             else { say("NO OPTIC INSTALLED", C_BLOOD); sfx(SFX_DENY); }
         }
         if (key_down(KEY_A)) {
@@ -893,7 +901,7 @@ static int offer_insurance(void)
             vid_frame_rect(bx, 132, 42, 13, c);
             vid_text_center(bx + 21, 135, o[i], (i == sel) ? C_WHITE : C_DIM);
         }
-        if (run_has(IMP_ORACLE) || T.mode == TMODE_PRACTICE) {
+        if (run_has(IMP_ORACLE) || (T.mode == TMODE_PRACTICE && T.coach)) {
             char b[40]; char *p = str_cat(b, "TC ");
             p = str_signed(p, true_count());
             str_cat(p, dev_insurance(true_count()) ? " - TAKE IT" : " - DECLINE");
@@ -1040,7 +1048,7 @@ int sc_table(int arg)
                 draw_chips(31, 68, T.bet, bet_unit(), T.v->accent);
 
                 /* the advisory is the lesson: bet with the count */
-                if (run_has(IMP_ORACLE) || T.mode == TMODE_PRACTICE) {
+                if (run_has(IMP_ORACLE) || (T.mode == TMODE_PRACTICE && T.coach)) {
                     char a[40]; char *q = str_cat(a, "ORACLE SAYS ");
                     q = str_int(q, advised_units());
                     str_cat(q, advised_units() == 1 ? " UNIT" : " UNITS");

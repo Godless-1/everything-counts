@@ -497,6 +497,48 @@ void ui_portrait(int x, int y, int id, u32 t)
 
 int ui_dialogue_len(const char *text) { return (int)ec_strlen(text); }
 
+#define DLG_COLS 28
+#define DLG_ROWS 4
+#define DLG_MAX  420
+
+/* A speech longer than the box is shown a page at a time.  Pages end on
+ * the last whole sentence that fits, so nobody is left holding one word
+ * on a page of its own; a sentence too long for the box is cut where the
+ * lines run out, as before. */
+int ui_dialogue_pages(const char *s, u16 *offs, int maxp)
+{
+    char tmp[DLG_MAX];
+    int np = 0, start = 0, len = (int)ec_strlen(s);
+    while (start < len && np < maxp) {
+        offs[np++] = (u16)start;
+        int best = -1;
+        for (int e = start; e < len; e++) {
+            char c = s[e];
+            int end_of_sentence = (c == '.' || c == '?' || c == '!') &&
+                                  (s[e + 1] == ' ' || s[e + 1] == 0);
+            if (!end_of_sentence && e + 1 < len) continue;
+            int n = e + 1 - start;
+            if (n > DLG_MAX - 1) break;
+            for (int i = 0; i < n; i++) tmp[i] = s[start + i];
+            tmp[n] = 0;
+            if (vid_text_wrap_lines(DLG_COLS, tmp) > DLG_ROWS) break;
+            best = e + 1;
+        }
+        if (best < 0) {                 /* one sentence, taller than the box */
+            u16 sub[4];
+            int n = len - start;
+            if (n > DLG_MAX - 1) n = DLG_MAX - 1;
+            for (int i = 0; i < n; i++) tmp[i] = s[start + i];
+            tmp[n] = 0;
+            int k = vid_wrap_pages(tmp, DLG_COLS, DLG_ROWS, sub, 4);
+            best = (k > 1) ? start + sub[1] : len;
+        }
+        start = best;
+        while (s[start] == ' ') start++;
+    }
+    return np ? np : 1;
+}
+
 void ui_dialogue_box(int speaker, const char *text, int nchars, u32 t)
 {
     const CharDef *c = &CHARS[speaker % CH_COUNT];
@@ -514,7 +556,7 @@ void ui_dialogue_box(int speaker, const char *text, int nchars, u32 t)
     vid_frame_rect(bx + 5, by - 5, nw + 6, 10, c->accent);
     vid_text(bx + 8, by - 4, c->name, c->accent);
 
-    vid_text_wrap_n(bx + 5, by + 7, 28, text, C_TEXT, nchars);
+    vid_text_wrap_n(bx + 5, by + 7, DLG_COLS, text, C_TEXT, nchars);
 
     if (nchars >= (int)ec_strlen(text) && ((t / 16) & 1))
         vid_text(bx + bw - 11, by + bh - 11, "\x04", c->accent);

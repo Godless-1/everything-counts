@@ -158,11 +158,30 @@ static void hub_rui_call(void)
       "Who is this? ... No. No, I have you. I have you. It just took a second and it shouldn't take a second.",
       "I'd like to talk to my sister. I'm told that's who I'm speaking to."
     };
+    /* the first call of each night is that night's call; after that she
+     * says what she says whenever you ring */
+    static const char *nightly[NIGHTS] = {
+      "They give me one sense at a time in here. Tonight it's hearing. So talk. Tell me what the rain is doing.",
+      "Is it the second night? They don't give me a clock. I count your calls instead. This is the second one, so: two.",
+      "I tried to remember our kitchen and it came back as a floor plan. Accurate. No smell. Bring me the smell when you come.",
+      "Somebody in the next partition has stopped answering to their name. I've been practising mine. Rui. Rui. Say it back to me.",
+      "You're tired. I can hear you being careful with me. Don't be careful. Be quick.",
+      "A man from Halcyon asked me today what you were like as a child. I told him you cheated at cards. He wrote it down.",
+      "Last night, then. Whatever walks out of that room tomorrow, make sure it's the one who used to let me win.",
+    };
     int lvl = run_drift_level();
-    const char *line = (lvl <= 1) ? warm[rng_below(3)] : cold[rng_below(3)];
-    g_run.flag[FLAG_RUI_CALLED] = 1;
+    int n = g_run.night;
+    const char *line;
+    if (n >= 1 && n <= NIGHTS && g_run.flag[FLAG_RUI_CALLED] != n) {
+        if (lvl <= 1)        line = nightly[n - 1];
+        else if (n == NIGHTS) line = "Last night. I have stopped being sure which of us is the one in escrow. Come and get me anyway.";
+        else                 line = cold[(n - 1) % 3];
+    } else {
+        line = (lvl <= 1) ? warm[rng_below(3)] : cold[rng_below(3)];
+    }
+    g_run.flag[FLAG_RUI_CALLED] = (u8)n;   /* the night of the latest call */
     u16 offs[8];
-    int np = vid_wrap_pages(line, 28, 4, offs, 8);
+    int np = ui_dialogue_pages(line, offs, 8);
     for (int pg = 0; pg < np; pg++) {
         const char *txt = line + offs[pg];
         int total = (pg + 1 < np) ? (int)(offs[pg + 1] - offs[pg]) : (int)ec_strlen(txt);
@@ -537,10 +556,14 @@ int sc_night_end(int arg)
         p = str_cat(p, "  "); str_cat(p, run_drift_name());
         vid_text(16, y, b, C_MAG);
 
+        vid_rect(0, 138, 240, 12, C_BLACK);
         if (lien) {
-            vid_rect(0, 138, 240, 12, C_BLACK);
             vid_text_center(120, 140, "LIEN APPLIED. THEY TOOK A PIECE OF HER.", C_BLOOD);
             ui_noise(0, 0, 240, 160, g_t, C_BLOOD, 30);
+        } else if (due > 0) {
+            vid_text_center(120, 140, "HALCYON THANKS YOU FOR YOUR PROMPTNESS.", C_DIM);
+        } else {
+            vid_text_center(120, 140, "NOTHING OWED TONIGHT. THEY WILL WAIT.", C_DIM);
         }
         ui_hint("\x13 SLEEP");
         app_frame_end();
@@ -557,7 +580,7 @@ static const Ending ENDINGS[] = {
   "You paid it in full with a head nobody touched.\n\nThey grow her a body in eleven days. She comes out of the tank furious about the haircut and she knows your voice on the first syllable.\n\nYou never play again. You keep the count anyway - it is yours, it was always the only thing that was.",
   C_GREEN, RAMP_GREEN },
 { "ASCENSION",
-  "You paid it in full, and there is less of you than there was.\n\nShe comes out of the tank. She looks at you for four seconds too long before she says your name, and she never once mentions the pause.\n\nYou tell yourself you would do it again. The part of you that would have argued was sold on night three.",
+  "You paid it in full, and there is less of you than there was.\n\nShe comes out of the tank. She looks at you for four seconds too long before she says your name, and she never once mentions the pause.\n\nYou tell yourself you would do it again. The part of you that would have argued went quiet some nights ago, and you did not hear it go.",
   C_MAG, RAMP_MAG },
 { "AN INSTANCE OF YOU",
   "Rui walks out in the morning, exactly as promised.\n\nSomewhere under the Spire a description of you sits at nine hundred tables at once and never gets tired and never gets bored and never once wonders why it is doing this.\n\nIt is not you. That distinction is legally settled. She visits it on Sundays.",

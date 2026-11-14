@@ -62,5 +62,7 @@ void ui_portrait(int x, int y, int id, u32 t);
 /* ---- dialogue -------------------------------------------------------- */
 void ui_dialogue_box(int speaker, const char *text, int nchars, u32 t);
 int  ui_dialogue_len(const char *text);
+/* cuts a speech into dialogue-box pages, between sentences where it can */
+int  ui_dialogue_pages(const char *text, u16 *offs, int maxp);
 
 #endif

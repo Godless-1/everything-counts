@@ -208,14 +208,57 @@ static void draw_card_row(const u8 *cards, int y, int show_value)
     }
 }
 
+/* ---- paging --------------------------------------------------------- */
+#define PARA_MAX 420
+
+static int para_copy(char *dst, const char *s, int n)
+{
+    if (n > PARA_MAX - 1) n = PARA_MAX - 1;
+    for (int i = 0; i < n; i++) dst[i] = s[i];
+    dst[n] = 0;
+    return n;
+}
+
+/* Cuts a body into screens of `rows` lines.  Breaks fall between
+ * paragraphs wherever they can, so a screen never ends on a stray last
+ * word; only a paragraph too tall for one screen is cut inside. */
+static int text_pages(const char *s, int cols, int rows, u16 *offs, int maxp)
+{
+    char tmp[PARA_MAX];
+    int np = 0, used = 0;
+    const char *p = s;
+    offs[np++] = 0;
+    while (*p) {
+        const char *e = p;
+        while (*e && !(e[0] == '\n' && e[1] == '\n')) e++;
+        para_copy(tmp, p, (int)(e - p));
+        int lines = vid_text_wrap_lines(cols, tmp);
+        int need = used ? used + 1 + lines : lines;
+        if (need > rows && used) {
+            if (np < maxp) offs[np++] = (u16)(p - s);
+            used = 0; need = lines;
+        }
+        if (lines > rows) {
+            u16 sub[8];
+            int k = vid_wrap_pages(tmp, cols, rows, sub, 8);
+            for (int i = 1; i < k; i++)
+                if (np < maxp) offs[np++] = (u16)((p - s) + sub[i]);
+            used = vid_text_wrap_lines(cols, tmp + sub[k - 1]);
+        } else used = need;
+        p = e;
+        while (*p == '\n') p++;
+    }
+    return np;
+}
+
 /* Text pages never run under the cards or off the screen: the body is
  * cut into as many screens as its layout needs, and A walks through them
  * before moving on to the next page. */
 static int page_text(const Lesson *L, int idx, const Page *p)
 {
     u16 offs[8];
-    int rows = (p->kind == PT_CARDS) ? 5 : (p->kind == PT_HAND ? 3 : 11);
-    int np = vid_wrap_pages(p->body, 38, rows, offs, 8);
+    int rows = (p->kind == PT_CARDS) ? 5 : (p->kind == PT_HAND ? 6 : 11);
+    int np = text_pages(p->body, 38, rows, offs, 8);
     int pg = 0;
 
     for (;;) {
@@ -240,26 +283,27 @@ static int page_text(const Lesson *L, int idx, const Page *p)
                 vid_text_wrap_n(6, 30, 38, txt, C_TEXT, chars);
                 draw_card_row(p->cards, 92, 1);
             } else if (p->kind == PT_HAND) {
-                vid_text(6, 28, "DEALER SHOWS", C_DIM);
+                /* dealer on the left, your hand on the right, the words
+                 * get the whole lower half */
+                vid_text(6, 28, "DEALER SHOWS", C_MID);
                 if (p->dealer) {
                     int n = card_count(p->dealer);
-                    for (int i = 0; i < n; i++) card_draw(92 + i * 34, 26, p->dealer[i], TAG_HIDE);
-                    card_draw_back(92 + n * 34, 26);
+                    for (int i = 0; i < n; i++) card_draw(6 + i * 34, 39, p->dealer[i], TAG_HIDE);
+                    card_draw_back(6 + n * 34, 39);
                 }
-                vid_text(6, 74, "YOU HOLD", C_DIM);
                 if (p->cards) {
                     int n = card_count(p->cards);
-                    for (int i = 0; i < n; i++) card_draw(92 + i * 34, 72, p->cards[i], TAG_HIDE);
                     Hand h; hand_clear(&h);
                     for (int i = 0; i < n; i++) hand_add(&h, p->cards[i]);
-                    char b[20]; char *q = b;
+                    char b[28]; char *q = str_cat(b, "YOU HOLD ");
                     if (hand_is_soft(&h)) q = str_cat(q, "SOFT ");
                     str_int(q, hand_total(&h));
-                    vid_text(6, 86, b, C_WHITE);
+                    vid_text(126, 28, b, C_WHITE);
+                    for (int i = 0; i < n; i++) card_draw(126 + i * 34, 39, p->cards[i], TAG_HIDE);
                 }
-                vid_rect(0, 116, 240, 34, C_BLACK);
-                vid_hline(0, 116, 240, C_GRID);
-                vid_text_wrap_n(4, 119, 38, txt, C_TEXT, chars);
+                vid_rect(0, 85, 240, 65, C_BLACK);
+                vid_hline(0, 85, 240, C_GRID);
+                vid_text_wrap_n(4, 89, 38, txt, C_TEXT, chars);
             } else {
                 vid_text_wrap_n(6, 30, 38, txt, C_TEXT, chars);
             }
@@ -276,7 +320,7 @@ static int page_text(const Lesson *L, int idx, const Page *p)
 static int page_speak(const Lesson *L, int idx, const Page *p)
 {
     u16 offs[8];
-    int np = vid_wrap_pages(p->body, 28, 4, offs, 8);
+    int np = ui_dialogue_pages(p->body, offs, 8);
     for (int pg = 0; pg < np; pg++) {
         const char *txt = p->body + offs[pg];
         int total = (pg + 1 < np) ? (int)(offs[pg + 1] - offs[pg]) : (int)ec_strlen(txt);
