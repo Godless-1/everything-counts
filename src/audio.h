@@ -28,6 +28,6 @@ void snd_update(void);        /* call once per frame */
 void sfx(int id);
 void mus_play(int song);
 void mus_stop(void);
-void mus_set_intensity(int level);   /* 0..2 - swaps in tenser patterns */
+void mus_set_intensity(int level);   /* 1 = louder lead, hats on the off-beats */
 
 #endif

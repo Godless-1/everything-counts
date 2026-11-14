@@ -404,6 +404,9 @@ static void script_step(void)
             sscanf(line, "%*s %127s %d", a, &n); set_field(a, n);
         } else if (!strcmp(cmd, "save")) {
             save_write();
+        } else if (!strcmp(cmd, "music")) {            /* music <song number> */
+            void mus_play(int song);
+            sscanf(line, "%*s %d", &n); mus_play(n);
         } else if (!strcmp(cmd, "nopulse")) {
             sscanf(line, "%*s %d", &host_no_pulse);
         } else if (!strcmp(cmd, "seed")) {
