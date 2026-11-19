@@ -385,8 +385,9 @@ static void shot(const char *name)
     for (int i = 0; i < SCREEN_W * SCREEN_H; i++) {
         u16 c = host_pal[page[i]];
         int r = c & 31, g = (c >> 5) & 31, b = (c >> 10) & 31;
-        if (mode == 2) { r -= r * bldy / 16; g -= g * bldy / 16; b -= b * bldy / 16; }
-        if (mode == 1) { r += (31 - r) * bldy / 16; g += (31 - g) * bldy / 16; b += (31 - b) * bldy / 16; }
+        /* BLDCNT effect bits 6-7: 2 = brighten (towards white), 3 = darken */
+        if (mode == 3) { r -= r * bldy / 16; g -= g * bldy / 16; b -= b * bldy / 16; }
+        if (mode == 2) { r += (31 - r) * bldy / 16; g += (31 - g) * bldy / 16; b += (31 - b) * bldy / 16; }
         fputc((r << 3) | (r >> 2), f);
         fputc((g << 3) | (g >> 2), f);
         fputc((b << 3) | (b >> 2), f);

@@ -99,7 +99,11 @@ wait 8
 press a
 wait 4
 shot S469-clinic-white-flash
-wait 40
+wait 4
+shot S469-clinic-white-flash-mid
+wait 4
+shot S469-clinic-white-flash-late
+wait 32
 shot S468-clinic-installed-panel
 press a
 wait 20
