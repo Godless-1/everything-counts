@@ -53,6 +53,9 @@ shot w3-p06-typing
 wait 30
 shot w3-p06
 press a
+wait 30
+shot w3-p06-s2
+press a
 # ---- page 7/16 PT_COUNTDEMO
 waitfor 400 7/16
 wait 8

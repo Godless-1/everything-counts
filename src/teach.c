@@ -26,12 +26,12 @@ void teach_tag_table(int x, int y)
     static const u8 col[3] = { C_GREEN, C_ICE, C_BLOOD };
     for (int i = 0; i < 3; i++) {
         int ry = y + i * 22;
-        vid_rect(x, ry, 214, 19, C_BLACK);
-        vid_frame_rect(x, ry, 214, 19, col[i]);
-        vid_hgrad(x + 1, ry + 1, 30, 17, RAMP_VIOLET, 8, 0);
-        vid_text_s(x + 6, ry + 2, val[i], col[i], 2);
+        vid_rect(x, ry, 214, 21, C_BLACK);
+        vid_frame_rect(x, ry, 214, 21, col[i]);
+        vid_hgrad(x + 1, ry + 1, 30, 19, RAMP_VIOLET, 8, 0);
+        vid_text_s(x + 6, ry + 3, val[i], col[i], 2);
         vid_text(x + 38, ry + 2, grp[i], C_WHITE);
-        vid_text(x + 38, ry + 11, note[i], C_DIM);
+        vid_text(x + 38, ry + 10, note[i], C_DIM);
     }
 }
 
@@ -417,18 +417,31 @@ static int page_quiz(const Lesson *L, int idx, const Page *p)
 
 static int page_tags(const Lesson *L, int idx, const Page *p)
 {
-    key_flush();
+    /* the table takes the top; the words below it have 5 rows, longer ones
+     * go on a second screen (A = MORE) instead of running under the hint bar */
+    u16 offs[8];
+    int np = text_pages(p->body, 38, 5, offs, 8);
+    int pg = 0;
     for (;;) {
-        app_frame_begin();
-        if (key_down(KEY_A)) { sfx(SFX_SELECT); return 1; }
-        if (key_down(KEY_B)) { sfx(SFX_BACK); return -1; }
-        if (key_down(KEY_SELECT)) { sfx(SFX_BACK); return -2; }
-        ui_backdrop(BG_TERMINAL, g_t, RAMP_GREEN);
-        page_header(L, idx, p->head);
-        teach_tag_table(13, 30);
-        vid_text_wrap(6, 100, 38, p->body, C_TEXT);
-        ui_hint("\x13 NEXT    \x14 BACK");
-        app_frame_end();
+        const char *txt = p->body + offs[pg];
+        int total = (pg + 1 < np) ? (int)(offs[pg + 1] - offs[pg]) : (int)ec_strlen(txt);
+        while (*txt == '\n' && total > 0) { txt++; total--; }
+        int go = 0;
+        key_flush();
+        while (!go) {
+            app_frame_begin();
+            if (key_down(KEY_A)) { sfx(SFX_SELECT); go = 1; }
+            if (key_down(KEY_B)) { sfx(SFX_BACK); go = -1; }
+            if (key_down(KEY_SELECT)) { sfx(SFX_BACK); return -2; }
+            ui_backdrop(BG_TERMINAL, g_t, RAMP_GREEN);
+            page_header(L, idx, p->head);
+            teach_tag_table(13, 28);
+            vid_text_wrap_n(6, 100, 38, txt, C_TEXT, total);
+            ui_hint(pg + 1 < np ? "\x13 MORE    \x14 BACK" : "\x13 NEXT    \x14 BACK");
+            app_frame_end();
+        }
+        if (go > 0) { if (++pg >= np) return 1; }
+        else        { if (--pg < 0)   return -1; }
     }
 }
 
