@@ -1,0 +1,129 @@
+# audit-clinic: the ripperdoc with the cursor on every implant, every install confirm, the installed panel, the flash, all installed, too few credits (S452-S471)
+autoshot au-clinic
+set night 3
+set creds 900000
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set drift 0
+set started 1
+save
+nopulse 1
+waitfor 600 UNASSISTED
+press a
+waitfor 300 CONTINUE
+press down
+press a
+waitfor 300 FIND A GAME
+press down
+press a
+waitfor 300 SUBLEVEL 2
+wait 10
+wait 6
+shot S452-clinic-kantor-optic
+press down
+wait 6
+shot S454-clinic-abacus-9
+press down
+wait 6
+shot S456-clinic-deepcount-oracle
+press down
+wait 6
+shot S458-clinic-eidetic-shunt
+press down
+wait 6
+shot S460-clinic-mnemonic-weave
+press down
+wait 6
+shot S462-clinic-chrono-lobe
+press down
+wait 6
+shot S464-clinic-vagus-damper
+press down
+wait 6
+shot S466-clinic-subdermal-vault
+set creds 99999999
+mash up 7 6
+wait 4
+press a
+wait 12
+shot S453-clinic-confirm-kantor-optic
+press b
+wait 6
+press down
+press a
+wait 12
+shot S455-clinic-confirm-abacus-9
+press b
+wait 6
+press down
+press a
+wait 12
+shot S457-clinic-confirm-deepcount-oracle
+press b
+wait 6
+press down
+press a
+wait 12
+shot S459-clinic-confirm-eidetic-shunt
+press b
+wait 6
+press down
+press a
+wait 12
+shot S461-clinic-confirm-mnemonic-weave
+press b
+wait 6
+press down
+press a
+wait 12
+shot S463-clinic-confirm-chrono-lobe
+press b
+wait 6
+press down
+press a
+wait 12
+shot S465-clinic-confirm-vagus-damper
+press b
+wait 6
+press down
+press a
+wait 12
+shot S467-clinic-confirm-subdermal-vault
+press b
+wait 6
+press down
+press a
+wait 8
+press a
+wait 4
+shot S469-clinic-white-flash
+wait 40
+shot S468-clinic-installed-panel
+press a
+wait 20
+set implant.0 1
+set implant.1 1
+set implant.2 1
+set implant.3 1
+set implant.4 1
+set implant.5 1
+set implant.6 1
+set implant.7 1
+wait 8
+shot S470-clinic-all-installed
+set implant.0 0
+set implant.1 0
+set implant.2 0
+set implant.3 0
+set implant.4 0
+set implant.5 0
+set implant.6 0
+set implant.7 0
+set creds 0
+press a
+wait 8
+shot S471-clinic-not-enough
+wait 30
+quit

@@ -1,0 +1,104 @@
+# audit-ledger: the night ledger paid in full, with a lien, at drift 55+, with nothing owed, at the largest values (S494-S498)
+autoshot au-ledger
+set night 2
+set creds 3000000
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set beat.4 1
+set beat.5 1
+set beat.6 1
+set beat.7 1
+set drift 0
+set rui 100
+set started 1
+save
+nopulse 1
+waitfor 600 UNASSISTED
+press a
+waitfor 300 CONTINUE
+press down
+press a
+waitfor 300 FIND A GAME
+mashuntil up 8 12 what you have is what
+wait 4
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+wait 20
+shot S494-ledger-paid-in-full
+press a
+waitfor 600 FIND A GAME
+wait 10
+set escrow 99999999
+set night 2
+mashuntil up 8 12 what you have is what
+wait 4
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+wait 20
+shot S497-ledger-nothing-owed
+press a
+waitfor 600 FIND A GAME
+wait 10
+set escrow 0
+set creds 3000000
+set drift 82
+set night 3
+mashuntil up 8 12 suspend. resume
+wait 4
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+wait 20
+shot S496-ledger-drift-55-plus
+press a
+waitfor 600 FIND A GAME
+wait 10
+set drift 0
+set creds 0
+set escrow 0
+set night 3
+mashuntil up 8 12 what you have is what
+wait 4
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+wait 20
+shot S495-ledger-lien
+press a
+waitfor 600 FIND A GAME
+wait 10
+set creds 2147483647
+set hands 65535
+set bs_total 65535
+set bs_correct 65535
+set checks_passed 65535
+set checks_failed 65535
+set best_streak 65535
+set biggest_win 2147483647
+set drill.0 100
+set drill.1 100
+set drill.2 100
+set drill.3 100
+set drill.4 100
+set escrow 99999999
+set drift 100
+set wire 100
+set escrow 0
+set night 7
+mashuntil up 8 12 suspend. resume
+wait 4
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+wait 20
+shot S498-ledger-extremes
+quit
