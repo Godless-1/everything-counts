@@ -41,6 +41,7 @@ volatile u32 irq_flags;
 void (*irq_handler_c)(void);
 
 extern u8 *vid_back;
+extern int g_hold_frame;
 int game_main(void);
 
 /* ---- options ----------------------------------------------------------- */
@@ -247,7 +248,9 @@ static int  want_hit;
 
 static void text_frame_end(void)
 {
-    if (opt_g) {
+    /* a hold frame draws nothing: keep the glyph snapshot of the frame that
+     * made the picture still on screen */
+    if (opt_g && !g_hold_frame) {
         memcpy(sgl, gl, sizeof(Glyph) * (size_t)ngl);
         sngl = ngl;
         memcpy(sowner, owner, sizeof owner);
@@ -369,7 +372,13 @@ static void shot(const char *name)
     fprintf(f, "P6\n%d %d\n255\n", SCREEN_W, SCREEN_H);
     /* host_frame() runs inside vid_vsync(), before the flip: the picture
      * just drawn (the one the glyph tables describe) is still vid_back */
+    /* during a hold frame (app_wait) nothing is flipped or redrawn: the
+     * picture on screen is the OTHER page, vid_back is two frames stale */
     const u8 *page = vid_back;
+    if (g_hold_frame) {
+        const u8 *p0 = (const u8 *)host_vram, *p1 = p0 + 0xA000;
+        page = (vid_back == p0) ? p1 : p0;
+    }
     u16 bld = *(u16 *)(host_io + 0x50), bldy = *(u16 *)(host_io + 0x54) & 31;
     int mode = (bld >> 6) & 3;
     if (bldy > 16) bldy = 16;
