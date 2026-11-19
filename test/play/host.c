@@ -367,9 +367,9 @@ static void shot(const char *name)
     FILE *f = fopen(path, "wb");
     if (!f) { perror(path); exit(2); }
     fprintf(f, "P6\n%d %d\n255\n", SCREEN_W, SCREEN_H);
-    /* the page that was just completed is the one being shown */
-    const u8 *page = (vid_back == (u8 *)host_vram) ? (u8 *)host_vram + 0xA000
-                                                    : (u8 *)host_vram;
+    /* host_frame() runs inside vid_vsync(), before the flip: the picture
+     * just drawn (the one the glyph tables describe) is still vid_back */
+    const u8 *page = vid_back;
     u16 bld = *(u16 *)(host_io + 0x50), bldy = *(u16 *)(host_io + 0x54) & 31;
     int mode = (bld >> 6) & 3;
     if (bldy > 16) bldy = 16;
