@@ -1,0 +1,61 @@
+# audit-table-1: lucky-nine, bet screens, a full turn, rules page 9, showdown and leave confirm (S348-S352)
+autoshot au-table-1
+set night 7
+set creds 50000000
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set beat.4 1
+set beat.5 1
+set beat.6 1
+set beat.7 1
+set started 1
+save
+waitfor 600 UNASSISTED
+press a
+waitfor 300 CONTINUE
+press down
+press a
+waitfor 300 FIND A GAME
+press a
+waitfor 300 THE STRIP
+mash down 1 10
+seed 4242
+nopulse 1
+stack 8 6 8 10 10 10 10 10
+press a
+wait 30
+shot S348-shuffle
+waitfor 600 PLACE YOUR BET
+wait 20
+shot S348-bet-min
+press start
+wait 10
+mash right 8 8
+wait 20
+shot S351-rules-page9
+press b
+wait 10
+tset trust 100
+mash right 6 8
+wait 20
+shot S349-bet-max
+mash left 8 6
+wait 10
+press a
+waitfor 400 SPLIT
+wait 20
+shot S350-turn-all-buttons
+press right
+press a
+wait 300
+shot S352-showdown
+press a
+wait 60
+press b
+wait 20
+shot S352-leave-confirm
+press b
+wait 10
+quit

@@ -1,0 +1,66 @@
+# audit-table-5: the-vault, bet screens, a full turn, rules page 9, showdown and leave confirm (S368-S372)
+autoshot au-table-5
+set night 6
+set creds 900000
+set escrow 1450000
+set drift 80
+set wire 70
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set beat.4 1
+set beat.5 1
+set beat.6 1
+set flag.8 1
+set started 1
+save
+nopulse 1
+waitfor 600 UNASSISTED
+press a
+waitfor 300 CONTINUE
+press down
+press a
+waitfor 300 FIND A GAME
+mashuntil up 8 12 suspend. resume
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+press a
+mashuntil a 60 40 DECIDE
+stack 8 6 8 10 10 10 10 10
+wait 30
+press a
+waitfor 600 PLACE YOUR BET
+wait 20
+shot S368-bet-min
+press start
+wait 10
+mash right 8 8
+wait 20
+shot S371-rules-page9
+press b
+wait 10
+tset trust 100
+mash right 6 8
+wait 20
+shot S369-bet-max
+mash left 8 6
+wait 10
+press a
+waitfor 400 SPLIT
+wait 20
+shot S370-turn-all-buttons
+press right
+press a
+wait 300
+shot S372-showdown
+press a
+wait 60
+press b
+wait 20
+shot S372-leave-confirm
+press b
+wait 10
+quit
