@@ -173,7 +173,7 @@ static const Page m1[] = {
 
 static const Page m2[] = {
 { PT_SPEAK, "BASIC STRATEGY",
-  "Every hand you can be dealt has exactly one best move. Not a feeling. A number, computed a long time ago and never overturned. Learn the chart and the house edge drops from about two percent to half of one.",
+  "Every hand you can be dealt has exactly one best move. Not a feeling. A number, computed a long time ago and never overturned. Learn the chart (a one-page table of the best move for every hand) and the house edge (the share of each bet the casino keeps) drops from about two percent to half of one.",
   0,0,{0},0,0,0, CH_GREY, 0 },
 
 { PT_TEXT, "WHY THERE IS A RIGHT ANSWER",
