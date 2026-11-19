@@ -393,6 +393,13 @@ static void shot(const char *name)
         fputc((b << 3) | (b >> 2), f);
     }
     fclose(f);
+    if (bldy > 0 && mode >= 2) {
+        /* the picture is mid fade or flash: the text under it is hidden on
+         * purpose, so the pixel check must not judge it */
+        snprintf(path, sizeof path, "%s/%s.blend", opt_out, name);
+        FILE *bf = fopen(path, "w");
+        if (bf) { fprintf(bf, "mode %d level %d\n", mode, (int)bldy); fclose(bf); }
+    }
     if (opt_g) glyph_files(name);
 }
 

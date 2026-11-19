@@ -7,7 +7,8 @@
   pixelcheck.py <dir>
 
 For every <name>.glyphs.tsv with a <name>.png beside it (names containing
-"fade" or "flash" are skipped) it looks at every glyph that drew ink and
+"fade" or "flash" and shots that have a <name>.blend file, written by the
+harness while a fade or flash is on screen, are skipped) it looks at every glyph that drew ink and
 writes one line per problem to <dir>/pixel.log:
 
   PARTIAL      some of the glyph's pixels were painted over by something else
@@ -82,6 +83,8 @@ def main():
         if 'fade' in name or 'flash' in name:
             continue
         png = os.path.join(d, name + '.png')
+        if os.path.exists(os.path.join(d, name + '.blend')):
+            continue                     # mid fade or flash: text hidden on purpose
         if os.path.exists(png):
             check(tsv, png, name, out)
     with open(os.path.join(d, 'pixel.log'), 'w') as f:
