@@ -1,0 +1,356 @@
+# audit-sim-extremes: the practice sim at its limits: 5..11-card hands, 8-card dealer hand, 7-card split hand, no credit for insurance, play money runs out (S306-S309, S321, S333; S331 is unreachable, see HANDOFF)
+waitfor 600 UNASSISTED
+press a
+waitfor 300 NEW RUN
+press down
+press a
+waitfor 300 GREY'S TRAINING CONSTRUCT
+wait 20
+press down
+press down
+press a
+waitfor 400 1/16
+wait 8
+mashuntil a 170 12 2/16
+waitfor 400 2/16
+wait 8
+mashuntil a 170 12 3/16
+waitfor 400 3/16
+wait 8
+mashuntil a 170 12 4/16
+waitfor 400 4/16
+wait 8
+mashuntil a 170 12 5/16
+waitfor 400 5/16
+wait 8
+mashuntil a 170 12 6/16
+waitfor 400 6/16
+wait 8
+wait 30
+press a
+waitfor 400 7/16
+wait 8
+wait 100
+wait 320
+press a
+waitfor 400 8/16
+wait 8
+wait 30
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press a
+waitfor 400 9/16
+wait 8
+mashuntil a 170 12 10/16
+waitfor 400 10/16
+wait 8
+wait 30
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press a
+waitfor 400 11/16
+wait 8
+mashuntil a 170 12 12/16
+waitfor 400 12/16
+wait 8
+mashuntil a 170 12 13/16
+waitfor 400 13/16
+wait 8
+mashuntil a 170 12 14/16
+waitfor 400 14/16
+wait 8
+wait 30
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press a
+waitfor 400 15/16
+wait 8
+mashuntil a 170 12 16/16
+waitfor 400 16/16
+wait 30
+autoshot au-sim
+seed 4242
+nopulse 1
+stack 2 10 3 7 2 2 3 4 2 1 1 1 11 3 12 3 3 3 1 1 1 3
+press a
+waitfor 900 PLACE YOUR BET
+wait 5
+press a
+waitfor 300 STAND
+press a
+wait 14
+shot X-three-cards
+press a
+wait 14
+press a
+wait 14
+shot S307-five-cards
+press a
+wait 14
+press a
+wait 14
+press a
+wait 14
+press a
+wait 14
+press a
+wait 14
+shot S308-ten-cards
+waitfor 600 NEXT HAND
+press a
+waitfor 900 PLACE YOUR BET
+wait 5
+press a
+waitfor 300 STAND
+press right
+press a
+wait 150
+shot S309-dealer-eight-cards
+waitfor 600 NEXT HAND
+press a
+waitfor 900 PLACE YOUR BET
+wait 5
+press b
+wait 15
+press a
+waitfor 300 GREY'S TRAINING CONSTRUCT
+wait 20
+press a
+waitfor 400 1/16
+wait 8
+mashuntil a 170 12 2/16
+waitfor 400 2/16
+wait 8
+mashuntil a 170 12 3/16
+waitfor 400 3/16
+wait 8
+mashuntil a 170 12 4/16
+waitfor 400 4/16
+wait 8
+mashuntil a 170 12 5/16
+waitfor 400 5/16
+wait 8
+mashuntil a 170 12 6/16
+waitfor 400 6/16
+wait 8
+wait 30
+press a
+waitfor 400 7/16
+wait 8
+wait 100
+wait 320
+press a
+waitfor 400 8/16
+wait 8
+wait 30
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press a
+waitfor 400 9/16
+wait 8
+mashuntil a 170 12 10/16
+waitfor 400 10/16
+wait 8
+wait 30
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press a
+waitfor 400 11/16
+wait 8
+mashuntil a 170 12 12/16
+waitfor 400 12/16
+wait 8
+mashuntil a 170 12 13/16
+waitfor 400 13/16
+wait 8
+mashuntil a 170 12 14/16
+waitfor 400 14/16
+wait 8
+wait 30
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press a
+waitfor 400 15/16
+wait 8
+mashuntil a 170 12 16/16
+waitfor 400 16/16
+wait 30
+autoshot au-sim
+seed 4242
+nopulse 1
+stack 1 10 1 7 1 1 2 2 2 2 3 3 3 2 11 2 7 3 4 3 3 2 3 2 9 1 7 6 12
+press a
+waitfor 900 PLACE YOUR BET
+wait 5
+press a
+waitfor 300 STAND
+press a
+wait 14
+press a
+wait 14
+press a
+wait 14
+press a
+wait 14
+press a
+wait 14
+press a
+wait 14
+press a
+wait 14
+press a
+wait 14
+press a
+wait 14
+shot S308-eleven-cards
+waitfor 600 NEXT HAND
+press a
+waitfor 900 PLACE YOUR BET
+wait 5
+press a
+waitfor 300 STAND
+mash right 3 6
+press a
+wait 20
+press a
+wait 14
+press a
+wait 14
+press a
+wait 14
+press a
+wait 14
+press a
+wait 14
+shot S306-split-seven-cards
+press right
+press a
+wait 20
+press right
+press a
+waitfor 600 NEXT HAND
+press a
+waitfor 900 PLACE YOUR BET
+wait 5
+set creds 700
+press a
+wait 30
+shot S321-no-credit-for-insurance
+waitfor 300 STAND
+press right
+press a
+waitfor 600 NEXT HAND
+press a
+wait 120
+shot S333-sim-closed-without-notice
+wait 60
+shot S333-after
+quit

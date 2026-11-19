@@ -399,7 +399,7 @@ static int   mu_left, mu_gap, mu_hold, mu_cool;   /* mashuntil */
 static u16   mu_key;
 
 /* cards the next shoe must start with (ranks 1..13, 1 = ace) */
-static u8  stack[64];
+static u8  stack[160];
 static int nstack;
 
 void host_shoe(Shoe *s)
@@ -555,7 +555,7 @@ static void script_step(void)
             sscanf(line, "%*s %d", &n); rng_seed((u32)n);
         } else if (!strcmp(cmd, "stack")) {            /* stack 1 13 8 8 ... */
             char *p = line + 5; nstack = 0;
-            while (nstack < 64) {
+            while (nstack < 160) {
                 char *e; long v = strtol(p, &e, 10);
                 if (e == p) break;
                 stack[nstack++] = (u8)v; p = e;
