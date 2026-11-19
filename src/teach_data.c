@@ -263,7 +263,7 @@ static const Page m3[] = {
   0,0 },
 
 { PT_TEXT, "THE TRUE COUNT",
-  "A running count (RC) of +6 means very different things with one deck left versus six decks left.\n\nTRUE COUNT (TC) = RUNNING COUNT divided by DECKS REMAINING (DL).\n\n+6 with 2 decks left is a true count of +3. +6 with 6 decks left is only +1. Estimate the decks left from the discard tray (the rack where used cards pile up). Nearest half deck is close enough.",
+  "A running count (RC) of +6 means very different things with one deck left versus six decks left.\n\nTRUE COUNT (TC) = RUNNING COUNT divided by DECKS REMAINING (DL).\n\n+6 with 2 decks left is a true count of +3. +6 with 6 decks left is only +1. Estimate the decks left from the discard tray (the rack where used cards pile up). Nearest half deck is close enough. Drop any fraction: +7 over 2 decks is +3.",
   0,0,{0},0,0,0,0,0 },
 
 { PT_QUIZ, "CHECK",

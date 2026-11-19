@@ -241,7 +241,7 @@ static void drill_true(void)
             p = str_cat(p, " = "); str_int(p, tc);
             vid_text_center(120, 52, b, C_WHITE);
             vid_text_center(120, 68, ok ? "\x10 RIGHT" : "\x11 WRONG", ok ? C_GREEN : C_BLOOD);
-            vid_text_wrap(32, 82, 29, "Round toward zero. Half a deck of error is survivable; a whole deck is not.", C_DIM);
+            vid_text_wrap(32, 82, 29, "Drop the fraction. Half a deck of error is survivable; a whole deck is not.", C_DIM);
             ui_hint("\x13 NEXT");
             app_frame_end();
             if (key_down(KEY_A)) break;
