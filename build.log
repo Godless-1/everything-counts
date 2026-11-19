@@ -1,3 +1,0 @@
-build-host/stage/teach_data.c:62:17: warning: ‘d_up3’ defined but not used [-Wunused-const-variable=]
-   62 | static const u8 d_up3[]     = { C_(R_3,SP), END };
-      |                 ^~~~~

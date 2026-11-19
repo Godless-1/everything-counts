@@ -21,3 +21,7 @@ mgbacfg/
 mgba.log
 build-host/
 build-st/
+
+# written by the audit tool rebuild.sh
+/build.log
+/build.exit
