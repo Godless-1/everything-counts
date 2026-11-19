@@ -1,0 +1,215 @@
+# audit-sim-l2: the walk of MOD 2 (audit-walk-mod2.txt) up to its last page, then the practice sim it opens
+# level 2 of the staged sim: MOD 1 + MOD 2 (grade line names basic strategy); same stacked shoe as audit-sim-l1
+# the lock (D-B01) wants the earlier modules ticked: a shortcut to the flow start, not a play-through
+set lessons 1
+waitfor 600 UNASSISTED
+press a
+waitfor 300 NEW RUN
+press down
+press a
+waitfor 300 GREY'S TRAINING CONSTRUCT
+wait 20
+shot w2-menu
+press down
+autoshot w2
+press a
+# ---- page 1/10 PT_SPEAK
+waitfor 400 1/10
+wait 8
+shot w2-p01-typing
+press a
+wait 160
+shot w2-p01-s2
+press a
+wait 160
+shot w2-p01-s3
+mashuntil a 170 12 2/10
+# ---- page 2/10 PT_TEXT
+waitfor 400 2/10
+wait 8
+shot w2-p02-typing
+mashuntil a 170 12 3/10
+# ---- page 3/10 PT_TEXT
+waitfor 400 3/10
+wait 8
+shot w2-p03-typing
+mashuntil a 170 12 4/10
+# ---- page 4/10 PT_HAND
+waitfor 400 4/10
+wait 8
+shot w2-p04-typing
+press a
+wait 160
+shot w2-p04-s2
+mashuntil a 170 12 5/10
+# ---- page 5/10 PT_HAND
+waitfor 400 5/10
+wait 8
+shot w2-p05-typing
+press a
+wait 160
+shot w2-p05-s2
+mashuntil a 170 12 6/10
+# ---- page 6/10 PT_QUIZ
+waitfor 400 6/10
+wait 8
+shot w2-p06-typing
+wait 30
+shot w2-p06-question
+press a
+wait 30
+shot w2-p06-answer-A
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+shot w2-p06-answer-B
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+shot w2-p06-answer-C
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+shot w2-p06-answer-D
+press a
+# ---- page 7/10 PT_HAND
+waitfor 400 7/10
+wait 8
+shot w2-p07-typing
+press a
+wait 160
+shot w2-p07-s2
+mashuntil a 170 12 8/10
+# ---- page 8/10 PT_CHART
+waitfor 400 8/10
+wait 8
+shot w2-p08-typing
+wait 30
+shot w2-p08
+press a
+waitfor 200 H HIT
+wait 20
+shot w2-p08-chart-hard
+press r
+wait 20
+shot w2-p08-chart-soft
+press r
+wait 20
+shot w2-p08-chart-pairs
+press b
+wait 20
+press r
+# ---- page 9/10 PT_QUIZ
+waitfor 400 9/10
+wait 8
+shot w2-p09-typing
+wait 30
+shot w2-p09-question
+press a
+wait 30
+shot w2-p09-answer-A
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+shot w2-p09-answer-B
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+shot w2-p09-answer-C
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+shot w2-p09-answer-D
+press a
+# ---- page 10/10 PT_PRACTICE
+waitfor 400 10/10
+wait 8
+shot w2-p10-typing
+wait 30
+shot w2-p10
+seed 4242
+nopulse 2
+stack 10 10 6 7 9 1 7 6 5 5 5 5 5 5 5 5
+cut 8
+press a
+wait 30
+shot L2-shuffle
+waitfor 900 PLACE YOUR BET
+wait 15
+shot L2-bet
+mash right 3 6
+wait 10
+shot L2-bet-max
+press start
+wait 6
+shot L2-rules-p1
+mash right 4 6
+wait 6
+shot L2-rules-p5
+mash right 4 6
+wait 6
+shot L2-rules-p9-table
+press right
+wait 6
+shot L2-rules-last
+press b
+wait 10
+press a
+wait 22
+shot L2-dealing
+waitfor 300 STAND
+wait 20
+shot L2-turn
+press right
+press a
+wait 40
+shot L2-grade-wrong
+waitfor 600 NEXT HAND
+wait 10
+shot L2-result
+press a
+waitfor 900 PLACE YOUR BET
+wait 5
+press a
+waitfor 300 INSURANCE
+wait 6
+shot L2-insurance
+press right
+press a
+waitfor 300 STAND
+wait 6
+press a
+waitfor 600 NEXT HAND
+wait 4
+shot L2-result2
+press a
+waitfor 400 NEW SHOE
+shot L2-new-shoe
+waitfor 900 PLACE YOUR BET
+wait 10
+shot L2-bet2
+press b
+wait 10
+shot L2-leave-box
+press a
+wait 60
+shot L2-closed
+quit

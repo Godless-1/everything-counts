@@ -31,7 +31,7 @@ wait 20
 shot S343-bet-min
 press start
 wait 10
-mash right 8 8
+mash right 11 8
 wait 20
 shot S346-rules-page9
 press b

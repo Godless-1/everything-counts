@@ -128,7 +128,8 @@ wait 30
 autoshot au-sim
 seed 4242
 nopulse 1
-stack 5 10 6 7 5 6 6 11 9 12 3 13 4 7 5 10 11 12 7 7 8 6 8 13 8 10 5 9 11 12 1 6 1 13 5 9 10 1 11 5 7 5 12 13 5 7 6 1 9 10 7 11 1 5 6 12 9 1 13 10 11 12 8 13 10 9 9 11
+stack 5 10 6 7 5 6 6 11 9 12 3 13 4 7 5 10 11 12 7 7 8 6 8 13 8 10 5 9 11 12 1 6 1 13 5 9 10 1 11 5 7 5 12 13 5 7 6 1 9 10 7 11 1 5 6 9 1 13 10 11 12 8 13 10 9 9 11
+cut 67
 press a
 wait 30
 shot S287-shuffle
@@ -217,7 +218,7 @@ shot S294-pair-split-selected
 press a
 wait 20
 shot S303-two-hands
-mash right 2 6
+wait 2
 press a
 wait 20
 press a
@@ -530,6 +531,15 @@ press right
 wait 5
 wait 10
 shot S342-rules-page9
+press right
+wait 6
+shot N66-rules-page10-heat-wire
+press right
+wait 6
+shot N66-rules-page11-readouts
+press right
+wait 6
+shot N66-rules-page12-room
 press b
 wait 10
 press b

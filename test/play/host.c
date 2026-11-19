@@ -416,6 +416,7 @@ static int   mu_left, mu_gap, mu_hold, mu_cool;   /* mashuntil */
 static u16   mu_key;
 
 /* cards the next shoe must start with (ranks 1..13, 1 = ace) */
+int host_cut;                 /* cards before the cut card of the next shoe (0 = by the venue) */
 static u8  stack[160];
 static int nstack;
 
@@ -577,6 +578,8 @@ static void script_step(void)
                 if (e == p) break;
                 stack[nstack++] = (u8)v; p = e;
             }
+        } else if (!strcmp(cmd, "cut")) {              /* cut <cards>: place the cut card for the next shoe */
+            sscanf(line, "%*s %d", &host_cut);
         } else if (!strcmp(cmd, "quit")) {
             finish(0);
         } else {

@@ -345,7 +345,7 @@ waitfor 600 NEXT HAND
 press a
 waitfor 900 PLACE YOUR BET
 wait 5
-set creds 700
+set creds 3000
 press a
 wait 30
 shot S321-no-credit-for-insurance

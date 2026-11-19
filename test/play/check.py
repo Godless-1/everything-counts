@@ -80,6 +80,27 @@ with tempfile.TemporaryDirectory() as tmp:
     check(num(d, 'opened', 'lessons') == 1 and num(d, 'opened', 'night') == 1,
           'with MOD 1 ticked, MOD 2 opens (its first page was reached)')
 
+    print('-- the practice sim shows only what the finished modules taught')
+    HUD = re.compile(r'\b(RC|TC|DL|HEAT|WIRE|ORACLE|OPTIC|INDEX|UNITS?|MAX|PULSE|SPREAD)\b')
+    def sim_text(script, tag):
+        out = os.path.join(tmp, tag)
+        play(script, out, '-x', '-g')
+        return {n: open(os.path.join(out, n)).read() for n in sorted(os.listdir(out))
+                if n.startswith(tag.upper()[:2] + '-') and n.endswith('.text.txt')}
+    for script, tag, name in (('audit-sim-l1.txt', 'l1', 'after MOD 1'), ('audit-sim-l2.txt', 'l2', 'after MOD 2')):
+        t = sim_text(script, tag)
+        shots = {n: x for n, x in t.items() if 'closed' not in n}      # 'closed' is the course menu again
+        check(len(shots) >= 12, '%s: the sim script took its shots (%d)' % (name, len(shots)))
+        bad = sorted(n for n, x in shots.items() if HUD.search(x))
+        check(not bad, '%s: no count HUD in the sim (%s)' % (name, ', '.join(bad[:3])))
+    out = os.path.join(tmp, 'full')
+    play('audit-sim.txt', out, '-x', '-g')
+    bet = open(os.path.join(out, 'S288-bet-first.text.txt')).read()
+    check('RC' in bet and 'MAX 7 UNITS' in bet and 'COACH SAYS' in bet,
+          'after MOD 3 the sim shows the count read-outs and the coach line')
+    check(os.path.exists(os.path.join(out, 'S324-pulse-true-count.text.txt')),
+          'after MOD 3 pulse checks come back')
+
     print('-- every screen: the tours must show no broken text')
     for t in sorted(f for f in os.listdir(SCR) if f.startswith('tour-')):
         d, ev = play(t, os.path.join(tmp, t))
