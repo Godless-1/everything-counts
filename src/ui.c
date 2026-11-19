@@ -603,6 +603,10 @@ void ui_dialogue_box(int speaker, const char *text, int nchars, u32 t)
 
     vid_text_wrap_n(bx + 5, by + 7, DLG_COLS, text, C_TEXT, nchars);
 
-    if (nchars >= (int)ec_strlen(text) && ((t / 16) & 1))
-        vid_text(bx + bw - 11, by + bh - 11, "\x04", c->accent);
+    /* the "more" arrow sits on the bottom border, never inside the text area
+     * (a full 4th line runs to the right edge of the box) */
+    if (nchars >= (int)ec_strlen(text) && ((t / 16) & 1)) {
+        vid_rect(bx + bw - 14, by + bh - 5, 8, 8, C_BLACK);
+        vid_text(bx + bw - 14, by + bh - 5, "\x04", c->accent);
+    }
 }
