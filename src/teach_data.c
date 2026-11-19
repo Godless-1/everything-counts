@@ -60,6 +60,7 @@ static const u8 d_upA[]     = { C_(R_A,WI), END };
 static const u8 d_up5[]     = { C_(R_5,SH), END };
 static const u8 d_up9[]     = { C_(R_9,PU), END };
 static const u8 d_up3[]     = { C_(R_3,SP), END };
+static const u8 d_up4[]     = { C_(R_4,SH), END };
 static const u8 d_12[]      = { C_(R_T,SP), C_(R_2,PU), END };
 static const u8 d_a7[]      = { C_(R_A,SP), C_(R_7,SH), END };
 static const u8 d_99[]      = { C_(R_9,SP), C_(R_9,WI), END };
@@ -184,8 +185,8 @@ static const Page m2[] = {
   0,0,{0},0,0,0,0,0 },
 
 { PT_HAND, "STIFF HANDS",
-  "12 through 16 are STIFF: too low to win by standing, too high to hit safely.\n\nAgainst a weak dealer card you stand and let them bust. Against a strong one you hit and accept the risk. Here: 12 against a THREE - stand and wait.",
-  d_12, d_up3, {0},0,0,0,0,0 },
+  "12 through 16 are STIFF: too low to win by standing, too high to hit safely.\n\nAgainst a weak dealer card you stand and let them bust. Against a strong one you hit and accept the risk. Here: 12 against a FOUR - stand and wait.",
+  d_12, d_up4, {0},0,0,0,0,0 },
 
 { PT_HAND, "SOFT HANDS PLAY DIFFERENTLY",
   "SOFT 18 (ace-seven) looks finished. It is not.\n\nAgainst 2-6 you double it. Against 7 or 8 you stand. Against 9, 10 or ACE you HIT an 18 - because soft 18 loses to the hands those cards make, and you cannot bust.",
