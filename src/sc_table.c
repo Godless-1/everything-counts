@@ -1202,6 +1202,13 @@ hand_done:
 
     mus_set_intensity(0);
     if (T.mode == TMODE_PRACTICE) {
+        if (g_table_end == TEND_BROKE) {
+            sfx(SFX_BAD);
+            epilogue("PLAY MONEY GONE",
+                "The sim has no more play money. Nothing real was lost.\n\n"
+                "Grey clears the table. Back to the course.",
+                "\x13 LEAVE", C_AMBER);
+        }
         g_run = real;
         return SC_HUB;
     }

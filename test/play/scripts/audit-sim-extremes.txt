@@ -353,8 +353,10 @@ press right
 press a
 waitfor 600 NEXT HAND
 press a
+waitfor 300 PLAY MONEY GONE
+wait 20
+shot S333-play-money-gone
+press a
 wait 120
-shot S333-sim-closed-without-notice
-wait 60
 shot S333-after
 quit
