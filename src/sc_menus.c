@@ -476,21 +476,21 @@ int sc_clinic(int arg)
         }
 
         ui_backdrop(BG_CLINIC, g_t, RAMP_GREEN);
-        vid_rect(0, 12, 240, 82, C_BLACK);
-        vid_rect_dither(0, 12, 240, 82, C_BLACK, C_INDIGO);
-        vid_hline(0, 93, 240, C_GREEN);
+        vid_rect(0, 12, 240, 74, C_BLACK);
+        vid_rect_dither(0, 12, 240, 74, C_BLACK, C_INDIGO);
+        vid_hline(0, 85, 240, C_GREEN);
         {
             char b[24]; b[0] = 0x09; str_money(b + 1, g_run.creds);
             ui_titlebar("GREY / SUBLEVEL 2", b, C_GREEN);
         }
 
         for (int i = 0; i < IMP_COUNT; i++) {
-            int y = 14 + i * 10;
+            int y = 13 + i * 9;
             const Implant *w = &IMPLANTS[i];
             u8 c = g_run.implant[i] ? C_DIM : w->colour;
             if (i == sel) {
                 if (g_run.implant[i]) c = C_MID;    /* C_DIM is too dark on the highlight bar */
-                vid_hgrad(0, y - 1, 240, 10, RAMP_VIOLET, 9, 0);
+                vid_hgrad(0, y - 1, 240, 9, RAMP_VIOLET, 9, 0);
                 vid_text(2, y, "\x01", c);
                 if (!g_run.implant[i]) c = C_WHITE;
             }
@@ -504,20 +504,22 @@ int sc_clinic(int arg)
         }
 
         const Implant *v = &IMPLANTS[sel];
-        int by = 96;
-        vid_rect(0, by - 2, 240, 52, C_BLACK);
+        int by = 88;
+        vid_rect(0, by - 2, 240, 74, C_BLACK);
         vid_hline(0, by - 2, 240, v->colour);
         vid_text(4, by, v->maker, C_DIM);
+        vid_text(236 - vid_text_len("\x13 BUY  \x14 LEAVE"), by, "\x13 BUY  \x14 LEAVE", C_DIM);
         vid_text_wrap(4, by + 10, 38, v->effect, C_TEXT);
         vid_text_wrap(4, by + 30, 38, v->warning, C_CANDY);
 
-        vid_rect(0, 148, 240, 12, C_BLACK);
-        char b[40], *p;
+        /* what the two meters in the price mean (the numbers are this implant's own) */
+        char b[48], *p;
         p = str_cat(b, "WIRE +"); p = str_int(p, v->wire);
-        vid_text(4, 150, b, C_ICE);
+        p = str_cat(p, v->wire ? ": louder to the pit's scanners" : ": silent to the scanners");
+        vid_text(4, 138, b, C_ICE);
         p = str_cat(b, "DRIFT +"); p = str_int(p, v->drift);
-        vid_text(64, 150, b, C_MAG);
-        vid_text(236 - vid_text_len("\x13 BUY  \x14 LEAVE"), 150, "\x13 BUY  \x14 LEAVE", C_DIM);
+        p = str_cat(p, v->drift ? ": less of the count is yours" : ": the count stays yours");
+        vid_text(4, 148, b, C_MAG);
         app_frame_end();
     }
 }
