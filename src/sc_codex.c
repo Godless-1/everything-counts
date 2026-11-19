@@ -63,6 +63,14 @@ static const char *GLOSS[] = {
  "BACKED OFF", "Politely told you may no longer play this game.",
  "WIRE",       "Detectable telemetry from your chrome. The pit scans for it.",
  "DRIFT",      "How much of the counting is no longer being done by you.",
+ "HI-LO (TAGS)","Tags: +1 for 2 to 6, 0 for 7 to 9, -1 for 10 to ace. Add them up as cards land. The sum is the running count.",
+ "PULSE CHECK","A surprise stop where the table asks for your running count from memory.",
+ "HOUSE EDGE", "The share of every bet the casino expects to keep over time. THE ROOMS lists it for each room.",
+ "CEILING",    "The most you may bet in a room. The table shows it as MAX UNITS. A high ceiling lets a counter ramp hard.",
+ "DISCARD TRAY","Where used cards stack. How tall the pile is tells you how many decks are gone.",
+ "H17 / S17",  "The dealer hits (H17) or stands (S17) on a soft 17. H17 is worse for you.",
+ "DAS / RSA",  "DAS: double down after a split. RSA: split aces again. Both help you.",
+ "CHROME",     "Implants that do part of the counting for you. The pit scans for them.",
 };
 #define NGLOSS ((int)(sizeof(GLOSS)/sizeof(char*)/2))
 
@@ -236,6 +244,7 @@ static void codex_rooms(void)
             char b[16]; int e = venue_edge_x100(&VENUES[i]);
             str_pct100(b, e, 0);
             vid_text(236 - vid_text_len(b), y, b, e > 100 ? C_BLOOD : (e < 35 ? C_GREEN : C_AMBER));
+            vid_text(130, y, "HOUSE EDGE", C_MID);
         }
         vid_rect(0, 86, 240, 64, C_BLACK);
         vid_hline(0, 86, 240, v->accent);
