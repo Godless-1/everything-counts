@@ -92,7 +92,8 @@ void vid_fade(int amount)
 {
     if (amount <= 0) { REG_BLDCNT = 0; return; }
     if (amount > 16) amount = 16;
-    REG_BLDCNT = 0x00FF | (2 << 6);   /* all targets, fade to black */
+    /* BLDCNT: bits 0-5 = target layers, bits 6-7 = effect (2 brighten, 3 darken) */
+    REG_BLDCNT = 0x3F | (3 << 6);     /* all targets, fade to black */
     REG_BLDY   = amount;
 }
 
@@ -100,7 +101,7 @@ void vid_fade_white(int amount)
 {
     if (amount <= 0) { REG_BLDCNT = 0; return; }
     if (amount > 16) amount = 16;
-    REG_BLDCNT = 0x00FF | (1 << 6);
+    REG_BLDCNT = 0x3F | (2 << 6);     /* all targets, fade to white */
     REG_BLDY   = amount;
 }
 
