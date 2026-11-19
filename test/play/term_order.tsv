@@ -15,3 +15,18 @@ audit-walk-mod3	discard tray	discard tray \(the rack
 audit-walk-mod3	pit boss	pit bosses \(the casino staff
 audit-walk-mod3	pulse check	that is a pulse check
 audit-walk-mod3	\bchrome\b	chrome \(the implant\)
+audit-walk-chain	\bchrome\b	chrome \(implants\)
+audit-walk-chain	\bdealer\b	dealer \(the casino's player\)
+audit-walk-chain	\bhouse\b	house \(the casino\)
+audit-walk-chain	\b52\b	one full pack
+audit-walk-chain	\bdraw\b	draw \(take another card\)
+audit-walk-chain	even money	even money \(1 to 1\)
+audit-walk-chain	\bshoe\b	shoe \(the box the cards are dealt from\)
+audit-walk-chain	house edge	house edge \(the share of each bet
+audit-walk-chain	\bchart\b	chart \(a one-page table
+audit-walk-chain	\bRC\b	running count \(RC\)
+audit-walk-chain	\bTC\b	true count \(TC\)
+audit-walk-chain	\bDL\b	decks remaining \(DL\)
+audit-walk-chain	discard tray	discard tray \(the rack
+audit-walk-chain	pit boss	pit bosses \(the casino staff
+audit-walk-chain	pulse check	that is a pulse check

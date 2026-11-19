@@ -116,13 +116,17 @@ with tempfile.TemporaryDirectory() as tmp:
     for a in sorted(f for f in os.listdir(SCR) if f.startswith('audit-') and f.endswith('.txt')):
         name = a[:-4]
         out = os.path.join(tmp, name)
-        play(a, out, '-x', '-g')
+        dumps, _ = play(a, out, '-x', '-g')
         audit.run_pixelcheck(out)
         bad = audit.findings(out, name)
         check(not bad, '%s: %d unexplained text problem(s): %r' % (name, len(bad), bad[:3]))
-        if name.startswith('audit-walk-mod'):
+        if name.startswith(('audit-walk-mod', 'audit-walk-chain')):
             bad = audit.term_order(out, name)
             check(not bad, '%s: term order: %r' % (name, bad[:3]))
+        if name == 'audit-walk-chain':
+            # the chain is a true first-time run: no 'set' line, MOD 1-3 ticked by playing them
+            check(not [l for l in open(os.path.join(SCR, a)) if l.startswith('set ')], 'chain walk has no set lines')
+            check(dumps.get('done', {}).get('lessons') == '7', 'chain walk finished MOD 1, 2 and 3 (lessons=7)')
 
 print('\n%d checks, %d failures' % (checks, fails))
 sys.exit(1 if fails else 0)

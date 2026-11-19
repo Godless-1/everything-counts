@@ -98,7 +98,9 @@ def screens(outdir):
     fs = [f for f in os.listdir(outdir) if f.endswith('.text.txt') and 'BOXTIGHT' not in f and '-menu' not in f
           and not f.startswith('waitfor')]
     fs.sort(key=lambda f: os.stat(os.path.join(outdir, f)).st_mtime_ns)
-    return [(f, _norm(open(os.path.join(outdir, f)).read())) for f in fs]
+    r = [(f, _norm(open(os.path.join(outdir, f)).read())) for f in fs]
+    # the training menu (autoshots draw it too) is a table of contents, not a lesson page
+    return [(f, x) for f, x in r if not x.startswith("DRY RUN B: BACK GREY'S TRAINING CONSTRUCT")]
 
 
 def term_order(outdir, walk):
