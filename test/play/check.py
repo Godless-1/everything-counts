@@ -101,6 +101,9 @@ with tempfile.TemporaryDirectory() as tmp:
     bet = open(os.path.join(out, 'S288-bet-first.text.txt')).read()
     check('RC' in bet and 'MAX 7 UNITS' in bet and 'COACH SAYS' in bet,
           'after MOD 3 the sim shows the count read-outs and the coach line')
+    # a bet-screen message is never cut off by the last hand's grade on the same row
+    row = open(os.path.join(out, 'S290-bet-coach-off.text.txt')).read()
+    check('BIG BET, DEAD SHOE' in row, 'the bet-screen message BIG BET, DEAD SHOE is whole beside the grade')
     check(os.path.exists(os.path.join(out, 'S324-pulse-true-count.text.txt')),
           'after MOD 3 pulse checks come back')
 

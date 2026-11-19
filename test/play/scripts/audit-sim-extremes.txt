@@ -360,4 +360,145 @@ shot S333-play-money-gone
 press a
 wait 120
 shot S333-after
+press a
+wait 40
+# third sitting (S7.2): heat 100 closes the practice sim (src/sc_table.c SIM CLOSED)
+press b
+wait 20
+press a
+wait 20
+press a
+waitfor 400 1/16
+wait 8
+mashuntil a 170 12 2/16
+waitfor 400 2/16
+wait 8
+mashuntil a 170 12 3/16
+waitfor 400 3/16
+wait 8
+mashuntil a 170 12 4/16
+waitfor 400 4/16
+wait 8
+mashuntil a 170 12 5/16
+waitfor 400 5/16
+wait 8
+mashuntil a 170 12 6/16
+waitfor 400 6/16
+wait 8
+wait 30
+press a
+wait 30
+press a
+waitfor 400 7/16
+wait 8
+wait 100
+wait 320
+press a
+waitfor 400 8/16
+wait 8
+wait 30
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press a
+waitfor 400 9/16
+wait 8
+mashuntil a 170 12 10/16
+waitfor 400 10/16
+wait 8
+wait 30
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press a
+waitfor 400 11/16
+wait 8
+mashuntil a 170 12 12/16
+waitfor 400 12/16
+wait 8
+mashuntil a 170 12 13/16
+waitfor 400 13/16
+wait 8
+mashuntil a 170 12 14/16
+waitfor 400 14/16
+wait 8
+wait 30
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press a
+waitfor 400 15/16
+wait 8
+mashuntil a 170 12 16/16
+waitfor 400 16/16
+wait 30
+seed 4242
+nopulse 1
+stack 1 10 7 6 12
+press a
+waitfor 900 PLACE YOUR BET
+wait 5
+press a
+waitfor 300 STAND
+press right
+press a
+waitfor 600 NEXT HAND
+tset heat 100
+press a
+wait 120
+shot G02-sim-closed-heat-stop
+press a
+wait 60
+shot G02-after
 quit

@@ -337,7 +337,10 @@ static void draw_message(void)
     vid_rect(0, 110, 240, 11, C_BLACK);
     vid_hline(0, 110, 240, C_GRID);
     int gw = T.grade[0] ? vid_text_len(T.grade) + 8 : 0;
-    if (T.grade[0]) vid_text(236 - gw + 8, 112, T.grade, T.grade_col);
+    /* a message too long to sit beside the last grade takes the whole row for as long
+     * as it lasts; the grade comes back after it (never a message cut off mid-word) */
+    if (T.msg_t > 0 && vid_text_len(T.msg) > 232 - gw) gw = 0;
+    if (gw) vid_text(236 - gw + 8, 112, T.grade, T.grade_col);
     if (T.msg_t > 0) {
         int avail = (232 - gw) / FONT_W;
         char cut[42];
