@@ -146,7 +146,7 @@ static const Page m1[] = {
 { PT_QUIZ, "CHECK",
   "Why split a pair of EIGHTS against a TEN, when both new hands will probably lose?",
   0,0,{ "Because 21 is more likely", "Because two bad hands lose less than one terrible one", "Because the dealer must then stand", "You should never split eights" }, 4, 1,
-  "Hard 16 is close to hopeless. Two hands starting at 8 each lose less money on average. Basic strategy is about losing less, not only about winning.",
+  "Hard 16 is close to hopeless. Two hands starting at 8 each lose less money on average. The aim is to lose less, not only to win.",
   0,0 },
 
 { PT_TEXT, "SURRENDER",
