@@ -331,15 +331,21 @@ int sc_venue(int arg)
     key_flush();
     app_fade_in(12);
     mus_play(MUS_NEON_RAIN);
+    int key_open = 0;                      /* SELECT: what the board's abbreviations mean */
     for (;;) {
         app_frame_begin();
-        if (key_repeat(KEY_DOWN)) { sel = (sel + 1) % NVENUES; sfx(SFX_MOVE); }
-        if (key_repeat(KEY_UP))   { sel = (sel + NVENUES - 1) % NVENUES; sfx(SFX_MOVE); }
-        if (key_down(KEY_B)) { sfx(SFX_BACK); app_fade_out(10); return SC_HUB; }
+        int was_open = key_open;
+        if (key_open) {
+            if (key_down(KEY_SELECT) || key_down(KEY_A) || key_down(KEY_B)) { sfx(SFX_BACK); key_open = 0; }
+        } else if (key_down(KEY_SELECT)) { sfx(SFX_SELECT); key_open = 1; }
+        else if (key_repeat(KEY_DOWN)) { sel = (sel + 1) % NVENUES; sfx(SFX_MOVE); }
+        else if (key_repeat(KEY_UP))   { sel = (sel + NVENUES - 1) % NVENUES; sfx(SFX_MOVE); }
+        else if (key_down(KEY_B)) { sfx(SFX_BACK); app_fade_out(10); return SC_HUB; }
         const Venue *v = &VENUES[sel];
         int barred = g_run.venue_locked[sel];
         int locked = g_run.night < v->night_min || sel == 5 || barred;
-        if (key_down(KEY_A)) {
+        if (was_open || key_down(KEY_SELECT)) { /* the press that opens or closes the key does nothing else */ }
+        else if (key_down(KEY_A)) {
             if (locked) { sfx(SFX_DENY); }
             else if (g_run.creds < v->min_bet) { sfx(SFX_DENY); toast("NOT ENOUGH ON HAND", C_BLOOD); app_wait(50); }
             else {
@@ -355,7 +361,7 @@ int sc_venue(int arg)
         ui_backdrop(BG_TERMINAL, g_t, v->ramp);
         vid_rect(0, 12, 240, 70, C_BLACK);
         vid_rect_dither(0, 12, 240, 70, C_BLACK, C_INDIGO);
-        ui_titlebar("THE STRIP", "B: HOME", v->accent);
+        ui_titlebar("THE STRIP", "B: HOME  SELECT: KEY", v->accent);
 
         for (int i = 0; i < NVENUES; i++) {
             int y = 15 + i * 11;
@@ -420,6 +426,21 @@ int sc_venue(int arg)
         } else {
             if (v->bj65) vid_text(4, ry, "6:5 - THIS ROOM IS A TAX", C_BLOOD);
             vid_text(236 - vid_text_len("\x13 SIT DOWN"), ry, "\x13 SIT DOWN", C_WHITE);
+        }
+        if (key_open) {
+            vid_overlay();                      /* a modal panel: what it covers is hidden on purpose */
+            ui_panel_solid(6, 26, 228, 96, v->accent, "THE BOARD");
+            static const char *const KEYLINE[8] = {
+                "H17 / S17  dealer hits / stands on",
+                "  soft 17",
+                "DAS  double down after a split",
+                "LS  late surrender (FOLD) allowed",
+                "% DEALT  how deep before the shuffle",
+                "HOUSE  casino's edge on perfect play",
+                "COUNTER  your edge when counting",
+                "BJ  3:2 is fair, 6:5 is a tax",
+            };
+            for (int k = 0; k < 8; k++) vid_text(12, 34 + k * 10, KEYLINE[k], C_TEXT);
         }
         app_frame_end();
     }

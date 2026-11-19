@@ -71,5 +71,12 @@ set creds 0
 press a
 wait 8
 shot S451-strip-deny-no-credits
+wait 60
+press select
+wait 8
+shot S451b-strip-key-panel
+press a
+wait 8
+shot S451c-strip-key-closed
 wait 20
 quit
