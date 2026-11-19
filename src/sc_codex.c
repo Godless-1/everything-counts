@@ -296,13 +296,13 @@ static void codex_stats(void)
         vid_text(8, y, b, C_TEXT); y += 12;
         p = str_cat(b, "BASIC STRATEGY     "); p = str_int(p, run_bs_accuracy()); str_cat(p, "%");
         vid_text(8, y, b, C_CYAN); y += 12;
-        p = str_cat(b, "COUNT CHECKS       "); p = str_int(p, run_check_accuracy()); str_cat(p, "%");
+        p = str_cat(b, "PULSE CHECKS       "); p = str_int(p, run_check_accuracy()); str_cat(p, "%");
         vid_text(8, y, b, C_GREEN); y += 12;
         p = str_cat(b, "BEST WIN STREAK    "); str_int(p, g_run.best_streak);
         vid_text(8, y, b, C_AMBER); y += 12;
         p = str_cat(b, "BIGGEST POT        "); *p++ = 0x09; str_money(p, g_run.biggest_win);
         vid_text(8, y, b, C_WHITE); y += 16;
-        vid_text(8, y, "RANGE BESTS", C_DIM); y += 12;
+        vid_text(8, y, "DRILL BESTS", C_DIM); y += 12;
         static const char *dn[5] = { "TAGS", "SPEED COUNT", "TRUE COUNT", "BASIC", "INDEX" };
         for (int i = 0; i < 5; i++) {
             p = str_cat(b, dn[i]);

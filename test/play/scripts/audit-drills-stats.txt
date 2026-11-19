@@ -14,7 +14,7 @@ wait 20
 press down
 press down
 press a
-waitfor 300 THE RANGE
+waitfor 300 TAG DRILL
 wait 20
 press down
 press down

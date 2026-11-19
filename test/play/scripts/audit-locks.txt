@@ -37,7 +37,7 @@ wait 20
 press down
 press down
 press a
-waitfor 300 THE RANGE
+waitfor 300 TAG DRILL
 wait 20
 shot L05-range-tag-locked
 press a
@@ -57,7 +57,7 @@ press a
 waitfor 40 NEEDS MOD 3
 wait 8
 shot L08-range-index-refused
-waitfor 40 THE RANGE
+waitfor 40 TAG DRILL
 dump rangerefused
 # finishing a module opens the next: MOD 1 ticked -> MOD 2 opens, MOD 3 and the chart stay shut
 set lessons 1

@@ -394,7 +394,7 @@ int sc_drill(int arg)
         }
 
         ui_backdrop(BG_GRID, g_t, RAMP_CYAN);
-        ui_titlebar("THE RANGE", "B: BACK", C_ICE);
+        ui_titlebar("DRILLS", "B: BACK", C_ICE);
         /* list on a plate at the left; the sun keeps the right */
         ui_panel(2, 17, 140, 74, C_ICE, 0);
         for (int i = 0; i < DR_COUNT_; i++) {

@@ -718,9 +718,9 @@ int sc_ending(int arg)
         vid_text(16, y, b, C_TEXT); y += 11;
         p = str_cat(b, "BASIC STRATEGY   "); p = str_int(p, run_bs_accuracy()); str_cat(p, "%");
         vid_text(16, y, b, C_CYAN); y += 11;
-        p = str_cat(b, "COUNT ACCURACY   "); p = str_int(p, run_check_accuracy()); str_cat(p, "%");
+        p = str_cat(b, "PULSE CHECKS     "); p = str_int(p, run_check_accuracy()); str_cat(p, "%");
         vid_text(16, y, b, C_GREEN); y += 11;
-        p = str_cat(b, "CHECKS HELD      "); p = str_int(p, g_run.checks_passed);
+        p = str_cat(b, "PULSE HELD       "); p = str_int(p, g_run.checks_passed);
         p = str_cat(p, " / "); str_int(p, g_run.checks_passed + g_run.checks_failed);
         vid_text(16, y, b, C_MID); y += 11;
         p = str_cat(b, "DRIFT            "); p = str_int(p, g_run.drift);
