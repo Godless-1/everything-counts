@@ -296,7 +296,7 @@ int sc_hub(int arg)
         /* a line of context for the highlighted option */
         static const char *hint[7] = {
             "pick a room. read the board first.",
-            "chrome helps. that is the problem.",
+            "chrome helps. WIRE: pits hear it.",
             "halcyon does not remind you twice.",
             "she can still hear the difference.",
             "learn the game, or learn it again.",
@@ -573,7 +573,7 @@ int sc_night_end(int arg)
         int y = 30;
         p = str_cat(b, "INSTALMENT DUE   "); *p++ = 0x09; str_money(p, due);
         vid_text(16, y, b, C_MID); y += 11;
-        p = str_cat(b, "WIRED            "); *p++ = 0x09; str_money(p, paid);
+        p = str_cat(b, "PAID             "); *p++ = 0x09; str_money(p, paid);
         vid_text(16, y, b, paid >= due ? C_GREEN : C_BLOOD); y += 11;
         p = str_cat(b, "ESCROW TOTAL     "); *p++ = 0x09; str_money(p, g_run.escrow_paid);
         vid_text(16, y, b, C_AMBER); y += 11;
@@ -590,6 +590,7 @@ int sc_night_end(int arg)
         p = str_cat(b, "DRIFT            "); p = str_int(p, g_run.drift);
         p = str_cat(p, "  "); str_cat(p, run_drift_name());
         vid_text(16, y, b, C_MAG);
+        vid_text(16, y + 14, "PULSE = COUNTS YOU HELD FROM MEMORY", C_MID);
 
         vid_rect(0, 138, 240, 12, C_BLACK);
         if (lien) {
