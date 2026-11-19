@@ -72,6 +72,13 @@ void shoe_build(Shoe *s, int decks, int pen_percent)
     s->recycled = 0;
     s->cut = (u16)((s->n * pen_percent) / 100);
     if (s->cut > s->n - 4) s->cut = s->n - 4;
+#ifdef EC_HOST
+    {   /* test harness only: a script may place the cut card for the next shoe */
+        extern int host_cut;
+        if (host_cut > 0 && host_cut < s->n) s->cut = (u16)host_cut;
+        host_cut = 0;
+    }
+#endif
 }
 
 void shoe_round_begin(Shoe *s) { s->round = s->pos; }

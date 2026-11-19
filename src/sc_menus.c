@@ -100,13 +100,14 @@ int sc_title(int arg)
         for (int i = 0; i < 5; i++) {
             int y = 98 + i * 10;
             u8 c = m[i].enabled ? m[i].colour : C_DIM;
+            u8 dc = (i == sel) ? C_MID : C_DIM;     /* C_DIM is too dark on the highlight bar */
             if (i == sel) {
                 vid_hgrad(mx - 10, y - 1, 110, 10, RAMP_VIOLET, 10, 0);
-                vid_text(mx - 8, y, "\x01", c);
+                vid_text(mx - 8, y, "\x01", m[i].enabled ? c : dc);
                 c = C_WHITE;
             }
             vid_text(mx + 4, y, m[i].label, c);
-            if (!m[i].enabled) vid_text(mx + 84, y, "\x0F", C_DIM);
+            if (!m[i].enabled) vid_text(mx + 84, y, "\x0F", dc);
         }
         vid_rect(0, 150, 240, 10, C_BLACK);
         vid_text_center(120, 151, "NEW HERE? START WITH DRY RUN.", C_DIM);
@@ -286,7 +287,7 @@ int sc_hub(int arg)
             u8 c = m[i].enabled ? m[i].colour : C_DIM;
             if (i == sel) {
                 vid_hgrad(4, y - 1, 132, 11, RAMP_VIOLET, 10, 0);
-                vid_text(6, y, "\x01", c);
+                vid_text(6, y, "\x01", m[i].enabled ? c : C_MID);   /* C_DIM is too dark on the bar */
                 c = C_WHITE;
             }
             vid_text(18, y, m[i].label, c);
@@ -295,7 +296,7 @@ int sc_hub(int arg)
         /* a line of context for the highlighted option */
         static const char *hint[7] = {
             "pick a room. read the board first.",
-            "chrome helps. that is the problem.",
+            "chrome helps. WIRE: pits hear it.",
             "halcyon does not remind you twice.",
             "she can still hear the difference.",
             "learn the game, or learn it again.",
@@ -315,7 +316,7 @@ int sc_hub(int arg)
         vid_rect(0, 143, 240, 17, C_BLACK);
         vid_hline(0, 143, 240, C_GRID);
         vid_text(4, 147, run_drift_level() >= 3 ? flat[sel] : hint[sel],
-                 run_drift_level() >= 3 ? C_MAGD : C_DIM);
+                 run_drift_level() >= 3 ? C_MAG : C_DIM);
         app_frame_end();
     }
 }
@@ -330,17 +331,23 @@ int sc_venue(int arg)
     key_flush();
     app_fade_in(12);
     mus_play(MUS_NEON_RAIN);
+    int key_open = 0;                      /* SELECT: what the board's abbreviations mean */
     for (;;) {
         app_frame_begin();
-        if (key_repeat(KEY_DOWN)) { sel = (sel + 1) % NVENUES; sfx(SFX_MOVE); }
-        if (key_repeat(KEY_UP))   { sel = (sel + NVENUES - 1) % NVENUES; sfx(SFX_MOVE); }
-        if (key_down(KEY_B)) { sfx(SFX_BACK); app_fade_out(10); return SC_HUB; }
+        int was_open = key_open;
+        if (key_open) {
+            if (key_down(KEY_SELECT) || key_down(KEY_A) || key_down(KEY_B)) { sfx(SFX_BACK); key_open = 0; }
+        } else if (key_down(KEY_SELECT)) { sfx(SFX_SELECT); key_open = 1; }
+        else if (key_repeat(KEY_DOWN)) { sel = (sel + 1) % NVENUES; sfx(SFX_MOVE); }
+        else if (key_repeat(KEY_UP))   { sel = (sel + NVENUES - 1) % NVENUES; sfx(SFX_MOVE); }
+        else if (key_down(KEY_B)) { sfx(SFX_BACK); app_fade_out(10); return SC_HUB; }
         const Venue *v = &VENUES[sel];
         int barred = g_run.venue_locked[sel];
         int locked = g_run.night < v->night_min || sel == 5 || barred;
-        if (key_down(KEY_A)) {
+        if (was_open || key_down(KEY_SELECT)) { /* the press that opens or closes the key does nothing else */ }
+        else if (key_down(KEY_A)) {
             if (locked) { sfx(SFX_DENY); }
-            else if (g_run.creds < v->min_bet) { sfx(SFX_DENY); }
+            else if (g_run.creds < v->min_bet) { sfx(SFX_DENY); toast("NOT ENOUGH ON HAND", C_BLOOD); app_wait(50); }
             else {
                 sfx(SFX_SELECT);
                 app_fade_out(12);
@@ -354,7 +361,7 @@ int sc_venue(int arg)
         ui_backdrop(BG_TERMINAL, g_t, v->ramp);
         vid_rect(0, 12, 240, 70, C_BLACK);
         vid_rect_dither(0, 12, 240, 70, C_BLACK, C_INDIGO);
-        ui_titlebar("THE STRIP", "B: HOME", v->accent);
+        ui_titlebar("THE STRIP", "B: HOME  SELECT: KEY", v->accent);
 
         for (int i = 0; i < NVENUES; i++) {
             int y = 15 + i * 11;
@@ -362,12 +369,13 @@ int sc_venue(int arg)
             int lk = g_run.night < w->night_min || i == 5 || g_run.venue_locked[i];
             u8 c = lk ? C_DIM : w->accent;
             if (i == sel) {
+                if (lk) c = C_MID;                  /* C_DIM is too dark on the highlight bar */
                 vid_hgrad(0, y - 1, 240, 11, RAMP_VIOLET, 9, 0);
                 vid_text(2, y, "\x01", c);
                 if (!lk) c = C_WHITE;
             }
             vid_text(12, y, w->name, c);
-            if (lk) vid_text(222, y, "\x0F", C_DIM);
+            if (lk) vid_text(222, y, "\x0F", i == sel ? C_MID : C_DIM);
         }
 
         /* the board */
@@ -418,6 +426,21 @@ int sc_venue(int arg)
         } else {
             if (v->bj65) vid_text(4, ry, "6:5 - THIS ROOM IS A TAX", C_BLOOD);
             vid_text(236 - vid_text_len("\x13 SIT DOWN"), ry, "\x13 SIT DOWN", C_WHITE);
+        }
+        if (key_open) {
+            vid_overlay();                      /* a modal panel: what it covers is hidden on purpose */
+            ui_panel_solid(6, 26, 228, 96, v->accent, "THE BOARD");
+            static const char *const KEYLINE[8] = {
+                "H17 / S17  dealer hits / stands on",
+                "  soft 17",
+                "DAS  double down after a split",
+                "LS  late surrender (FOLD) allowed",
+                "% DEALT  how deep before the shuffle",
+                "HOUSE  casino's edge on perfect play",
+                "COUNTER  your edge when counting",
+                "BJ  3:2 is fair, 6:5 is a tax",
+            };
+            for (int k = 0; k < 8; k++) vid_text(12, 34 + k * 10, KEYLINE[k], C_TEXT);
         }
         app_frame_end();
     }
@@ -474,20 +497,21 @@ int sc_clinic(int arg)
         }
 
         ui_backdrop(BG_CLINIC, g_t, RAMP_GREEN);
-        vid_rect(0, 12, 240, 82, C_BLACK);
-        vid_rect_dither(0, 12, 240, 82, C_BLACK, C_INDIGO);
-        vid_hline(0, 93, 240, C_GREEN);
+        vid_rect(0, 12, 240, 74, C_BLACK);
+        vid_rect_dither(0, 12, 240, 74, C_BLACK, C_INDIGO);
+        vid_hline(0, 85, 240, C_GREEN);
         {
             char b[24]; b[0] = 0x09; str_money(b + 1, g_run.creds);
             ui_titlebar("GREY / SUBLEVEL 2", b, C_GREEN);
         }
 
         for (int i = 0; i < IMP_COUNT; i++) {
-            int y = 14 + i * 10;
+            int y = 13 + i * 9;
             const Implant *w = &IMPLANTS[i];
             u8 c = g_run.implant[i] ? C_DIM : w->colour;
             if (i == sel) {
-                vid_hgrad(0, y - 1, 240, 10, RAMP_VIOLET, 9, 0);
+                if (g_run.implant[i]) c = C_MID;    /* C_DIM is too dark on the highlight bar */
+                vid_hgrad(0, y - 1, 240, 9, RAMP_VIOLET, 9, 0);
                 vid_text(2, y, "\x01", c);
                 if (!g_run.implant[i]) c = C_WHITE;
             }
@@ -501,20 +525,22 @@ int sc_clinic(int arg)
         }
 
         const Implant *v = &IMPLANTS[sel];
-        int by = 96;
-        vid_rect(0, by - 2, 240, 52, C_BLACK);
+        int by = 88;
+        vid_rect(0, by - 2, 240, 74, C_BLACK);
         vid_hline(0, by - 2, 240, v->colour);
         vid_text(4, by, v->maker, C_DIM);
+        vid_text(236 - vid_text_len("\x13 BUY  \x14 LEAVE"), by, "\x13 BUY  \x14 LEAVE", C_DIM);
         vid_text_wrap(4, by + 10, 38, v->effect, C_TEXT);
         vid_text_wrap(4, by + 30, 38, v->warning, C_CANDY);
 
-        vid_rect(0, 148, 240, 12, C_BLACK);
-        char b[40], *p;
+        /* what the two meters in the price mean (the numbers are this implant's own) */
+        char b[48], *p;
         p = str_cat(b, "WIRE +"); p = str_int(p, v->wire);
-        vid_text(4, 150, b, C_ICE);
+        p = str_cat(p, v->wire ? ": louder to the pit's scanners" : ": silent to the scanners");
+        vid_text(4, 138, b, C_ICE);
         p = str_cat(b, "DRIFT +"); p = str_int(p, v->drift);
-        vid_text(64, 150, b, C_MAG);
-        vid_text(236 - vid_text_len("\x13 BUY  \x14 LEAVE"), 150, "\x13 BUY  \x14 LEAVE", C_DIM);
+        p = str_cat(p, v->drift ? ": less of the count is yours" : ": the count stays yours");
+        vid_text(4, 148, b, C_MAG);
         app_frame_end();
     }
 }
@@ -567,31 +593,33 @@ int sc_night_end(int arg)
 
         int y = 30;
         p = str_cat(b, "INSTALMENT DUE   "); *p++ = 0x09; str_money(p, due);
-        vid_text(16, y, b, C_MID); y += 11;
-        p = str_cat(b, "WIRED            "); *p++ = 0x09; str_money(p, paid);
-        vid_text(16, y, b, paid >= due ? C_GREEN : C_BLOOD); y += 11;
+        vid_text(16, y, b, C_MID); y += 10;
+        p = str_cat(b, "PAID             "); *p++ = 0x09; str_money(p, paid);
+        vid_text(16, y, b, paid >= due ? C_GREEN : C_BLOOD); y += 10;
         p = str_cat(b, "ESCROW TOTAL     "); *p++ = 0x09; str_money(p, g_run.escrow_paid);
-        vid_text(16, y, b, C_AMBER); y += 11;
+        vid_text(16, y, b, C_AMBER); y += 10;
         p = str_cat(b, "ON HAND          "); *p++ = 0x09; str_money(p, g_run.creds);
-        vid_text(16, y, b, C_WHITE); y += 14;
+        vid_text(16, y, b, C_WHITE); y += 13;
 
-        ui_divider(16, y - 4, 208, C_GRID);
+        ui_divider(16, y - 3, 208, C_GRID);
         p = str_cat(b, "HANDS PLAYED     "); str_int(p, g_run.hands_played);
-        vid_text(16, y, b, C_MID); y += 11;
+        vid_text(16, y, b, C_MID); y += 10;
         p = str_cat(b, "BASIC STRATEGY   "); p = str_int(p, run_bs_accuracy()); str_cat(p, "%");
-        vid_text(16, y, b, run_bs_accuracy() >= 90 ? C_GREEN : C_AMBER); y += 11;
+        vid_text(16, y, b, run_bs_accuracy() >= 90 ? C_GREEN : C_AMBER); y += 10;
         p = str_cat(b, "PULSE CHECKS     "); p = str_int(p, run_check_accuracy()); str_cat(p, "%");
-        vid_text(16, y, b, run_check_accuracy() >= 70 ? C_GREEN : C_AMBER); y += 11;
+        vid_text(16, y, b, run_check_accuracy() >= 70 ? C_GREEN : C_AMBER); y += 10;
         p = str_cat(b, "DRIFT            "); p = str_int(p, g_run.drift);
         p = str_cat(p, "  "); str_cat(p, run_drift_name());
         vid_text(16, y, b, C_MAG);
+        vid_text(16, y + 12, "BASIC = HANDS YOU PLAYED CORRECTLY", C_MID);
+        vid_text(16, y + 21, "PULSE = COUNTS YOU HELD FROM MEMORY", C_MID);
 
         vid_rect(0, 138, 240, 12, C_BLACK);
         if (lien) {
             vid_text_center(120, 140, "LIEN APPLIED. THEY TOOK A PIECE OF HER.", C_BLOOD);
             ui_noise(0, 0, 240, 160, g_t, C_BLOOD, 30);
         } else if (run_drift_level() >= 3) {
-            vid_text_center(120, 140, "YOU DID NOT DREAM. IT DEFRAGMENTED.", C_MAGD);
+            vid_text_center(120, 140, "YOU DID NOT DREAM. IT DEFRAGMENTED.", C_MAG);
         } else if (due > 0) {
             vid_text_center(120, 140, "HALCYON THANKS YOU FOR YOUR PROMPTNESS.", C_DIM);
         } else {
@@ -664,7 +692,7 @@ int sc_ending(int arg)
         ui_backdrop(BG_VOID, g_t, E->ramp);
         vid_hline(0, 26, 240, E->col);
         vid_text_center_s(120, 10, E->title, E->col, 2);
-        vid_text_wrap_n(10, 32, 37, E->body, C_TEXT, chars);   /* room for 12 lines */
+        vid_text_wrap_n(10, 28, 37, E->body, C_TEXT, chars);   /* 12 lines: y=28..145, rule at 26 */
         if (chars >= total) ui_hint("\x13");
         app_frame_end();
     }
@@ -683,16 +711,16 @@ int sc_ending(int arg)
         ui_titlebar("RUN REPORT", 0, E->col);
         char b[48], *p;
         int y = 22;
-        ui_panel(10, 16, 220, 118, E->col, 0);
+        ui_panel(10, 16, 220, 128, E->col, 0);
         p = str_cat(b, "ESCROW PAID      "); *p++ = 0x09; str_money(p, g_run.escrow_paid);
         vid_text(16, y, b, C_AMBER); y += 11;
         p = str_cat(b, "HANDS PLAYED     "); str_int(p, g_run.hands_played);
         vid_text(16, y, b, C_TEXT); y += 11;
         p = str_cat(b, "BASIC STRATEGY   "); p = str_int(p, run_bs_accuracy()); str_cat(p, "%");
         vid_text(16, y, b, C_CYAN); y += 11;
-        p = str_cat(b, "COUNT ACCURACY   "); p = str_int(p, run_check_accuracy()); str_cat(p, "%");
+        p = str_cat(b, "PULSE CHECKS     "); p = str_int(p, run_check_accuracy()); str_cat(p, "%");
         vid_text(16, y, b, C_GREEN); y += 11;
-        p = str_cat(b, "CHECKS HELD      "); p = str_int(p, g_run.checks_passed);
+        p = str_cat(b, "PULSE HELD       "); p = str_int(p, g_run.checks_passed);
         p = str_cat(p, " / "); str_int(p, g_run.checks_passed + g_run.checks_failed);
         vid_text(16, y, b, C_MID); y += 11;
         p = str_cat(b, "DRIFT            "); p = str_int(p, g_run.drift);
@@ -701,7 +729,7 @@ int sc_ending(int arg)
         p = str_cat(b, "WIRE             "); str_int(p, g_run.wire);
         vid_text(16, y, b, C_ICE); y += 11;
         p = str_cat(b, "BIGGEST POT      "); *p++ = 0x09; str_money(p, g_run.biggest_win);
-        vid_text(16, y, b, C_WHITE); y += 14;
+        vid_text(16, y, b, C_WHITE); y += 11;
         vid_text_wrap(16, y, 34,
             "The count was never the hard part. Deciding what to spend to keep it was.", C_DIM);
         ui_hint("\x13 TITLE");

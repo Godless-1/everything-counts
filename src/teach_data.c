@@ -60,17 +60,18 @@ static const u8 d_upA[]     = { C_(R_A,WI), END };
 static const u8 d_up5[]     = { C_(R_5,SH), END };
 static const u8 d_up9[]     = { C_(R_9,PU), END };
 static const u8 d_up3[]     = { C_(R_3,SP), END };
+static const u8 d_up4[]     = { C_(R_4,SH), END };
 static const u8 d_12[]      = { C_(R_T,SP), C_(R_2,PU), END };
 static const u8 d_a7[]      = { C_(R_A,SP), C_(R_7,SH), END };
 static const u8 d_99[]      = { C_(R_9,SP), C_(R_9,WI), END };
 
 static const Page m1[] = {
 { PT_SPEAK, "DRY RUN", 
-  "You lost the lace, so you lost the shortcut. Fine. I am going to teach you the game the way people learned it before anybody had chrome in their skull. Slowly, and from nothing.",
+  "You lost the lace, so you lost the shortcut. Fine. I am going to teach you the game the way people learned it before anybody had chrome (implants) in their skull. Slowly, and from nothing.",
   0,0,{0},0,0,0, CH_GREY, 0 },
 
 { PT_TEXT, "ONE RULE FIRST",
-  "Blackjack is one number against another number.\n\nYou build a total. The dealer builds a total. Whoever is closer to 21 without going over wins.\n\nGo over 21 and you lose immediately. That is called a BUST, and it is the only reason the house makes money.",
+  "Blackjack is one number against another number.\n\nYou build a total. The dealer (the casino's player) builds a total. Whoever is closer to 21 without going over wins.\n\nGo over 21 and you lose immediately. That is called a BUST, and it is the only reason the house (the casino) makes money.",
   0,0,{0},0,0,0,0,0 },
 
 { PT_CARDS, "NUMBER CARDS",
@@ -78,11 +79,11 @@ static const Page m1[] = {
   d_numbers,0,{0},0,0,0,0,0 },
 
 { PT_CARDS, "THE PICTURE CARDS",
-  "10, JACK, QUEEN and KING are all worth exactly 10.\n\nThat means sixteen cards in every 52 are worth ten. Remember that. Later it is the whole game.",
+  "10, JACK, QUEEN and KING are all worth exactly 10.\n\nThat means sixteen cards in every 52 (one full pack) are worth ten. Remember that. Later it is the whole game.",
   d_tens,0,{0},0,0,0,0,0 },
 
 { PT_CARDS, "THE ACE IS TWO CARDS",
-  "An ACE is worth 11, or 1, whichever is better for you. It changes value by itself, hand by hand.\n\nYou never have to decide. It is always counted the way that helps you.",
+  "An ACE is worth 11, or 1, whichever is better for you. It changes value by itself, hand by hand (your hand is the cards you hold).\n\nYou never have to decide. It is always counted the way that helps you.",
   d_aces,0,{0},0,0,0,0,0 },
 
 { PT_CARDS, "SOFT HANDS",
@@ -90,7 +91,7 @@ static const Page m1[] = {
   d_soft17,0,{0},0,0,0,0,0 },
 
 { PT_CARDS, "HARD HANDS",
-  "TEN plus SEVEN is HARD 17. There is no ace to fall back on.\n\nDraw to it and any card above a four kills you. Same number, completely different hand - which is why the game keeps them apart.",
+  "TEN plus SEVEN is HARD 17. There is no ace to fall back on.\n\nDraw (take another card) to it and any card above a four kills you. Same number, completely different hand - which is why the game keeps them apart.",
   d_hard17,0,{0},0,0,0,0,0 },
 
 { PT_CARDS, "WHEN SOFT GOES HARD",
@@ -104,7 +105,7 @@ static const Page m1[] = {
   0,0 },
 
 { PT_CARDS, "BLACKJACK",
-  "An ACE with any ten-value card, in your first two cards, is a BLACKJACK. 21 on the deal.\n\nIt beats any other 21 and it pays extra - 3 to 2 instead of even money. Bet 100, win 150.",
+  "An ACE with any ten-value card, in your first two cards, is a BLACKJACK. 21 with two cards.\n\nIt beats any other 21 and it pays extra - 3 to 2 instead of even money (1 to 1). Bet 100, win 150.",
   d_bj,0,{0},0,0,0,0,0 },
 
 { PT_TEXT, "WHAT A TABLE LOOKS LIKE",
@@ -122,7 +123,7 @@ static const Page m1[] = {
   0,0 },
 
 { PT_TEXT, "THE DEALER IS A MACHINE",
-  "The dealer makes no decisions. Ever.\n\nThey turn over the hole card and then follow one rule: draw while the total is 16 or less, stop at 17 or more.\n\nSome houses make the dealer HIT a soft 17 as well. That single rule costs you about a fifth of a percent. Always check.",
+  "The dealer makes no decisions. Ever.\n\nThey turn over the hole card and then follow one rule: draw while the total is 16 or less, stop at 17 or more.\n\nSome houses make the dealer HIT a soft 17 as well. That single rule costs you about a fifth of a percent of every bet you make. Always check.",
   0,0,{0},0,0,0,0,0 },
 
 { PT_QUIZ, "CHECK",
@@ -146,7 +147,7 @@ static const Page m1[] = {
 { PT_QUIZ, "CHECK",
   "Why split a pair of EIGHTS against a TEN, when both new hands will probably lose?",
   0,0,{ "Because 21 is more likely", "Because two bad hands lose less than one terrible one", "Because the dealer must then stand", "You should never split eights" }, 4, 1,
-  "Hard 16 is close to hopeless. Two hands starting at 8 each lose less money on average. Basic strategy is about losing less, not only about winning.",
+  "Hard 16 is close to hopeless. Two hands starting at 8 each lose less money on average. The aim is to lose less, not only to win.",
   0,0 },
 
 { PT_TEXT, "SURRENDER",
@@ -154,11 +155,11 @@ static const Page m1[] = {
   0,0,{0},0,0,0,0,0 },
 
 { PT_HAND, "INSURANCE",
-  "When the dealer shows an ACE they offer INSURANCE - a side bet, half your stake, that pays 2 to 1 if their hole card is a ten.\n\nThere are 16 ten-value cards in 52. The bet needs better than one in three to break even. It does not get there. Insurance loses money.",
+  "When the dealer shows an ACE they offer INSURANCE - a side bet, half your bet, that pays 2 to 1 if their hole card is a ten.\n\nThere are 16 ten-value cards in 52. The bet needs better than one in three to break even. It does not get there. Insurance loses money.",
   d_16, d_upA, {0},0,0,0,0,0 },
 
 { PT_SPEAK, "DRY RUN",
-  "Refuse insurance. Every time. Until the day you can actually see that the shoe is stuffed with tens - and then take it, and take it hard. That day is what the rest of this course is for.",
+  "Refuse insurance. Every time. Until the day you can actually see that the shoe (the box the cards are dealt from) is stuffed with tens - and then take it, and take it hard. That day is what the rest of this course is for.",
   0,0,{0},0,0,0, CH_GREY, 0 },
 
 { PT_PRACTICE, "LIVE HANDS",
@@ -172,7 +173,7 @@ static const Page m1[] = {
 
 static const Page m2[] = {
 { PT_SPEAK, "BASIC STRATEGY",
-  "Every hand you can be dealt has exactly one best move. Not a feeling. A number, computed a long time ago and never overturned. Learn the chart and the house edge drops from about two percent to half of one.",
+  "Every hand you can be dealt has exactly one best move. Not a feeling. A number, computed a long time ago and never overturned. Learn the chart (a one-page table of the best move for every hand) and the house edge (the share of each bet the casino keeps) drops from about two percent to half of one.",
   0,0,{0},0,0,0, CH_GREY, 0 },
 
 { PT_TEXT, "WHY THERE IS A RIGHT ANSWER",
@@ -184,8 +185,8 @@ static const Page m2[] = {
   0,0,{0},0,0,0,0,0 },
 
 { PT_HAND, "STIFF HANDS",
-  "12 through 16 are STIFF: too low to win by standing, too high to hit safely.\n\nAgainst a weak dealer card you stand and let them bust. Against a strong one you hit and accept the risk. Here: 12 against a THREE - stand and wait.",
-  d_12, d_up3, {0},0,0,0,0,0 },
+  "12 through 16 are STIFF: too low to win by standing, too high to hit safely.\n\nAgainst a weak dealer card you stand and let them bust. Against a strong one you hit and accept the risk. Here: 12 against a FOUR - stand and wait.",
+  d_12, d_up4, {0},0,0,0,0,0 },
 
 { PT_HAND, "SOFT HANDS PLAY DIFFERENTLY",
   "SOFT 18 (ace-seven) looks finished. It is not.\n\nAgainst 2-6 you double it. Against 7 or 8 you stand. Against 9, 10 or ACE you HIT an 18 - because soft 18 loses to the hands those cards make, and you cannot bust.",
@@ -252,7 +253,7 @@ static const Page m3[] = {
   0,0,{0},0,0,0,0,0 },
 
 { PT_COUNTDEMO, "RUNNING COUNT",
-  "Watch. Each card moves the number. Start at zero every time a fresh shoe is shuffled.",
+  "Watch. Each card moves the running count (RC). Start at zero every time a fresh shoe is shuffled.",
   d_run1,0,{0},0,0,0,0,0 },
 
 { PT_QUIZ, "CHECK",
@@ -262,7 +263,7 @@ static const Page m3[] = {
   0,0 },
 
 { PT_TEXT, "THE TRUE COUNT",
-  "A running count of +6 means very different things with one deck left versus six decks left.\n\nTRUE COUNT = RUNNING COUNT divided by DECKS REMAINING.\n\n+6 with 2 decks left is a true count of +3. +6 with 6 decks left is only +1. Estimate the decks left from the discard tray. Nearest half deck is close enough.",
+  "A running count (RC) of +6 means very different things with one deck left versus six decks left.\n\nTRUE COUNT (TC) = RUNNING COUNT divided by DECKS REMAINING (DL).\n\n+6 with 2 decks left is a true count of +3. +6 with 6 decks left is only +1. Estimate the decks left from the discard tray (the rack where used cards pile up). Nearest half deck is close enough. Drop any fraction: +7 over 2 decks is +3.",
   0,0,{0},0,0,0,0,0 },
 
 { PT_QUIZ, "CHECK",
@@ -272,15 +273,15 @@ static const Page m3[] = {
   0,0 },
 
 { PT_TEXT, "BETTING THE COUNT",
-  "Counting earns nothing unless your money moves with it.\n\nA workable ramp: bet (TRUE COUNT minus 1) units, minimum one unit.\n\nTC 0 or less: 1 unit. TC +2: 1 unit. TC +3: 2 units. TC +5: 4 units.\n\nSmall when the shoe is dead. Large when it is rich. That difference is your entire wage.",
+  "Counting earns nothing unless your money moves with it.\n\nA workable ramp: bet (TRUE COUNT minus 1) units, minimum one unit. A unit is your smallest bet.\n\nTC 0 or less: 1 unit. TC +2: 1 unit. TC +3: 2 units. TC +5: 4 units.\n\nSmall when the shoe is dead (full of low cards). Large when it is rich. That difference is your entire wage.",
   0,0,{0},0,0,0,0,0 },
 
 { PT_TEXT, "THE PART THAT GETS YOU CAUGHT",
-  "Pit bosses do not catch counters by counting. They catch them by watching bet sizes.\n\nA player who bets one unit for ten hands and then suddenly slides out eight units is advertising. Move in steps. Keep some bets wrong on purpose. Lose a little cover money.\n\nOn this floor that is the HEAT bar. Fill it and you are done for the night.",
+  "Pit bosses (the casino staff who watch the tables) do not catch counters by counting. They catch them by watching bet sizes.\n\nA player who bets one unit for ten hands and then suddenly slides out eight units is advertising. Move in steps. Keep some bets wrong on purpose. Lose a little cover money.\n\nOn this floor that is the HEAT bar. Fill it and you are done for the night.",
   0,0,{0},0,0,0,0,0 },
 
 { PT_TEXT, "INDEX PLAYS",
-  "At extreme counts, basic strategy stops being correct.\n\nThe big one: take INSURANCE at true count +3 or higher. That single deviation is worth more than most of the others put together.\n\nThe next: STAND on 16 against a TEN at true count 0 or better.\n\nThe game will flag these as INDEX when you have the chrome for it.",
+  "At extreme counts, basic strategy stops being correct.\n\nThe big one: take INSURANCE at true count +3 or higher. That single deviation is worth more than most of the others put together.\n\nThe next: STAND on 16 against a TEN at true count 0 or better.\n\nThe game will flag these as INDEX when you have the chrome (the implant) for it.",
   0,0,{0},0,0,0,0,0 },
 
 { PT_QUIZ, "CHECK",
@@ -290,11 +291,11 @@ static const Page m3[] = {
   0,0 },
 
 { PT_SPEAK, "THE COUNT",
-  "One number. In your head. Never on a screen, never on chrome the pit can scan. The second a machine does it for you, it is not yours and it is not deniable.",
+  "One number. In your head. Never on a screen, never on chrome the pit can scan (check for hidden machines). The second a machine does it for you, it is not yours and it is not deniable.",
   0,0,{0},0,0,0, CH_GREY, 0 },
 
 { PT_PRACTICE, "PUT IT TOGETHER",
-  "Live hands, coach on, counter on. Play until the pulse checks stop frightening you.\n\nThen press SELECT at the table to switch both off, and do it again.",
+  "Live hands, coach on, count readout on. Now and then the sim stops and asks for your running count: that is a pulse check. Answer from memory.\n\nThen press SELECT at the table to switch both off, and do it again.",
   0,0,{0},0,0,0,0,0 },
 };
 

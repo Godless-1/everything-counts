@@ -22,7 +22,7 @@ static const SLine b0[] = {
 { CH_KESTREL, "Resolved into components. They wrote that and somebody signed off on the wording." },
 { CH_SABLE, "Don't read it twice, it doesn't get better. The Verge came down, your sister's body went with it, and Halcyon caught her mind on the way out. Now they're renting her back to you." },
 { CH_KESTREL, "And my lace burned out in the same collapse." },
-{ CH_SABLE, "Which is the only good news in this room. Everyone in this city is chipped. The pits scan for co-processor chatter before you've finished sitting down. You're the only person on the strip who can count a shoe without broadcasting that you're counting a shoe." },
+{ CH_SABLE, "Which is the only good news in this room. Everyone in this city is chipped. The pits scan for co-processor chatter before you've finished sitting down. You're the only person on the strip who can count a shoe (the box the cards are dealt from) without broadcasting that you're counting a shoe." },
 { CH_KESTREL, "I can't count. Not any more. The lace did it for eleven years." },
 { CH_SABLE, "Then you've got until tomorrow night to learn it back. Grey's got a training construct in the basement. Go be a person again." },
 };
@@ -34,7 +34,7 @@ static const SLine b1[] = {
 { CH_SABLE, "Twenty thousand. It is nothing. It's designed to be nothing, so you'll believe the rest is possible." },
 { CH_SABLE, "Start low. The Slag Pit runs two decks and nobody down there is paid enough to watch you. Learn the room before you learn the money." },
 { CH_KESTREL, "And when the money gets big enough to notice?" },
-{ CH_SABLE, "Then you'll want chrome. And chrome is where this stops being about blackjack." },
+{ CH_SABLE, "Then you'll want chrome (implants that count for you). And chrome is where this stops being about blackjack." },
 };
 
 /* ---- 2: Mara --------------------------------------------------------- */

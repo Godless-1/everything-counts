@@ -1,0 +1,82 @@
+# audit-venue: The Strip at night 1 and night 7 with the cursor on every room, a barred room, too few credits (S438-S451)
+autoshot au-venue
+set night 3
+set creds 900000
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set drift 0
+set started 1
+save
+nopulse 1
+waitfor 600 UNASSISTED
+press a
+waitfor 300 CONTINUE
+press down
+press a
+waitfor 300 FIND A GAME
+press a
+waitfor 300 THE STRIP
+set night 1
+mash up 6 6
+wait 4
+wait 8
+shot S438-strip-night1-slag-pit
+press down
+wait 8
+shot S440-strip-night1-lucky-nine
+press down
+wait 8
+shot S442-strip-night1-golden-lotus
+press down
+wait 8
+shot S444-strip-night1-neon-sutra
+press down
+wait 8
+shot S446-strip-night1-halcyon-skydeck
+press down
+wait 8
+shot S448-strip-night1-the-vault
+press down
+set night 7
+mash up 6 6
+wait 4
+wait 8
+shot S439-strip-night7-slag-pit
+press down
+wait 8
+shot S441-strip-night7-lucky-nine
+press down
+wait 8
+shot S443-strip-night7-golden-lotus
+press down
+wait 8
+shot S445-strip-night7-neon-sutra
+press down
+wait 8
+shot S447-strip-night7-halcyon-skydeck
+press down
+wait 8
+shot S449-strip-night7-the-vault
+press down
+set night 3
+set locked.2 1
+mash up 6 6
+mash down 2 8
+wait 8
+shot S450-strip-barred-room
+set locked.2 0
+set creds 0
+press a
+wait 8
+shot S451-strip-deny-no-credits
+wait 60
+press select
+wait 8
+shot S451b-strip-key-panel
+press a
+wait 8
+shot S451c-strip-key-closed
+wait 20
+quit

@@ -1,0 +1,56 @@
+# audit-title: boot log, title without and with a started run, overwrite confirm (S001-S011, S013, S014)
+autoshot au-title
+wait 80
+shot S001-boot-partial
+waitfor 300 UNASSISTED
+wait 8
+shot S002-boot-complete
+wait 10
+shot S002-boot-prompt-try
+press a
+waitfor 300 NEW RUN
+wait 20
+shot S003-title-fresh-new-run
+press down
+wait 20
+shot S004-title-fresh-dry-run
+press down
+wait 20
+shot S005-title-fresh-drills
+press down
+wait 20
+shot S006-title-fresh-codex
+set night 3
+set creds 900000
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set started 1
+save
+press down
+wait 20
+shot S007-title-started-new-run
+press down
+wait 20
+shot S008-title-started-continue
+press down
+wait 20
+shot S009-title-started-dry-run
+press down
+wait 20
+shot S010-title-started-drills
+press down
+wait 20
+shot S011-title-started-codex
+press down
+wait 5
+press a
+waitfor 100 NEW RUN
+wait 5
+wait 20
+shot S013-newrun-confirm-new-run
+press right
+wait 20
+shot S014-newrun-confirm-cancel
+quit

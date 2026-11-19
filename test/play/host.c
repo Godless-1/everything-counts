@@ -41,6 +41,7 @@ volatile u32 irq_flags;
 void (*irq_handler_c)(void);
 
 extern u8 *vid_back;
+extern int g_hold_frame;
 int game_main(void);
 
 /* ---- options ----------------------------------------------------------- */
@@ -50,6 +51,8 @@ static FILE *opt_snd;
 static FILE *script;
 static long  frame_no;
 static int   quiet;
+static int   opt_g;                       /* -g: glyph dump with every shot */
+static int   opt_x;                       /* -x: box-edge events */
 
 /* ---- text watcher ------------------------------------------------------ */
 #define MAXG 4096
@@ -64,6 +67,11 @@ static int   ngl;
 static int   cur_g = -1;
 static const char *cur_text = "";
 static u16   owner[SCREEN_W * SCREEN_H];   /* glyph index + 1 */
+static u8    boxmap[SCREEN_W * SCREEN_H];  /* 1 = outline pixel of a frame rect */
+/* the finished frame, kept for shots taken after text_frame_end() reset it */
+static Glyph sgl[MAXG];
+static int   sngl;
+static u16   sowner[SCREEN_W * SCREEN_H];
 
 #define MAXEV 4000
 static char *seen_ev[MAXEV];
@@ -140,6 +148,12 @@ void host_px(int x, int y, int w, int h)
             if (cur_g >= 0) {
                 Glyph *g = &gl[cur_g];
                 g->ink++;
+                if (opt_x && boxmap[yy * SCREEN_W + xx]) {
+                    char d[300];
+                    snprintf(d, sizeof d, "\"%s\" at %d,%d", printable(g->text), g->x, g->y);
+                    event("BOXEDGE", g->text, d);
+                    boxmap[yy * SCREEN_W + xx] = 0;
+                }
                 if (*o && *o - 1 != cur_g) {
                     Glyph *p = &gl[*o - 1];
                     if (!twin(g, p)) {
@@ -154,15 +168,34 @@ void host_px(int x, int y, int w, int h)
                     }                       /* a twin is meant to cover it */
                 }
                 *o = (u16)(cur_g + 1);
-            } else if (*o) {
-                gl[*o - 1].lost++;
-                *o = 0;
+            } else {
+                boxmap[yy * SCREEN_W + xx] = 0;
+                if (*o) {
+                    gl[*o - 1].lost++;
+                    *o = 0;
+                }
             }
         }
 }
 
 /* a pop-up is about to cover the picture: forget what is underneath */
-void host_overlay(void) { memset(owner, 0, sizeof owner); }
+void host_overlay(void) { memset(owner, 0, sizeof owner); memset(boxmap, 0, sizeof boxmap); }
+
+/* the outline of a frame rectangle was just drawn (-x only) */
+void host_box(int x, int y, int w, int h)
+{
+    if (!opt_x) return;
+    for (int i = 0; i < w; i++)
+        for (int k = 0; k < 2; k++) {
+            int xx = x + i, yy = k ? y + h - 1 : y;
+            if ((unsigned)xx < SCREEN_W && (unsigned)yy < SCREEN_H) boxmap[yy * SCREEN_W + xx] = 1;
+        }
+    for (int j = 0; j < h; j++)
+        for (int k = 0; k < 2; k++) {
+            int xx = k ? x + w - 1 : x, yy = y + j;
+            if ((unsigned)xx < SCREEN_W && (unsigned)yy < SCREEN_H) boxmap[yy * SCREEN_W + xx] = 1;
+        }
+}
 
 /* scripts can switch the random count checks off to stay deterministic */
 int host_no_pulse;
@@ -215,6 +248,29 @@ static int  want_hit;
 
 static void text_frame_end(void)
 {
+    /* a hold frame draws nothing: keep the glyph snapshot of the frame that
+     * made the picture still on screen */
+    if (opt_g && !g_hold_frame) {
+        memcpy(sgl, gl, sizeof(Glyph) * (size_t)ngl);
+        sngl = ngl;
+        memcpy(sowner, owner, sizeof owner);
+    }
+    if (opt_x)
+        for (int y = 0; y < SCREEN_H; y++)
+            for (int x = 0; x < SCREEN_W; x++) {
+                int o = owner[y * SCREEN_W + x];
+                if (!o) continue;
+                int hit = (x > 0 && boxmap[y * SCREEN_W + x - 1]) ||
+                          (x < SCREEN_W - 1 && boxmap[y * SCREEN_W + x + 1]) ||
+                          (y > 0 && boxmap[(y - 1) * SCREEN_W + x]) ||
+                          (y < SCREEN_H - 1 && boxmap[(y + 1) * SCREEN_W + x]);
+                if (hit) {
+                    Glyph *g = &gl[o - 1];
+                    char d[300];
+                    snprintf(d, sizeof d, "\"%s\" at %d,%d", printable(g->text), g->x, g->y);
+                    event("BOXTIGHT", g->text, d);
+                }
+            }
     if (auto_on) autoshot_frame();
     want_hit = 0;
     if (want_text[0])
@@ -235,6 +291,75 @@ static void text_frame_end(void)
     }
     ngl = 0;
     memset(owner, 0, sizeof owner);
+    memset(boxmap, 0, sizeof boxmap);
+}
+
+/* ---- glyph dump (-g) --------------------------------------------------- */
+static int   g_head[MAXG];
+static int   g_next[SCREEN_W * SCREEN_H];
+static int   g_own[MAXG];
+static int   sort_i[MAXG];
+
+static int cmp_y(const void *a, const void *b)
+{
+    const Glyph *p = &sgl[*(const int *)a], *q = &sgl[*(const int *)b];
+    return (p->y != q->y) ? p->y - q->y : p->x - q->x;
+}
+static int cmp_x(const void *a, const void *b)
+{
+    const Glyph *p = &sgl[*(const int *)a], *q = &sgl[*(const int *)b];
+    return (p->x != q->x) ? p->x - q->x : p->y - q->y;
+}
+
+static void glyph_files(const char *name)
+{
+    char path[512];
+    for (int i = 0; i < sngl; i++) { g_head[i] = -1; g_own[i] = 0; }
+    for (int p = 0; p < SCREEN_W * SCREEN_H; p++) {
+        int o = sowner[p];
+        if (!o || o > sngl) continue;
+        g_next[p] = g_head[o - 1]; g_head[o - 1] = p; g_own[o - 1]++;
+    }
+    snprintf(path, sizeof path, "%s/%s.glyphs.tsv", opt_out, name);
+    FILE *f = fopen(path, "w");
+    if (!f) { perror(path); exit(2); }
+    for (int i = 0; i < sngl; i++) {
+        Glyph *g = &sgl[i];
+        fprintf(f, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\t", g->x, g->y, g->ch, g->scale,
+                g->ink, g->lost, g->clipped, printable(g->text));
+        int first = 1;
+        for (int p = g_head[i]; p >= 0; p = g_next[p]) {
+            fprintf(f, first ? "%d,%d" : ";%d,%d", p % SCREEN_W, p / SCREEN_W);
+            first = 0;
+        }
+        fputc('\n', f);
+    }
+    fclose(f);
+
+    /* the text a person can read: visible glyphs, row by row */
+    snprintf(path, sizeof path, "%s/%s.text.txt", opt_out, name);
+    f = fopen(path, "w");
+    if (!f) { perror(path); exit(2); }
+    int n = 0;
+    for (int i = 0; i < sngl; i++) if (g_own[i] > 0 && sgl[i].scale >= 1) sort_i[n++] = i;
+    qsort(sort_i, (size_t)n, sizeof sort_i[0], cmp_y);
+    for (int a = 0; a < n;) {
+        int b = a + 1, y0 = sgl[sort_i[a]].y;
+        while (b < n && sgl[sort_i[b]].y - y0 <= 3) b++;
+        qsort(sort_i + a, (size_t)(b - a), sizeof sort_i[0], cmp_x);
+        const Glyph *prev = 0;
+        for (int k = a; k < b; k++) {
+            const Glyph *g = &sgl[sort_i[k]];
+            if (prev && g->ch == prev->ch && g->x - prev->x <= 3) continue;  /* shadow twin */
+            if (prev && g->x - (prev->x + 6 * prev->scale) >= 6) fputc(' ', f);
+            if (g->ch >= 32 && g->ch <= 126) fputc(g->ch, f);
+            else fprintf(f, "<%02X>", g->ch);
+            prev = g;
+        }
+        fputc('\n', f);
+        a = b;
+    }
+    fclose(f);
 }
 
 /* ---- screenshots ------------------------------------------------------- */
@@ -245,22 +370,37 @@ static void shot(const char *name)
     FILE *f = fopen(path, "wb");
     if (!f) { perror(path); exit(2); }
     fprintf(f, "P6\n%d %d\n255\n", SCREEN_W, SCREEN_H);
-    /* the page that was just completed is the one being shown */
-    const u8 *page = (vid_back == (u8 *)host_vram) ? (u8 *)host_vram + 0xA000
-                                                    : (u8 *)host_vram;
+    /* host_frame() runs inside vid_vsync(), before the flip: the picture
+     * just drawn (the one the glyph tables describe) is still vid_back */
+    /* during a hold frame (app_wait) nothing is flipped or redrawn: the
+     * picture on screen is the OTHER page, vid_back is two frames stale */
+    const u8 *page = vid_back;
+    if (g_hold_frame) {
+        const u8 *p0 = (const u8 *)host_vram, *p1 = p0 + 0xA000;
+        page = (vid_back == p0) ? p1 : p0;
+    }
     u16 bld = *(u16 *)(host_io + 0x50), bldy = *(u16 *)(host_io + 0x54) & 31;
     int mode = (bld >> 6) & 3;
     if (bldy > 16) bldy = 16;
     for (int i = 0; i < SCREEN_W * SCREEN_H; i++) {
         u16 c = host_pal[page[i]];
         int r = c & 31, g = (c >> 5) & 31, b = (c >> 10) & 31;
-        if (mode == 2) { r -= r * bldy / 16; g -= g * bldy / 16; b -= b * bldy / 16; }
-        if (mode == 1) { r += (31 - r) * bldy / 16; g += (31 - g) * bldy / 16; b += (31 - b) * bldy / 16; }
+        /* BLDCNT effect bits 6-7: 2 = brighten (towards white), 3 = darken */
+        if (mode == 3) { r -= r * bldy / 16; g -= g * bldy / 16; b -= b * bldy / 16; }
+        if (mode == 2) { r += (31 - r) * bldy / 16; g += (31 - g) * bldy / 16; b += (31 - b) * bldy / 16; }
         fputc((r << 3) | (r >> 2), f);
         fputc((g << 3) | (g >> 2), f);
         fputc((b << 3) | (b >> 2), f);
     }
     fclose(f);
+    if (bldy > 0 && mode >= 2) {
+        /* the picture is mid fade or flash: the text under it is hidden on
+         * purpose, so the pixel check must not judge it */
+        snprintf(path, sizeof path, "%s/%s.blend", opt_out, name);
+        FILE *bf = fopen(path, "w");
+        if (bf) { fprintf(bf, "mode %d level %d\n", mode, (int)bldy); fclose(bf); }
+    }
+    if (opt_g) glyph_files(name);
 }
 
 /* ---- the script -------------------------------------------------------- */
@@ -276,7 +416,8 @@ static int   mu_left, mu_gap, mu_hold, mu_cool;   /* mashuntil */
 static u16   mu_key;
 
 /* cards the next shoe must start with (ranks 1..13, 1 = ace) */
-static u8  stack[64];
+int host_cut;                 /* cards before the cut card of the next shoe (0 = by the venue) */
+static u8  stack[160];
 static int nstack;
 
 void host_shoe(Shoe *s)
@@ -312,6 +453,9 @@ static void save_flush(void)
     if (f) { fwrite(host_sram, 1, sizeof host_sram, f); fclose(f); }
 }
 
+int  host_table_peek(int what);
+void host_table_poke(int what, int v);
+
 static void dump(const char *label)
 {
     printf("DUMP %s frame=%ld creds=%d escrow=%d night=%d drift=%d wire=%d rui=%d "
@@ -327,6 +471,8 @@ static void dump(const char *label)
     for (int i = 0; i < IMP_COUNT; i++) putchar('0' + g_run.implant[i]);
     printf(" drills=");
     for (int i = 0; i < 5; i++) printf("%d,", g_run.best_drill[i]);
+    printf(" trust=%d heat=%d rc=%d tc=%d", host_table_peek(0), host_table_peek(1),
+           host_table_peek(2), host_table_peek(3));
     putchar('\n');
     fflush(stdout);
 }
@@ -343,6 +489,15 @@ static void set_field(const char *f, int v)
     else if (!strcmp(f, "liens"))   g_run.liens = (u8)v;
     else if (!strcmp(f, "lessons")) g_run.lessons_done = (u8)v;
     else if (!strcmp(f, "started")) g_run.seen_intro = (u8)v;
+    else if (!strcmp(f, "hands"))   g_run.hands_played = (u16)v;
+    else if (!strcmp(f, "bs_total"))   g_run.bs_total = (u16)v;
+    else if (!strcmp(f, "bs_correct")) g_run.bs_correct = (u16)v;
+    else if (!strcmp(f, "checks_passed")) g_run.checks_passed = (u16)v;
+    else if (!strcmp(f, "checks_failed")) g_run.checks_failed = (u16)v;
+    else if (!strcmp(f, "best_streak"))   g_run.best_streak = (u16)v;
+    else if (!strcmp(f, "biggest_win"))   g_run.biggest_win = v;
+    else if (sscanf(f, "drill.%d", &i) == 1 && i >= 0 && i < 5)  g_run.best_drill[i] = (u8)v;
+    else if (sscanf(f, "locked.%d", &i) == 1 && i >= 0 && i < 6) g_run.venue_locked[i] = (u8)v;
     else if (sscanf(f, "implant.%d", &i) == 1 && i >= 0 && i < IMP_COUNT) g_run.implant[i] = (u8)v;
     else if (sscanf(f, "flag.%d", &i) == 1 && i >= 0 && i < FLAG_COUNT)   g_run.flag[i] = (u8)v;
     else if (sscanf(f, "beat.%d", &i) == 1 && i >= 0 && i < NIGHTS + 2)   g_run.beat_done[i] = (u8)v;
@@ -402,6 +557,11 @@ static void script_step(void)
             sscanf(line, "%*s %127s", a); dump(a);
         } else if (!strcmp(cmd, "set")) {
             sscanf(line, "%*s %127s %d", a, &n); set_field(a, n);
+        } else if (!strcmp(cmd, "tset")) {             /* tset trust|heat N */
+            sscanf(line, "%*s %127s %d", a, &n);
+            if (!strcmp(a, "trust")) host_table_poke(0, n);
+            else if (!strcmp(a, "heat")) host_table_poke(1, n);
+            else { fprintf(stderr, "script: unknown tset field '%s'\n", a); exit(2); }
         } else if (!strcmp(cmd, "save")) {
             save_write();
         } else if (!strcmp(cmd, "music")) {            /* music <song number> */
@@ -413,11 +573,13 @@ static void script_step(void)
             sscanf(line, "%*s %d", &n); rng_seed((u32)n);
         } else if (!strcmp(cmd, "stack")) {            /* stack 1 13 8 8 ... */
             char *p = line + 5; nstack = 0;
-            while (nstack < 64) {
+            while (nstack < 160) {
                 char *e; long v = strtol(p, &e, 10);
                 if (e == p) break;
                 stack[nstack++] = (u8)v; p = e;
             }
+        } else if (!strcmp(cmd, "cut")) {              /* cut <cards>: place the cut card for the next shoe */
+            sscanf(line, "%*s %d", &host_cut);
         } else if (!strcmp(cmd, "quit")) {
             finish(0);
         } else {
@@ -496,10 +658,12 @@ int main(int argc, char **argv)
         else if (!strcmp(argv[i], "-s") && i + 1 < argc) opt_sav = argv[++i];
         else if (!strcmp(argv[i], "-a") && i + 1 < argc) opt_snd = fopen(argv[++i], "wb");
         else if (!strcmp(argv[i], "-q")) quiet = 1;
+        else if (!strcmp(argv[i], "-g")) opt_g = 1;
+        else if (!strcmp(argv[i], "-x")) opt_x = 1;
         else spath = argv[i];
     }
     if (!spath) {
-        fprintf(stderr, "usage: play [-o outdir] [-s file.sav] [-a psg.log] [-q] script\n");
+        fprintf(stderr, "usage: play [-o outdir] [-s file.sav] [-a psg.log] [-q] [-g] [-x] script\n");
         return 2;
     }
     script = strcmp(spath, "-") ? fopen(spath, "r") : stdin;

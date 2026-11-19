@@ -1,0 +1,93 @@
+# audit-hub: the hub with the cursor on every item at two drift levels, PAY ESCROW disabled, PAY confirm, payment toast, sleep confirm (S404-S418, S434, S435, S437; S436 is unreachable)
+autoshot au-hub
+set night 3
+set creds 900000
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set drift 40
+set started 1
+save
+nopulse 1
+waitfor 600 UNASSISTED
+press a
+waitfor 300 CONTINUE
+press down
+press a
+waitfor 300 FIND A GAME
+wait 12
+shot S404-hub-find-a-game-drift40
+press down
+wait 12
+shot S405-hub-see-grey-drift40
+press down
+wait 12
+shot S406-hub-pay-escrow-drift40
+press down
+wait 12
+shot S407-hub-call-rui-drift40
+press down
+wait 12
+shot S408-hub-dry-run-drift40
+press down
+wait 12
+shot S409-hub-drills-drift40
+press down
+wait 12
+shot S410-hub-end-the-night-drift40
+press down
+set drift 82
+wait 12
+shot S411-hub-find-a-game-drift82
+press down
+wait 12
+shot S412-hub-see-grey-drift82
+press down
+wait 12
+shot S413-hub-pay-escrow-drift82
+press down
+wait 12
+shot S414-hub-call-rui-drift82
+press down
+wait 12
+shot S415-hub-dry-run-drift82
+press down
+wait 12
+shot S416-hub-drills-drift82
+press down
+wait 12
+shot S417-hub-end-the-night-drift82
+press down
+set drift 0
+set night 1
+set escrow 20000
+set creds 900000
+wait 10
+shot S418-hub-pay-disabled
+set night 7
+set escrow 0
+set creds 99999999
+press down
+press down
+wait 5
+press a
+wait 15
+shot S434-pay-escrow-confirm
+press a
+wait 10
+shot S435-payment-logged-toast
+waitfor 300 FIND A GAME
+wait 90
+set drift 0
+mashuntil up 8 12 what you have is what
+wait 5
+press a
+wait 12
+shot S437-sleep-confirm-sleep
+press right
+wait 8
+shot S437-sleep-confirm-not-yet
+press b
+wait 10
+quit

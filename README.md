@@ -142,7 +142,7 @@ faces and the neon are all code.
 ## The maths is measured, not asserted
 
 `make test` builds the same `blackjack.c` / `cards.c` / `game.c` that ship in the
-ROM against host shims and runs **451 checks**:
+ROM against host shims and runs **1,154 checks**:
 
 - card values, soft/hard evaluation, blackjack vs. a 21 built from three cards,
   21 after a split
@@ -150,6 +150,9 @@ ROM against host shims and runs **451 checks**:
 - true-count arithmetic
 - **the entire basic-strategy chart**, cell by cell, against a reference for
   6 decks / S17 / DAS / late surrender — 350 cells
+- **the chart you are taught and the practice table agree**: all 350 cells of
+  the lesson chart equal what the practice table's coach and grader say, and
+  one deliberately flipped cell must be caught
 - the index plays, at and either side of every threshold
 - **3,000,000 hands per room** of perfect basic strategy, confirming the house
   edge the game prints is the one it actually charges
@@ -185,6 +188,11 @@ sessions through it — no emulator involved:
   to the credit after each one
 - a campaign in progress, the drills opened from the title screen, two cold
   starts: the campaign must still be in the save
+- the locks: a fresh cartridge cannot open MOD 2, MOD 3, the chart or a drill,
+  and the practice table shows only what the finished modules have taught
+- the screen audit: every audit script is played with the text watcher, a
+  pixel-level text check and a check that each lesson word is explained
+  before it is used
 - tours of every screen (all seven nights, both tables, the course, the
   codex, the drills, all eleven endings) with a watcher on every glyph the renderer
   draws: any text **clipped by the screen edge, drawn over other text, or
@@ -192,7 +200,8 @@ sessions through it — no emulator involved:
 
 `test/play/psg.py` renders the logged sound-chip registers to a WAV and
 lists the notes, and `make selftest` builds a ROM that measures the shuffle
-on the target CPU itself.
+on the target CPU itself. In all, `make test` runs 1,154 rules checks and
+78 play-through checks, in about 2 minutes 40 seconds.
 
 ---
 

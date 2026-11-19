@@ -424,6 +424,54 @@ static void test_chart(void)
     }
 }
 
+/* D-B04: the chart the lessons show and the coach/grader of the practice sim
+ * are one rule set.  Every cell of the chart (17 hard + 8 soft + 10 pair rows
+ * times 10 up cards) must equal what the sim says for the same hand.  `flip`
+ * (>= 0) changes the chart's answer for that one cell, for the negative
+ * control; returns the number of cells that disagree. */
+static int chart_vs_sim(const Venue *v, int flip)
+{
+    static const int nrows[3] = { 17, 8, 10 };
+    int bad = 0, idx = 0;
+    for (int t = 0; t < 3; t++)
+        for (int r = 0; r < nrows[t]; r++) {
+            Hand h; chart_hand(t, r, &h);
+            for (int u = 0; u < 10; u++, idx++) {
+                int shown = chart_action(v, t, r, UP[u]);
+                if (idx == flip) shown = (shown == ACT_HIT) ? ACT_STAND : ACT_HIT;
+                int coach = sim_action(&h, UP[u], v, 1, 1);
+                if (shown != coach) {
+                    if (flip < 0)
+                        printf("  FAIL  chart %s row %d vs up %d: chart %s, sim %s\n",
+                               t == 0 ? "hard" : t == 1 ? "soft" : "pair", r, u,
+                               action_name(shown), action_name(coach));
+                    bad++;
+                }
+                checks++;
+            }
+        }
+    return bad;
+}
+
+static void test_chart_vs_sim(void)
+{
+    puts("-- the chart and the practice sim agree on every cell (Golden Lotus)");
+    const Venue *v = &VENUES[CHART_VENUE];
+    CHECK(CHART_VENUE == VENUE_LOTUS && v->decks == 6 && v->surrender, "the shared chart room is the Golden Lotus");
+    /* why the sim must share the chart's room: the Slag Pit's chart is another chart */
+    int other = 0;
+    for (int t = 0, idx = 0; t < 3; t++)
+        for (int r = 0; r < (t == 0 ? 17 : t == 1 ? 8 : 10); r++)
+            for (int u = 0; u < 10; u++, idx++)
+                if (chart_action(&VENUES[VENUE_SLAG], t, r, UP[u]) != chart_action(v, t, r, UP[u])) other++;
+    CHECK(other == 13, "the Slag Pit chart differs from the Lotus chart in 13 cells");
+    int bad = chart_vs_sim(v, -1);
+    if (bad) { printf("  FAIL  %d of 350 cells differ\n", bad); fails++; }
+    /* negative control: flipping one chart cell must be seen */
+    int ctl = chart_vs_sim(v, 123);
+    CHECK(ctl == 1, "negative control: one flipped chart cell is reported as exactly one disagreement");
+}
+
 static void test_deviations(void)
 {
     puts("-- index plays");
@@ -745,6 +793,7 @@ int main(void)
     test_tags();
     test_true_count();
     test_chart();
+    test_chart_vs_sim();
     test_deviations();
     test_settle();
     test_shoe_dry();

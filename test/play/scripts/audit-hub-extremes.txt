@@ -1,0 +1,74 @@
+# audit-hub-extremes: the hub status panel at the edges of every value: drift tiers, credits, escrow, night, wire (S419-S433)
+autoshot au-hubx
+set night 3
+set creds 900000
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set drift 0
+set started 1
+save
+nopulse 1
+waitfor 600 UNASSISTED
+press a
+waitfor 300 CONTINUE
+press down
+press a
+waitfor 300 FIND A GAME
+set drift 0
+wait 8
+shot S419-hub-drift-0
+set drift 14
+wait 8
+shot S420-hub-drift-14
+set drift 15
+wait 8
+shot S421-hub-drift-15
+set drift 34
+wait 8
+shot S422-hub-drift-34
+set drift 35
+wait 8
+shot S423-hub-drift-35
+set drift 54
+wait 8
+shot S424-hub-drift-54
+set drift 55
+wait 8
+shot S425-hub-drift-55
+set drift 79
+wait 8
+shot S426-hub-drift-79
+set drift 80
+wait 8
+shot S427-hub-drift-80
+set drift 100
+wait 8
+shot S428-hub-drift-100
+set drift 0
+set night 1
+set creds 0
+set escrow 0
+wait 8
+shot S429-hub-creds-0-night-1
+set night 3
+set creds 99999999
+set escrow 99999999
+wait 8
+shot S430-hub-creds-and-escrow-99999999
+set creds 2147483647
+set escrow 0
+wait 8
+shot S431-hub-creds-2147483647
+set night 7
+set creds 900000
+wait 8
+shot S432-hub-night-7
+set wire 0
+wait 8
+shot S433-hub-wire-0
+set wire 100
+wait 8
+shot S433-hub-wire-100
+quit

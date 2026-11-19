@@ -1,0 +1,368 @@
+# audit-story-b: a new run taking the second choice at beats 2-6, then the Vault beat; every speech box shot (closing lines after choice 2, DECIDE cursor on choice 2, beat 7)
+autoshot au-storyb
+nopulse 1
+waitfor 600 UNASSISTED
+press a
+waitfor 300 NEW RUN
+press a
+mashuntil a 60 60 DECIDE
+wait 20
+press a
+waitfor 400 GREY'S TRAINING CONSTRUCT
+wait 20
+press b
+mashuntil a 60 60 FIND A GAME
+wait 10
+set creds 3000000
+mashuntil up 8 12 what you have is what
+wait 4
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+wait 10
+press a
+waitfor 600 THE DEALER
+wait 95
+shot S522-b2l1box1
+press a
+wait 95
+shot S523-b2l1box2
+press a
+wait 95
+shot S524-b2l1box3
+press a
+wait 95
+shot S525-b2l2box1
+press a
+wait 95
+shot S526-b2l3box1
+press a
+wait 95
+shot S527-b2l4box1
+press a
+wait 95
+shot S528-b2l4box2
+press a
+wait 95
+shot S529-b2l5box1
+press a
+wait 95
+shot S530-b2l5box2
+press a
+wait 95
+shot S531-b2l6box1
+press a
+wait 95
+shot S532-b2l7box1
+press a
+waitfor 300 DECIDE
+wait 10
+press down
+wait 6
+shot S621-b2-decide-choice2
+press a
+wait 95
+shot S591-b2-close2-box1
+shot S643-portrait-pit
+press a
+wait 95
+shot S592-b2-close2-box2
+press a
+waitfor 600 FIND A GAME
+wait 10
+set creds 3000000
+mashuntil up 8 12 what you have is what
+wait 4
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+wait 10
+press a
+waitfor 600 STILL WARM
+wait 95
+shot S533-b3l1box1
+press a
+wait 95
+shot S603-echo-b3-mara_sold-box1
+press a
+wait 95
+shot S604-echo-b3-mara_sold-box2
+press a
+wait 95
+shot S534-b3l2box1
+press a
+wait 95
+shot S535-b3l3box1
+press a
+wait 95
+shot S536-b3l3box2
+press a
+wait 95
+shot S537-b3l3box3
+press a
+wait 95
+shot S538-b3l4box1
+press a
+wait 95
+shot S539-b3l4box2
+press a
+wait 95
+shot S540-b3l4box3
+press a
+wait 95
+shot S541-b3l5box1
+press a
+wait 95
+shot S542-b3l6box1
+press a
+wait 95
+shot S543-b3l6box2
+press a
+waitfor 300 DECIDE
+wait 10
+press down
+wait 6
+shot S623-b3-decide-choice2
+press a
+wait 95
+shot S594-b3-close2-box1
+press a
+waitfor 600 FIND A GAME
+wait 10
+set creds 3000000
+mashuntil up 8 12 what you have is what
+wait 4
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+wait 10
+press a
+waitfor 600 COVER
+wait 95
+shot S544-b4l1box1
+press a
+wait 95
+shot S545-b4l2box1
+press a
+wait 95
+shot S546-b4l3box1
+press a
+wait 95
+shot S547-b4l3box2
+press a
+wait 95
+shot S548-b4l3box3
+press a
+wait 95
+shot S549-b4l4box1
+press a
+wait 95
+shot S550-b4l5box1
+press a
+wait 95
+shot S551-b4l5box2
+press a
+wait 95
+shot S552-b4l6box1
+press a
+wait 95
+shot S553-b4l7box1
+press a
+waitfor 300 DECIDE
+wait 10
+press down
+wait 6
+shot S625-b4-decide-choice2
+press a
+wait 95
+shot S596-b4-close2-box1
+press a
+wait 95
+shot S597-b4-close2-box2
+press a
+waitfor 600 FIND A GAME
+wait 10
+set creds 3000000
+mashuntil up 8 12 what you have is what
+wait 4
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+wait 10
+press a
+waitfor 600 THE WHALE
+wait 95
+shot S554-b5l1box1
+press a
+wait 95
+shot S555-b5l1box2
+press a
+wait 95
+shot S611-echo-b5-refused_sable-box1
+press a
+wait 95
+shot S612-echo-b5-refused_sable-box2
+press a
+wait 95
+shot S556-b5l2box1
+press a
+wait 95
+shot S557-b5l2box2
+press a
+wait 95
+shot S558-b5l3box1
+press a
+wait 95
+shot S559-b5l3box2
+press a
+wait 95
+shot S560-b5l4box1
+press a
+wait 95
+shot S561-b5l5box1
+press a
+wait 95
+shot S562-b5l5box2
+press a
+wait 95
+shot S563-b5l5box3
+press a
+wait 95
+shot S564-b5l6box1
+press a
+wait 95
+shot S565-b5l6box2
+press a
+wait 95
+shot S566-b5l6box3
+press a
+wait 95
+shot S567-b5l7box1
+press a
+wait 95
+shot S568-b5l8box1
+press a
+waitfor 300 DECIDE
+wait 10
+press down
+wait 6
+shot S627-b5-decide-choice2
+press a
+wait 95
+shot S599-b5-close2-box1
+press a
+wait 95
+shot S600-b5-close2-box2
+press a
+waitfor 600 FIND A GAME
+wait 10
+set creds 3000000
+mashuntil up 8 12 what you have is what
+wait 4
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+wait 10
+press a
+waitfor 600 AN INSTANCE OF YOU
+wait 95
+shot S569-b6l1box1
+press a
+wait 95
+shot S570-b6l1box2
+press a
+wait 95
+shot S571-b6l2box1
+press a
+wait 95
+shot S572-b6l2box2
+press a
+wait 95
+shot S615-echo-b6-ozerov_spared-box1
+press a
+wait 95
+shot S616-echo-b6-ozerov_spared-box2
+press a
+wait 95
+shot S574-b6l3box1
+press a
+wait 95
+shot S575-b6l3box2
+press a
+wait 95
+shot S576-b6l3box3
+press a
+wait 95
+shot S577-b6l4box1
+press a
+wait 95
+shot S578-b6l4box2
+press a
+wait 95
+shot S579-b6l5box1
+press a
+wait 95
+shot S580-b6l6box1
+press a
+wait 95
+shot S581-b6l6box2
+press a
+wait 95
+shot S582-b6l7box1
+press a
+wait 95
+shot S583-b6l8box1
+press a
+waitfor 300 DECIDE
+wait 10
+press down
+wait 6
+shot S629-b6-decide-choice2
+press a
+wait 95
+shot S602-b6-close2-box1
+press a
+waitfor 600 FIND A GAME
+wait 10
+set creds 3000000
+set drift 60
+mashuntil up 8 12 suspend. resume
+wait 4
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+wait 10
+press a
+waitfor 600 THE VAULT
+wait 95
+shot S584-b7l1box1
+press a
+wait 95
+shot S585-b7l1box2
+press a
+wait 95
+shot S587-b7l2box1
+press a
+wait 95
+shot S617-echo-b7-drift-box1
+press a
+wait 95
+shot S618-echo-b7-drift-box2
+press a
+wait 95
+shot S588-b7l3box1
+press a
+wait 95
+shot S589-b7l4box1
+press a
+waitfor 300 DECIDE
+wait 10
+shot S630-b7-decide-choice1
+press a
+quit

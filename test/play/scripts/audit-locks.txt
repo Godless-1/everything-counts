@@ -1,0 +1,82 @@
+# audit-locks (D-B01, D-B03): a FRESH cartridge cannot open MOD 2, MOD 3, the chart or any drill.
+# Locked rows show a padlock and say why; A is refused (the menu stays); finishing a module opens the next.
+autoshot au-locks
+waitfor 600 UNASSISTED
+press a
+waitfor 300 NEW RUN
+wait 20
+press down
+press a
+waitfor 300 GREY'S TRAINING CONSTRUCT
+wait 20
+shot L01-teach-mod1-open
+press down
+wait 20
+press a
+waitfor 40 FINISH MOD 1 FIRST
+wait 8
+shot L02-teach-mod2-refused
+dump mod2refused
+press down
+wait 20
+press a
+waitfor 40 FINISH MOD 2 FIRST
+wait 8
+shot L03-teach-mod3-refused
+press down
+wait 20
+press a
+waitfor 40 FINISH MOD 2 FIRST
+wait 8
+shot L04-teach-chart-refused
+waitfor 40 GREY'S TRAINING CONSTRUCT
+dump teachrefused
+press b
+waitfor 300 NEW RUN
+wait 20
+press down
+press down
+press a
+waitfor 300 TAG DRILL
+wait 20
+shot L05-range-tag-locked
+press a
+waitfor 40 NEEDS MOD 3
+wait 8
+shot L06-range-tag-refused
+press down
+press down
+press down
+wait 20
+shot L07-range-basic-locked
+press a
+waitfor 40 NEEDS MOD 2
+wait 8
+press down
+press a
+waitfor 40 NEEDS MOD 3
+wait 8
+shot L08-range-index-refused
+waitfor 40 TAG DRILL
+dump rangerefused
+# finishing a module opens the next: MOD 1 ticked -> MOD 2 opens, MOD 3 and the chart stay shut
+set lessons 1
+press b
+waitfor 300 NEW RUN
+wait 20
+press down
+press a
+waitfor 300 GREY'S TRAINING CONSTRUCT
+wait 20
+press down
+wait 20
+shot L09-mod1-done-mod2-open
+press down
+wait 20
+shot L10-mod1-done-mod3-locked
+press up
+press a
+waitfor 400 1/10
+shot L11-mod2-opened
+dump opened
+quit

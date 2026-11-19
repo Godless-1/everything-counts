@@ -1,0 +1,24 @@
+# audit-fades: the screen half way through a fade out and a fade in (S681, S682)
+autoshot au-fades
+nopulse 1
+set night 3
+set creds 900000
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set started 1
+save
+waitfor 600 UNASSISTED
+press a
+waitfor 300 CONTINUE
+wait 20
+press down
+press a
+wait 6
+shot S681-fade-out-half-way
+waitfor 300 FIND A GAME
+wait 3
+shot S682-fade-in-half-way
+wait 30
+quit

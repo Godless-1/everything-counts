@@ -1,0 +1,553 @@
+# audit-sim: the practice sim (MOD 3 page 16): bets, turns, coach, grades, splits, insurance, pulse checks, rules book (S287-S342 except S306-S309, S321, S331, S333)
+set lessons 3
+waitfor 600 UNASSISTED
+press a
+waitfor 300 NEW RUN
+press down
+press a
+waitfor 300 GREY'S TRAINING CONSTRUCT
+wait 20
+press down
+press down
+press a
+waitfor 400 1/16
+wait 8
+mashuntil a 170 12 2/16
+waitfor 400 2/16
+wait 8
+mashuntil a 170 12 3/16
+waitfor 400 3/16
+wait 8
+mashuntil a 170 12 4/16
+waitfor 400 4/16
+wait 8
+mashuntil a 170 12 5/16
+waitfor 400 5/16
+wait 8
+mashuntil a 170 12 6/16
+waitfor 400 6/16
+wait 8
+wait 30
+press a
+wait 30
+press a
+waitfor 400 7/16
+wait 8
+wait 100
+wait 320
+press a
+waitfor 400 8/16
+wait 8
+wait 30
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press a
+waitfor 400 9/16
+wait 8
+mashuntil a 170 12 10/16
+waitfor 400 10/16
+wait 8
+wait 30
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press a
+waitfor 400 11/16
+wait 8
+mashuntil a 170 12 12/16
+waitfor 400 12/16
+wait 8
+mashuntil a 170 12 13/16
+waitfor 400 13/16
+wait 8
+mashuntil a 170 12 14/16
+waitfor 400 14/16
+wait 8
+wait 30
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press b
+wait 10
+press down
+wait 10
+press a
+wait 30
+press a
+waitfor 400 15/16
+wait 8
+mashuntil a 170 12 16/16
+waitfor 400 16/16
+wait 30
+autoshot au-sim
+seed 4242
+nopulse 1
+stack 5 10 6 7 5 6 6 11 9 12 3 13 4 7 5 10 11 12 7 7 8 6 8 13 8 10 5 9 11 12 1 6 1 13 5 9 10 1 11 5 7 5 12 13 5 7 6 1 9 10 7 11 1 5 6 9 1 13 10 11 12 8 13 10 9 9 11
+cut 67
+press a
+wait 30
+shot S287-shuffle
+waitfor 900 PLACE YOUR BET
+wait 5
+wait 10
+shot S288-bet-first
+mash right 3 6
+wait 10
+shot S289-bet-max
+press a
+wait 22
+shot S291-dealing
+waitfor 300 STAND
+wait 20
+shot S295-coach-optic-double
+press right
+wait 10
+shot S293-stand-selected
+press right
+wait 10
+shot S293-double-selected
+press select
+wait 10
+shot S297-coach-off
+press left
+press a
+wait 3
+shot S300-grade-basic-double
+waitfor 600 NEXT HAND
+wait 20
+shot S315-house-takes-it
+shot S317-big-bet-dead-shoe
+press a
+waitfor 900 PLACE YOUR BET
+wait 5
+wait 10
+shot S290-bet-coach-off
+mash left 3 6
+press a
+waitfor 300 STAND
+press select
+wait 8
+shot S298-coach-on
+mash right 2 6
+press a
+wait 8
+shot S302-doubled
+wait 30
+shot S299-grade-correct
+waitfor 400 DEALER BUSTS
+shot S313-dealer-busts
+waitfor 600 NEXT HAND
+wait 10
+shot S314-you-take-it
+press a
+waitfor 900 PLACE YOUR BET
+wait 5
+press a
+waitfor 300 STAND
+press a
+wait 14
+shot S292-hit-stand
+press a
+wait 6
+shot S301-bust
+waitfor 600 NEXT HAND
+press a
+waitfor 900 PLACE YOUR BET
+wait 5
+press a
+waitfor 300 STAND
+press right
+press a
+waitfor 600 NEXT HAND
+wait 10
+shot S316-push
+press a
+waitfor 900 PLACE YOUR BET
+wait 5
+press a
+waitfor 300 STAND
+mash right 3 6
+wait 8
+shot S294-pair-split-selected
+press a
+wait 20
+shot S303-two-hands
+wait 2
+press a
+wait 20
+press a
+wait 60
+press right
+press a
+wait 30
+shot S304-three-hands-c-active
+press right
+press a
+waitfor 600 NEXT HAND
+press a
+waitfor 900 PLACE YOUR BET
+wait 5
+press a
+waitfor 300 STAND
+mash right 3 6
+press a
+wait 20
+shot S305-split-aces
+press a
+waitfor 600 NEXT HAND
+press a
+waitfor 900 PLACE YOUR BET
+wait 5
+press a
+waitfor 300 STAND
+press select
+press a
+wait 6
+shot S310-soft21
+waitfor 600 NEXT HAND
+press a
+waitfor 900 PLACE YOUR BET
+wait 5
+press a
+waitfor 300 STAND
+press a
+wait 6
+shot S310-hard21
+waitfor 600 NEXT HAND
+press a
+waitfor 900 PLACE YOUR BET
+wait 5
+press a
+wait 40
+shot S311-blackjack
+waitfor 600 NEXT HAND
+press a
+waitfor 900 PLACE YOUR BET
+wait 5
+press a
+waitfor 300 INSURANCE
+wait 15
+shot S320-insurance-coach-off
+press a
+waitfor 300 STAND
+press select
+press right
+press a
+waitfor 600 NEXT HAND
+press a
+waitfor 900 PLACE YOUR BET
+wait 5
+press a
+waitfor 300 INSURANCE
+wait 15
+shot S318-insurance-no
+press left
+wait 10
+shot S319-insurance-take
+press a
+wait 20
+shot S312-dealer-blackjack
+waitfor 600 NEXT HAND
+press a
+waitfor 900 PLACE YOUR BET
+wait 5
+stack 5 6 5 4 2 3 4 6 5 4 6 5 6 4 6 6 3 2 3 4 5 5 3 7 5 10 11 6 11 4 9 6 2 9 3 3 7 4 3 2 3 7 9 2 2 7 2 2 7 9 7 8 9 9
+press a
+waitfor 300 STAND
+press right
+press a
+waitfor 600 NEXT HAND
+press a
+waitfor 900 PLACE YOUR BET
+wait 5
+press a
+waitfor 300 STAND
+press right
+press a
+waitfor 600 NEXT HAND
+press a
+waitfor 900 COUNT?
+wait 3
+dump p0
+shot S324-pulse-true-count
+mash down 18 3
+wait 386
+shot S325-pulse-timer-low
+press a
+waitfor 300 CONTINUE
+wait 20
+shot S328-pulse-held-true
+press a
+waitfor 400 PLACE YOUR BET
+wait 5
+shot S330-new-shoe
+nopulse 1
+wait 5
+press a
+waitfor 300 STAND
+press right
+press a
+waitfor 600 NEXT HAND
+wait 10
+press a
+waitfor 400 PLACE YOUR BET
+wait 5
+wait 5
+press a
+waitfor 300 STAND
+press right
+press a
+waitfor 600 NEXT HAND
+wait 10
+shot S317-cold-bet-hot-shoe
+press a
+waitfor 400 PLACE YOUR BET
+wait 5
+nopulse 2
+mash right 3 6
+wait 5
+press a
+waitfor 300 STAND
+press right
+press a
+waitfor 600 NEXT HAND
+wait 10
+shot S317-good-spread
+press a
+waitfor 900 COUNT?
+wait 3
+dump p1
+shot S322-pulse-entry-zero
+mash right 12 6
+shot S323-pulse-plus60
+mash left 24 6
+shot S323-pulse-minus60
+press a
+waitfor 300 CONTINUE
+wait 20
+shot S329-pulse-dropped-true
+press a
+waitfor 400 PLACE YOUR BET
+wait 5
+mash left 3 6
+wait 5
+press a
+waitfor 300 STAND
+press right
+press a
+waitfor 600 NEXT HAND
+wait 10
+press a
+waitfor 900 COUNT?
+wait 3
+dump p2
+shot p2-q
+mash up 16 3
+press a
+waitfor 300 CONTINUE
+wait 20
+shot p2-result
+press a
+waitfor 400 PLACE YOUR BET
+wait 5
+wait 5
+press a
+waitfor 300 STAND
+wait 10
+shot S296-coach-index-stand
+press right
+press a
+waitfor 600 NEXT HAND
+wait 10
+press a
+waitfor 900 COUNT?
+wait 3
+dump p3
+shot p3-q
+mash up 22 3
+press a
+waitfor 300 CONTINUE
+wait 20
+shot S326-pulse-held-running
+press a
+waitfor 400 PLACE YOUR BET
+wait 5
+wait 5
+press a
+waitfor 300 STAND
+press right
+press a
+waitfor 600 NEXT HAND
+wait 10
+press a
+waitfor 900 COUNT?
+wait 3
+dump p4
+shot p4-q
+mash left 12 6
+press a
+waitfor 300 CONTINUE
+wait 20
+shot S327-pulse-dropped-running
+press a
+waitfor 400 PLACE YOUR BET
+wait 5
+wait 5
+press a
+waitfor 300 STAND
+press right
+press a
+waitfor 600 NEXT HAND
+wait 10
+press a
+waitfor 900 COUNT?
+wait 3
+dump p5
+shot p5-q
+press a
+waitfor 300 CONTINUE
+wait 20
+shot p5-result
+press a
+waitfor 400 PLACE YOUR BET
+wait 5
+wait 5
+press a
+waitfor 300 STAND
+press right
+press a
+waitfor 600 NEXT HAND
+wait 10
+press a
+waitfor 900 COUNT?
+wait 3
+dump p6
+shot p6-q
+press a
+waitfor 300 CONTINUE
+wait 20
+shot p6-result
+press a
+waitfor 400 PLACE YOUR BET
+wait 5
+wait 5
+press a
+waitfor 300 STAND
+press right
+press a
+waitfor 600 NEXT HAND
+wait 10
+press a
+waitfor 900 COUNT?
+wait 3
+dump p7
+shot p7-q
+press a
+waitfor 300 CONTINUE
+wait 20
+shot p7-result
+press a
+waitfor 400 PLACE YOUR BET
+wait 5
+press start
+wait 10
+wait 10
+shot S334-rules-page1
+press right
+wait 5
+wait 10
+shot S335-rules-page2
+press right
+wait 5
+wait 10
+shot S336-rules-page3
+press right
+wait 5
+wait 10
+shot S337-rules-page4
+press right
+wait 5
+wait 10
+shot S338-rules-page5
+press right
+wait 5
+wait 10
+shot S339-rules-page6
+press right
+wait 5
+wait 10
+shot S340-rules-page7
+press right
+wait 5
+wait 10
+shot S341-rules-page8
+press right
+wait 5
+wait 10
+shot S342-rules-page9
+press right
+wait 6
+shot N66-rules-page10-heat-wire
+press right
+wait 6
+shot N66-rules-page11-readouts
+press right
+wait 6
+shot N66-rules-page12-room
+press b
+wait 10
+press b
+wait 15
+shot S332-leave-cashout
+press right
+wait 15
+shot S332-leave-stay
+press b
+wait 10
+quit

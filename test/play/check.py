@@ -9,6 +9,9 @@ whole game and asserts on the bankroll, the save file and the text watcher.
 """
 import os, re, subprocess, sys, tempfile
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import audit
+
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 RUN = os.path.join(ROOT, 'test', 'play', 'run.sh')
 SCR = os.path.join(ROOT, 'test', 'play', 'scripts')
@@ -70,10 +73,63 @@ with tempfile.TemporaryDirectory() as tmp:
     check(num(d, 'hub', 'night') == 3 and num(d, 'hub', 'escrow') == 220000,
           'CONTINUE resumes that campaign')
 
+    print('-- the locks: a fresh cartridge cannot open MOD 2, MOD 3, the chart or a drill')
+    # the script itself fails (exit 3) if a locked A opens anything: it waits for the
+    # refusal text 'FINISH MOD 1 FIRST' / 'NEEDS MOD 3' on screen, then the menu title
+    d, ev = play('audit-locks.txt', os.path.join(tmp, 'locks'))
+    check(all(k in d for k in ('mod2refused', 'teachrefused', 'rangerefused', 'opened')),
+          'the lock script ran to its end (every refusal text was shown)')
+    check(num(d, 'rangerefused', 'lessons') == 0, 'refused entries finish no lesson')
+    check(num(d, 'opened', 'lessons') == 1 and num(d, 'opened', 'night') == 1,
+          'with MOD 1 ticked, MOD 2 opens (its first page was reached)')
+
+    print('-- the practice sim shows only what the finished modules taught')
+    HUD = re.compile(r'\b(RC|TC|DL|HEAT|WIRE|ORACLE|OPTIC|INDEX|UNITS?|MAX|PULSE|SPREAD)\b')
+    def sim_text(script, tag):
+        out = os.path.join(tmp, tag)
+        play(script, out, '-x', '-g')
+        return {n: open(os.path.join(out, n)).read() for n in sorted(os.listdir(out))
+                if n.startswith(tag.upper()[:2] + '-') and n.endswith('.text.txt')}
+    for script, tag, name in (('audit-sim-l1.txt', 'l1', 'after MOD 1'), ('audit-sim-l2.txt', 'l2', 'after MOD 2')):
+        t = sim_text(script, tag)
+        shots = {n: x for n, x in t.items() if 'closed' not in n}      # 'closed' is the course menu again
+        check(len(shots) >= 12, '%s: the sim script took its shots (%d)' % (name, len(shots)))
+        bad = sorted(n for n, x in shots.items() if HUD.search(x))
+        check(not bad, '%s: no count HUD in the sim (%s)' % (name, ', '.join(bad[:3])))
+    out = os.path.join(tmp, 'full')
+    play('audit-sim.txt', out, '-x', '-g')
+    bet = open(os.path.join(out, 'S288-bet-first.text.txt')).read()
+    check('RC' in bet and 'MAX 7 UNITS' in bet and 'COACH SAYS' in bet,
+          'after MOD 3 the sim shows the count read-outs and the coach line')
+    # a bet-screen message is never cut off by the last hand's grade on the same row
+    row = open(os.path.join(out, 'S290-bet-coach-off.text.txt')).read()
+    check('BIG BET, DEAD SHOE' in row, 'the bet-screen message BIG BET, DEAD SHOE is whole beside the grade')
+    check(os.path.exists(os.path.join(out, 'S324-pulse-true-count.text.txt')),
+          'after MOD 3 pulse checks come back')
+
     print('-- every screen: the tours must show no broken text')
     for t in sorted(f for f in os.listdir(SCR) if f.startswith('tour-')):
         d, ev = play(t, os.path.join(tmp, t))
         check(ev == [], '%s: %d text problem(s): %r' % (t, len(ev), ev[:3]))
+
+    print('-- the screen audit: every audit script, pixel by pixel, and the order of the lesson words')
+    # each audit-*.txt runs with -x -g; whatever the watcher (events.log) or pixelcheck.py
+    # (pixel.log) reports must be explained by a row of allowlist.tsv or by the card-rank
+    # echo rule; the three lesson walks must also gloss each term where it first appears
+    for a in sorted(f for f in os.listdir(SCR) if f.startswith('audit-') and f.endswith('.txt')):
+        name = a[:-4]
+        out = os.path.join(tmp, name)
+        dumps, _ = play(a, out, '-x', '-g')
+        audit.run_pixelcheck(out)
+        bad = audit.findings(out, name)
+        check(not bad, '%s: %d unexplained text problem(s): %r' % (name, len(bad), bad[:3]))
+        if name.startswith(('audit-walk-mod', 'audit-walk-chain')):
+            bad = audit.term_order(out, name)
+            check(not bad, '%s: term order: %r' % (name, bad[:3]))
+        if name == 'audit-walk-chain':
+            # the chain is a true first-time run: no 'set' line, MOD 1-3 ticked by playing them
+            check(not [l for l in open(os.path.join(SCR, a)) if l.startswith('set ')], 'chain walk has no set lines')
+            check(dumps.get('done', {}).get('lessons') == '7', 'chain walk finished MOD 1, 2 and 3 (lessons=7)')
 
 print('\n%d checks, %d failures' % (checks, fails))
 sys.exit(1 if fails else 0)

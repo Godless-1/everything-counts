@@ -1,0 +1,575 @@
+# audit-endings: all eleven endings (half typed, complete, RUN REPORT), the report at the largest values, the title after a finished run (S646-S679, S012)
+autoshot au-endings
+set night 7
+set creds 0
+set escrow 2000000
+set drift 0
+set rui 100
+set liens 0
+set started 1
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set beat.4 1
+set beat.5 1
+set beat.6 1
+set beat.7 1
+set flag.0 1
+set flag.1 0
+set flag.2 0
+set flag.3 0
+set flag.4 1
+set flag.5 0
+set flag.6 1
+set flag.7 0
+set flag.8 1
+save
+waitfor 600 UNASSISTED
+press a
+waitfor 300 CONTINUE
+press down
+press a
+waitfor 300 FIND A GAME
+mashuntil up 8 12 what you have is what
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+press a
+waitfor 400 EVERYTHING COUNTS
+wait 190
+shot S661-end-everything-counts-half-typed
+wait 420
+shot S662-end-everything-counts-complete
+press a
+waitfor 300 RUN REPORT
+wait 20
+shot S663-end-everything-counts-run-report
+press a
+waitfor 400 NEW RUN
+wait 10
+set night 7
+set creds 0
+set escrow 2000000
+set drift 20
+set rui 100
+set liens 0
+set started 1
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set beat.4 1
+set beat.5 1
+set beat.6 1
+set beat.7 1
+set flag.0 0
+set flag.1 0
+set flag.2 0
+set flag.3 0
+set flag.4 0
+set flag.5 0
+set flag.6 0
+set flag.7 0
+set flag.8 0
+save
+wait 4
+press down
+press a
+waitfor 300 FIND A GAME
+mashuntil up 8 12 what you have is what
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+press a
+waitfor 400 FLESH AND BLOOD
+wait 190
+shot S646-end-flesh-and-blood-half-typed
+wait 420
+shot S647-end-flesh-and-blood-complete
+press a
+waitfor 300 RUN REPORT
+wait 20
+shot S648-end-flesh-and-blood-run-report
+press a
+waitfor 400 NEW RUN
+wait 10
+set night 7
+set creds 0
+set escrow 2000000
+set drift 40
+set rui 100
+set liens 0
+set started 1
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set beat.4 1
+set beat.5 1
+set beat.6 1
+set beat.7 1
+set flag.0 0
+set flag.1 0
+set flag.2 0
+set flag.3 0
+set flag.4 0
+set flag.5 0
+set flag.6 0
+set flag.7 0
+set flag.8 0
+save
+wait 4
+press down
+press a
+waitfor 300 FIND A GAME
+mashuntil up 8 12 what you have is what
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+press a
+waitfor 400 ASCENSION
+wait 190
+shot S649-end-ascension-half-typed
+wait 420
+shot S650-end-ascension-complete
+press a
+waitfor 300 RUN REPORT
+wait 20
+shot S651-end-ascension-run-report
+press a
+waitfor 400 NEW RUN
+wait 10
+set night 7
+set creds 0
+set escrow 2000000
+set drift 80
+set rui 100
+set liens 0
+set started 1
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set beat.4 1
+set beat.5 1
+set beat.6 1
+set beat.7 1
+set flag.0 0
+set flag.1 0
+set flag.2 0
+set flag.3 0
+set flag.4 0
+set flag.5 0
+set flag.6 0
+set flag.7 0
+set flag.8 0
+save
+wait 4
+press down
+press a
+waitfor 300 FIND A GAME
+mashuntil up 8 12 suspend. resume
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+press a
+waitfor 400 HOLLOWED
+wait 190
+shot S658-end-hollowed-half-typed
+wait 420
+shot S659-end-hollowed-complete
+press a
+waitfor 300 RUN REPORT
+wait 20
+shot S660-end-hollowed-run-report
+press a
+waitfor 400 NEW RUN
+wait 10
+set night 7
+set creds 0
+set escrow 2000000
+set drift 10
+set rui 100
+set liens 0
+set started 1
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set beat.4 1
+set beat.5 1
+set beat.6 1
+set beat.7 1
+set flag.0 0
+set flag.1 0
+set flag.2 0
+set flag.3 0
+set flag.4 0
+set flag.5 1
+set flag.6 0
+set flag.7 0
+set flag.8 0
+save
+wait 4
+press down
+press a
+waitfor 300 FIND A GAME
+mashuntil up 8 12 what you have is what
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+press a
+waitfor 400 WARD NINE
+wait 190
+shot S664-end-ward-nine-half-typed
+wait 420
+shot S665-end-ward-nine-complete
+press a
+waitfor 300 RUN REPORT
+wait 20
+shot S666-end-ward-nine-run-report
+press a
+waitfor 400 NEW RUN
+wait 10
+set night 7
+set creds 0
+set escrow 2000000
+set drift 10
+set rui 83
+set liens 0
+set started 1
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set beat.4 1
+set beat.5 1
+set beat.6 1
+set beat.7 1
+set flag.0 0
+set flag.1 0
+set flag.2 0
+set flag.3 0
+set flag.4 0
+set flag.5 0
+set flag.6 0
+set flag.7 0
+set flag.8 0
+save
+wait 4
+press down
+press a
+waitfor 300 FIND A GAME
+mashuntil up 8 12 what you have is what
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+press a
+waitfor 400 WHAT THEY KEPT
+wait 190
+shot S667-end-kept-half-typed
+wait 420
+shot S668-end-kept-complete
+press a
+waitfor 300 RUN REPORT
+wait 20
+shot S669-end-kept-run-report
+press a
+waitfor 400 NEW RUN
+wait 10
+set night 7
+set creds 0
+set escrow 100000
+set drift 0
+set rui 100
+set liens 0
+set started 1
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set beat.4 1
+set beat.5 1
+set beat.6 1
+set beat.7 1
+set flag.0 1
+set flag.1 0
+set flag.2 0
+set flag.3 0
+set flag.4 1
+set flag.5 0
+set flag.6 1
+set flag.7 0
+set flag.8 1
+save
+wait 4
+press down
+press a
+waitfor 300 FIND A GAME
+mashuntil up 8 12 what you have is what
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+press a
+waitfor 400 CLEAN HANDS
+wait 190
+shot S673-end-clean-hands-half-typed
+wait 420
+shot S674-end-clean-hands-complete
+press a
+waitfor 300 RUN REPORT
+wait 20
+shot S675-end-clean-hands-run-report
+press a
+waitfor 400 NEW RUN
+wait 10
+set night 7
+set creds 0
+set escrow 100000
+set drift 20
+set rui 100
+set liens 0
+set started 1
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set beat.4 1
+set beat.5 1
+set beat.6 1
+set beat.7 1
+set flag.0 0
+set flag.1 0
+set flag.2 0
+set flag.3 0
+set flag.4 0
+set flag.5 0
+set flag.6 0
+set flag.7 0
+set flag.8 0
+save
+wait 4
+press down
+press a
+waitfor 300 FIND A GAME
+mashuntil up 8 12 what you have is what
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+press a
+waitfor 400 RESOLVED
+wait 190
+shot S655-end-resolved-half-typed
+wait 420
+shot S656-end-resolved-complete
+press a
+waitfor 300 RUN REPORT
+wait 20
+shot S657-end-resolved-run-report
+press a
+waitfor 400 NEW RUN
+wait 10
+set night 7
+set creds 0
+set escrow 100000
+set drift 60
+set rui 100
+set liens 0
+set started 1
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set beat.4 1
+set beat.5 1
+set beat.6 1
+set beat.7 1
+set flag.0 0
+set flag.1 0
+set flag.2 0
+set flag.3 0
+set flag.4 0
+set flag.5 0
+set flag.6 0
+set flag.7 0
+set flag.8 0
+save
+wait 4
+press down
+press a
+waitfor 300 FIND A GAME
+mashuntil up 8 12 suspend. resume
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+press a
+waitfor 400 REPOSSESSED
+wait 190
+shot S670-end-repossessed-half-typed
+wait 420
+shot S671-end-repossessed-complete
+press a
+waitfor 300 RUN REPORT
+wait 20
+shot S672-end-repossessed-run-report
+press a
+waitfor 400 NEW RUN
+wait 10
+set night 7
+set creds 0
+set escrow 100000
+set drift 10
+set rui 100
+set liens 0
+set started 1
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set beat.4 1
+set beat.5 1
+set beat.6 1
+set beat.7 1
+set flag.0 0
+set flag.1 0
+set flag.2 0
+set flag.3 0
+set flag.4 0
+set flag.5 0
+set flag.6 0
+set flag.7 1
+set flag.8 0
+save
+wait 4
+press down
+press a
+waitfor 300 FIND A GAME
+mashuntil up 8 12 what you have is what
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+press a
+waitfor 400 AN INSTANCE OF YOU
+wait 190
+shot S652-end-instance-half-typed
+wait 420
+shot S653-end-instance-complete
+press a
+waitfor 300 RUN REPORT
+wait 20
+shot S654-end-instance-run-report
+press a
+waitfor 400 NEW RUN
+wait 10
+set night 7
+set creds 0
+set escrow 100000
+set drift 60
+set rui 100
+set liens 0
+set started 1
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set beat.4 1
+set beat.5 1
+set beat.6 1
+set beat.7 1
+set flag.0 0
+set flag.1 0
+set flag.2 0
+set flag.3 0
+set flag.4 0
+set flag.5 0
+set flag.6 0
+set flag.7 1
+set flag.8 0
+save
+wait 4
+press down
+press a
+waitfor 300 FIND A GAME
+mashuntil up 8 12 suspend. resume
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+press a
+waitfor 400 A COPY OF A COPY
+wait 190
+shot S676-end-copy-half-typed
+wait 420
+shot S677-end-copy-complete
+press a
+waitfor 300 RUN REPORT
+wait 20
+shot S678-end-copy-run-report
+press a
+waitfor 400 NEW RUN
+wait 10
+set night 7
+set creds 0
+set escrow 2000000
+set drift 20
+set rui 100
+set liens 0
+set started 1
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set beat.4 1
+set beat.5 1
+set beat.6 1
+set beat.7 1
+set flag.0 0
+set flag.1 0
+set flag.2 0
+set flag.3 0
+set flag.4 0
+set flag.5 0
+set flag.6 0
+set flag.7 0
+set flag.8 0
+set hands 65535
+set bs_total 65535
+set bs_correct 65535
+set checks_passed 65535
+set checks_failed 65535
+set best_streak 65535
+set biggest_win 2147483647
+set wire 100
+save
+wait 4
+press down
+press a
+waitfor 300 FIND A GAME
+mashuntil up 8 12 what you have is what
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+press a
+waitfor 400 FLESH AND BLOOD
+wait 700
+press a
+waitfor 300 RUN REPORT
+wait 20
+shot S679-run-report-extreme-values
+press a
+waitfor 400 NEW RUN
+wait 20
+shot S012-title-after-finished-run
+quit

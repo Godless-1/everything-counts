@@ -1,0 +1,51 @@
+# audit-codex-stats: chrome page with every implant installed (S241) and YOUR NUMBERS at the limits (S243).
+# Split from audit-codex (D-B18) so that script has no `set` after its first waitfor.
+autoshot au-codexstats
+set implant.0 1
+set implant.1 1
+set implant.2 1
+set implant.3 1
+set implant.4 1
+set implant.5 1
+set implant.6 1
+set implant.7 1
+set hands 65535
+set bs_total 65535
+set bs_correct 65535
+set checks_passed 65535
+set checks_failed 65535
+set best_streak 65535
+set biggest_win 2147483647
+set drill.0 100
+set drill.1 100
+set drill.2 100
+set drill.3 100
+set drill.4 100
+set creds 2147483647
+set escrow 99999999
+set drift 100
+set wire 100
+waitfor 600 UNASSISTED
+press a
+waitfor 300 NEW RUN
+wait 20
+mash down 4 10
+press a
+waitfor 300 ALWAYS OPEN
+wait 20
+press down
+press down
+press down
+press down
+press down
+press down
+press a
+wait 20
+shot S241-chrome-all-installed
+press b
+wait 10
+press down
+press a
+wait 20
+shot S243-your-numbers-extreme
+quit

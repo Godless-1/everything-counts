@@ -45,6 +45,8 @@ typedef struct {
     int   hands_total;
     int   pending_check;
     int   coach;
+    int   level;            /* practice sim: 1 after MOD 1, 2 after MOD 2, 3 after MOD 3 */
+    int   pulse_n;          /* pulse checks asked so far in this sitting */
     int   showdown_timer;
 
     char  msg[64];
@@ -66,6 +68,24 @@ typedef struct {
 
 static Tbl T;
 
+#ifdef EC_HOST
+/* test harness: set or read the live table (0 trust, 1 heat; peek 2 rc, 3 tc) */
+void host_table_poke(int what, int v)
+{
+    if (what == 0) T.trust = v;
+    else if (what == 1) T.heat = v;
+}
+int host_table_peek(int what)
+{
+    switch (what) {
+    case 0: return T.trust;
+    case 1: return T.heat;
+    case 2: return T.cnt.running;
+    default: return count_true(&T.cnt, &T.shoe);
+    }
+}
+#endif
+
 /* ---------------------------------------------------------------------- */
 static void say(const char *s, u8 col)
 {
@@ -83,6 +103,9 @@ static char *str_money_signed(char *p, s32 v)
 }
 
 static s32 bet_unit(void)       { return T.v->min_bet; }
+/* the practice sim shows only what the finished modules taught: before MOD 3
+ * it has no count, tags, heat, wire, pulse checks or index advice */
+static int sim_basic(void)      { return T.mode == TMODE_PRACTICE && T.level < 3; }
 static int max_units(void)
 {
     int u = 1 + T.trust / 8;
@@ -131,6 +154,7 @@ static void draw_hud(void)
     vid_frame_rect(4, 13, 66, 5, C_GRID);
     vid_text(72, 12, "SHOE", C_DIM);
 
+    if (sim_basic()) return;
     /* heat */
     vid_text(104, 12, "HEAT", (T.heat > 70) ? C_BLOOD : C_DIM);
     ui_bar(130, 13, 38, 5, T.heat, 100, RAMP_ALERT, (T.heat > 70) ? C_BLOOD : C_GRID);
@@ -167,7 +191,7 @@ static void hand_label(int x, int y, const Hand *h, int hide_hole, u8 col)
 static int tag_mode(void)
 {
     /* in the sim the coach brings the counter with it; SELECT drops both */
-    return ((T.mode == TMODE_PRACTICE && T.coach) || run_has(IMP_ABACUS)) ? TAG_SHOW : TAG_HIDE;
+    return ((T.mode == TMODE_PRACTICE && T.coach && !sim_basic()) || run_has(IMP_ABACUS)) ? TAG_SHOW : TAG_HIDE;
 }
 
 static void draw_hand_full(int cx, int y, const Hand *h, int hide_hole)
@@ -186,15 +210,19 @@ static void draw_hand_full(int cx, int y, const Hand *h, int hide_hole)
 static void draw_hand_mini(int x, int y, const Hand *h, int active, int idx)
 {
     char b[20];
-    u8 col = active ? C_WHITE : C_DIM;
+    u8 col = active ? C_WHITE : C_MID;
     if (active) {
         vid_rect(x - 2, y - 2, 116, 22, C_BLACK);
         ui_brackets(x - 2, y - 2, 116, 22, T.v->accent, 4);
     }
     b[0] = 'A' + idx; b[1] = 0;
-    vid_text(x, y + 5, b, active ? T.v->accent : C_DIM);
-    for (int i = 0; i < h->n && i < 6; i++)
-        card_draw_mini(x + 8 + i * 11, y, h->card[i]);
+    vid_text(x, y + 5, b, active ? T.v->accent : C_MID);
+    /* every card is drawn: 11 px apart up to six, then squeezed into the
+     * 70 px between the letter and the total (a mini card is 14 px wide) */
+    int mstep = h->n <= 6 ? 11 : 56 / (h->n - 1);
+    if (mstep < 4) mstep = 4;
+    for (int i = 0; i < h->n; i++)
+        card_draw_mini(x + 8 + i * mstep, y, h->card[i]);
     char t[16]; char *p = t;
     if (hand_is_soft(h)) p = str_cat(p, "S");
     p = str_int(p, hand_total(h));
@@ -214,6 +242,14 @@ static void draw_count_hud(void)
     int practice = (T.mode == TMODE_PRACTICE && T.coach);
     int x = 4;
     char b[24];
+
+    if (sim_basic()) {
+        /* no count yet: the only number here is the table limit */
+        vid_text(4, y + 3, "TABLE LIMIT", C_DIM);
+        b[0] = 0x09; str_money(b + 1, bet_unit() * max_units());
+        vid_text(76, y + 3, b, C_CYAN);
+        return;
+    }
 
     if (practice || run_has(IMP_ABACUS)) {
         vid_text(x, y + 3, "RC", C_AMBER); x += 18;
@@ -301,7 +337,10 @@ static void draw_message(void)
     vid_rect(0, 110, 240, 11, C_BLACK);
     vid_hline(0, 110, 240, C_GRID);
     int gw = T.grade[0] ? vid_text_len(T.grade) + 8 : 0;
-    if (T.grade[0]) vid_text(236 - gw + 8, 112, T.grade, T.grade_col);
+    /* a message too long to sit beside the last grade takes the whole row for as long
+     * as it lasts; the grade comes back after it (never a message cut off mid-word) */
+    if (T.msg_t > 0 && vid_text_len(T.msg) > 232 - gw) gw = 0;
+    if (gw) vid_text(236 - gw + 8, 112, T.grade, T.grade_col);
     if (T.msg_t > 0) {
         int avail = (232 - gw) / FONT_W;
         char cut[42];
@@ -321,7 +360,7 @@ static void draw_table(int hide_hole)
     vid_text(3, 22, "DEALER", C_MID);
     if (T.tbl.dealer.n) {
         draw_hand_full(152, 20, &T.tbl.dealer, hide_hole);
-        hand_label(3, 32, &T.tbl.dealer, hide_hole, hide_hole ? C_DIM : C_WHITE);
+        hand_label(3, 32, &T.tbl.dealer, hide_hole, hide_hole ? C_MID : C_WHITE);
     }
 
     /* ---- player ------------------------------------------------------ */
@@ -360,20 +399,30 @@ static const char *RULES_TITLE[] = {
     "HOW THE DEALER PLAYS",
     "WHAT YOU GET PAID",
     "INSURANCE (IT IS A TRAP)",
+    "READING THE TABLE",
+    "HEAT AND WIRE",
+    "THE COUNT READ-OUTS",
     "THIS HOUSE, THESE RULES",
 };
 static const char *RULES_BODY[] = {
- "Beat the dealer's hand without going over 21.\nGoing over 21 is a BUST and you lose at once, even if the dealer busts later. That is the whole house edge.",
+ "Beat the dealer's hand without going over 21.\nGoing over 21 is a BUST and you lose at once, even if the dealer busts later. That is the whole house edge (the casino's built-in advantage).",
  "Number cards are worth their number. 10, JACK, QUEEN and KING are all worth 10. An ACE is worth 11 or 1, whichever helps you.\nSuits never matter. Only the numbers.",
  "A hand holding an ace that can still count it as 11 is SOFT. SOFT 17 is A+6: it cannot bust on one card.\nIf counting the ace as 11 would bust you, it drops to 1 and the hand is HARD.",
  "You get two cards face up. The dealer gets one face up (the UP CARD) and one face down (the HOLE CARD).\nYou act first. Then the dealer turns the hole card over and plays.",
- "HIT   take another card.\nSTAND stop and keep your total.\nDOUBLE double your bet and take exactly one more card.\nSPLIT  two cards of equal value become two hands.\nFOLD   surrender and lose only half your bet.",
+ "HIT   take another card.\nSTAND stop and keep your total.\nDOUBLE double your bet and take exactly one more card.\nSPLIT  two cards of equal value become two hands.\nFOLD   surrender and lose only half your bet.\nFOLD is not offered in every room. The last page says.",
  "The dealer never chooses. The dealer draws to 16 and stands on 17 or more.\nSome houses make the dealer hit a SOFT 17. That rule costs you money - check the board before you sit.",
  "Win a hand: paid even money, 1 to 1.\nTie: PUSH, your bet comes back.\nBLACKJACK (an ace plus a ten-value card in your first two cards) pays 3 to 2.\nA house paying 6 to 5 on blackjack is robbing you. Walk.",
- "If the dealer shows an ace they offer INSURANCE: a side bet that pays 2 to 1 if their hole card is a ten.\nIt loses money over time. The only reason to take it is when you KNOW tens are thick in the shoe. That is what counting is for.",
+ "If the dealer shows an ace they offer INSURANCE: a side bet that pays 2 to 1 if their hole card is a ten.\nIt loses money over time. The only reason to take it is when you KNOW tens are thick in the shoe (the box the cards are dealt from). That is what counting is for.",
+ "SHOE: the bar at the top shows how many cards are dealt. The red mark is the shuffle card. When the dealt cards reach it, the shoe is shuffled again.",
+ "HEAT: how closely the pit is watching you. Fill it and the night ends.\n\nWIRE: how loud your chrome is to the pit's scanners.",
+ "MAX UNITS: the most you may bet here. A unit is your smallest bet.\n\nPULSE CHECK: now and then the table stops and asks for your running count. Answer from memory.\n\nRC, TC, DL: running count, true count, decks left.",
  0,
 };
-#define NRULES 9
+#define NRULES 12                       /* 9 + 3 table pages; the room page is last */
+/* the two pages about the count read-outs exist only where the HUD shows them */
+static int rules_pages(void) { return sim_basic() ? 10 : 12; }
+/* index into the tables: the room page is always the last one shown */
+static int rules_index(int page) { return page == rules_pages() - 1 ? NRULES - 1 : page; }
 
 static void rules_book(void)
 {
@@ -382,16 +431,16 @@ static void rules_book(void)
     char dyn[400];
     for (;;) {
         app_frame_begin();
-        if (key_repeat(KEY_RIGHT) && page < NRULES - 1) { page++; sfx(SFX_MOVE); }
+        if (key_repeat(KEY_RIGHT) && page < rules_pages() - 1) { page++; sfx(SFX_MOVE); }
         if (key_repeat(KEY_LEFT)  && page > 0)          { page--; sfx(SFX_MOVE); }
         if (key_down(KEY_B) || key_down(KEY_START))     { sfx(SFX_BACK); return; }
 
         ui_backdrop(BG_TERMINAL, g_t, T.v->ramp);
         ui_titlebar("RULES", "B: BACK", C_CYAN);
-        ui_panel(8, 22, 224, 118, C_CYAN, RULES_TITLE[page]);
+        ui_panel(8, 22, 224, 118, C_CYAN, RULES_TITLE[rules_index(page)]);
 
-        const char *body = RULES_BODY[page];
-        if (page == NRULES - 1) {
+        const char *body = RULES_BODY[rules_index(page)];
+        if (page == rules_pages() - 1) {
             char *p = dyn;
             p = str_cat(p, "DECKS IN THE SHOE: ");
             p = str_int(p, T.v->decks);
@@ -409,8 +458,8 @@ static void rules_book(void)
         }
         vid_text_wrap(14, 32, 36, body, C_TEXT);
 
-        for (int i = 0; i < NRULES; i++)
-            vid_rect(74 + i * 10, 143, 7, 3, i == page ? C_CYAN : C_GRID);
+        for (int i = 0; i < rules_pages(); i++)
+            vid_rect(120 - rules_pages() * 5 + i * 10, 143, 7, 3, i == page ? C_CYAN : C_GRID);
         ui_hint2("\x15\x16 / \x02\x01 PAGE", "\x14 CLOSE");
         app_frame_end();
     }
@@ -430,16 +479,22 @@ static void draw_coach(void)
     Hand *h = &T.tbl.hand[T.tbl.active];
     if (!h->n || !T.tbl.dealer.n) return;
 
-    int cds = hand_can_double(h, T.v->das);
-    int cs  = hand_can_split(h, T.tbl.nhands, T.v->max_hands, T.v->rsa);
+    int afford = g_run.creds >= h->bet;
+    int cds = afford && hand_can_double(h, T.v->das);
+    int cs  = afford && hand_can_split(h, T.tbl.nhands, T.v->max_hands, T.v->rsa);
     int csu = T.v->surrender && hand_can_surrender(h) && T.tbl.nhands == 1;
-    int base = bs_action(h, T.tbl.dealer.card[0], T.v, cds, cs, csu);
+    int base = sim_action(h, T.tbl.dealer.card[0], T.v, T.tbl.nhands, afford);
     int dev = 0, act = base;
-    if (run_has(IMP_MNEMONIC) || T.mode == TMODE_PRACTICE)
+    if (run_has(IMP_MNEMONIC) || (T.mode == TMODE_PRACTICE && !sim_basic()))
         act = dev_action(h, T.tbl.dealer.card[0], true_count(), T.v, cds, cs, csu, &dev);
 
+    /* split aces take one card and stand: the coach names what is on offer */
+    int offered = 0;
+    for (int i = 0; i < T.nacts; i++) if (T.acts[i] == act) offered = 1;
+    if (!offered) { act = ACT_STAND; dev = 0; }
+
     char b[32];
-    char *p = str_cat(b, dev ? "INDEX \x01 " : "OPTIC \x01 ");
+    char *p = str_cat(b, dev ? "INDEX \x01 " : "COACH \x01 ");
     str_cat(p, act_label(act));
     /* right end of the count row: clear of all five action buttons */
     int w = vid_text_len(b) + 8;
@@ -469,6 +524,11 @@ static int pulse_check(int kind)
     int limit = run_has(IMP_CHRONO) ? 520 : 330;
     if (T.mode == TMODE_PRACTICE) limit = 600;
     int t = limit;
+    /* the first check of a sitting says what it is before it asks */
+    int first = T.mode == TMODE_PRACTICE ? T.pulse_n == 0
+                                         : g_run.checks_passed + g_run.checks_failed == 0;
+    int dy = first ? 10 : 0;
+    T.pulse_n++;
     sfx(SFX_ALERT);
     key_flush();
 
@@ -489,20 +549,21 @@ static int pulse_check(int kind)
         vid_overlay();
         for (int j = 0; j < 160; j += 2) vid_hline(0, j, 240, C_BLACK);
 
-        ui_panel(28, 38, 184, 74, C_MAG, "PULSE CHECK");
-        vid_text_center(120, 46, q, C_WHITE);
+        ui_panel(28, 38, 184, 74 + dy, C_MAG, "PULSE CHECK");
+        if (dy) vid_text_center(120, 46, "THE TABLE TESTS YOUR HEAD.", C_MID);
+        vid_text_center(120, 46 + dy, q, C_WHITE);
 
         char b[16];
         str_signed(b, answer);
-        vid_rect(88, 60, 64, 26, C_BLACK);
-        vid_frame_rect(88, 60, 64, 26, C_MAG);
-        vid_text_center_s(120, 64, b, C_WHITE, 2);
-        vid_text(76, 68, "\x02", C_MAG);
-        vid_text(158, 68, "\x01", C_MAG);
+        vid_rect(88, 60 + dy, 64, 26, C_BLACK);
+        vid_frame_rect(88, 60 + dy, 64, 26, C_MAG);
+        vid_text_center_s(120, 64 + dy, b, C_WHITE, 2);
+        vid_text(76, 68 + dy, "\x02", C_MAG);
+        vid_text(158, 68 + dy, "\x01", C_MAG);
 
-        ui_bar(40, 92, 160, 6, t, limit, RAMP_ALERT,
+        ui_bar(40, 92 + dy, 160, 6, t, limit, RAMP_ALERT,
                (t < limit / 3) ? C_BLOOD : C_GRID);
-        vid_text_center(120, 100, "\x03\x04 +/-1   \x02\x01 +/-5   \x13 LOCK IN", C_DIM);
+        vid_text_center(120, 100 + dy, "\x03\x04 +/-1   \x02\x01 +/-5   \x13 LOCK IN", C_DIM);
 
         if (t < 60 && ((t / 4) & 1)) ui_noise(0, 0, 240, 160, g_t, C_MAG, 40);
         app_frame_end();
@@ -576,7 +637,7 @@ static void recount_after_recycle(void)
         for (int k = 0; k < T.tbl.hand[i].n; k++) count_card(&T.cnt, T.tbl.hand[i].card[k]);
     for (int k = 0; k < T.tbl.dealer.n; k++)
         if (k != 1 || T.tbl.hole_shown) count_card(&T.cnt, T.tbl.dealer.card[k]);
-    say("SHOE DRY: DISCARDS RESHUFFLED", C_AMBER);
+    say("SHOE DRY: RESHUFFLING", C_AMBER);
 }
 
 static u8 draw_card(void)
@@ -621,13 +682,13 @@ static void new_shoe(void)
             card_draw_back(x, 52 + ((i & 1) ? 4 : -4));
         }
         vid_text_center(120, 108, "SHUFFLE", C_WHITE);
-        vid_text_center(120, 120, "THE COUNT GOES BACK TO ZERO", C_AMBER);
+        vid_text_center(120, 120, sim_basic() ? "NEW SHOE" : "THE COUNT GOES BACK TO ZERO", C_AMBER);
         app_frame_end();
     }
     if (T.mode == TMODE_PRACTICE && T.hands_total == 0)
-        say("SELECT: COACH AND COUNTER ON/OFF", C_CYAN);
+        say(sim_basic() ? "SELECT: COACH ON/OFF" : "SELECT: COACH AND READOUT ON/OFF", C_CYAN);
     else
-        say("NEW SHOE. COUNT = 0", C_AMBER);
+        say(sim_basic() ? "NEW SHOE" : "NEW SHOE. COUNT = 0", C_AMBER);
 }
 
 static void build_actions(void)
@@ -663,9 +724,9 @@ static void grade_action(int chosen)
     int cs  = afford && hand_can_split(h, T.tbl.nhands, T.v->max_hands, T.v->rsa);
     int csu = T.v->surrender && hand_can_surrender(h) && T.tbl.nhands == 1;
     int dev = 0;
-    int right = dev_action(h, T.tbl.dealer.card[0], true_count(), T.v,
-                           cds, cs, csu, &dev);
-    int basic = bs_action(h, T.tbl.dealer.card[0], T.v, cds, cs, csu);
+    int basic = sim_action(h, T.tbl.dealer.card[0], T.v, T.tbl.nhands, afford);
+    int right = sim_basic() ? basic
+              : dev_action(h, T.tbl.dealer.card[0], true_count(), T.v, cds, cs, csu, &dev);
 
     g_run.bs_total++;
     if (chosen == right || chosen == basic) {
@@ -675,7 +736,9 @@ static void grade_action(int chosen)
         T.last_action_ok = 1;
     } else {
         char *p = T.grade;
-        p = str_cat(p, "BASIC: ");
+        /* MOD 2 names basic strategy; before it the coach is simply "the coach" */
+        p = str_cat(p, T.level < 2 && T.mode == TMODE_PRACTICE ? "COACH SAYS: "
+                                                              : "BASIC STRATEGY SAYS: ");
         str_cat(p, act_label(basic));
         T.grade_col = C_BLOOD;
         T.last_action_ok = 0;
@@ -712,7 +775,9 @@ static void settle(void)
 
     /* bet-sizing feedback: this is the whole lesson */
     int adv = advised_units();
-    if (T.tc_at_bet >= 2 && units <= 1) {
+    if (sim_basic()) {
+        /* no count yet, so nothing to say about hot or cold shoes */
+    } else if (T.tc_at_bet >= 2 && units <= 1) {
         say("COLD BET, HOT SHOE", C_AMBER);
     } else if (T.tc_at_bet <= 0 && units >= 4) {
         say("BIG BET, DEAD SHOE", C_BLOOD);
@@ -832,9 +897,9 @@ static int player_turn(void)
             if (coach_available()) {
                 T.coach = !T.coach; sfx(SFX_SELECT);
                 if (T.mode == TMODE_PRACTICE)
-                    say(T.coach ? "COACH ON" : "COACH OFF. YOU COUNT IT.", C_CYAN);
+                    say(T.coach ? "COACH ON" : sim_basic() ? "COACH OFF" : "COACH OFF. YOU COUNT IT.", C_CYAN);
             }
-            else { say("NO OPTIC INSTALLED", C_BLOOD); sfx(SFX_DENY); }
+            else { say("NO COACH INSTALLED", C_BLOOD); sfx(SFX_DENY); }
         }
         if (key_down(KEY_A)) {
             int a = T.acts[T.act_sel];
@@ -912,7 +977,9 @@ static int offer_insurance(void)
             vid_frame_rect(bx, 132, 42, 13, c);
             vid_text_center(bx + 21, 135, o[i], (i == sel) ? C_WHITE : C_DIM);
         }
-        if (run_has(IMP_ORACLE) || (T.mode == TMODE_PRACTICE && T.coach)) {
+        if (sim_basic()) {
+            vid_text(4, 135, "LOSES MONEY OVER TIME.", C_MID);
+        } else if (run_has(IMP_ORACLE) || (T.mode == TMODE_PRACTICE && T.coach)) {
             char b[40]; char *p = str_cat(b, "TC ");
             p = str_signed(p, true_count());
             str_cat(p, dev_insurance(true_count()) ? " - TAKE IT" : " - DECLINE");
@@ -936,8 +1003,8 @@ static void epilogue(const char *title, const char *text, const char *hint, u8 c
         draw_table(0);
         vid_overlay();
         for (int j = 0; j < 160; j += 2) vid_hline(0, j, 240, C_BLACK);
-        ui_panel(14, 30, 212, 104, col, title);
-        vid_text_wrap(21, 40, 33, text, C_TEXT);
+        ui_panel(10, 22, 220, 124, col, title);
+        vid_text_wrap(16, 33, 35, text, C_TEXT);
         ui_hint(hint);
         app_frame_end();
         if (key_down(KEY_A)) { sfx(SFX_SELECT); break; }
@@ -963,20 +1030,22 @@ static void scan_check(void)
         "He does not look at you. He looks at the pit, and the pit looks at you.\n\n"
         "Your chrome is louder than this room allows.",
         "\x13 KEEP PLAYING", C_MAG);
-    say("WIRE OVER THIS ROOM'S LIMIT", C_MAG);
+    say("WIRE OVER ROOM LIMIT", C_MAG);
 }
 
 int sc_table(int arg)
 {
     int vi = arg & 0xFF;
-    T.mode = (arg >> 8) & 0xFF;
+    T.mode = (arg >> 8) & 0x0F;
+    T.level = (arg >> 12) & 0x0F;
+    T.pulse_n = 0;
     T.v = &VENUES[vi];
     T.vi = vi;
 
     /* Grey's construct runs on play money: nothing that happens in it
      * touches the real bankroll, the stats or the save */
     Run real = g_run;
-    if (T.mode == TMODE_PRACTICE) g_run.creds = 50000;
+    if (T.mode == TMODE_PRACTICE) g_run.creds = 250000;   /* a unit of the Lotus is 2,500: 100 units */
     int song = T.mode == TMODE_PRACTICE    ? MUS_NEON_RAIN
              : T.mode == TMODE_STORY_VAULT ? MUS_VAULT : MUS_THE_SHOE;
 
@@ -1000,14 +1069,14 @@ int sc_table(int arg)
         /* ---- shoe boundary ------------------------------------------ */
         if (shoe_exhausted(&T.shoe)) {
             /* a recycled shoe has no honest count left to be asked about */
-            if (!T.shoe.recycled)
+            if (!T.shoe.recycled && !sim_basic())
                 pulse_check(T.hands_total > 6 ? CHK_TRUE : CHK_RUNNING);
             new_shoe();
         }
 
         if (g_run.creds < T.v->min_bet) { g_table_end = TEND_BROKE; break; }
         /* at the Vault they want to watch you count; nobody is thrown out */
-        if (T.mode == TMODE_STORY_VAULT) T.heat = 0;
+        if (T.mode == TMODE_STORY_VAULT || sim_basic()) T.heat = 0;
         if (T.heat >= 100) { g_table_end = TEND_BACKED_OFF; break; }
 
         /* ---- betting ------------------------------------------------ */
@@ -1031,7 +1100,10 @@ int sc_table(int arg)
 
                 if (key_down(KEY_START)) { rules_book(); key_flush(); }
                 if (key_down(KEY_B)) {
-                    if (confirm_box("LEAVE THE TABLE AND CASH OUT?", "CASH OUT", "STAY",
+                    int sim = T.mode == TMODE_PRACTICE;     /* the sim says what leaving it means */
+                    if (confirm_box(sim ? "LEAVE THE SIM? THE PLAY MONEY STAYS HERE."
+                                        : "LEAVE THE TABLE AND CASH OUT?",
+                                    sim ? "LEAVE" : "CASH OUT", "STAY",
                                     T.v->accent, BG_FELT, T.v->ramp)) { leaving = 1; break; }
                     key_flush();
                 }
@@ -1042,36 +1114,43 @@ int sc_table(int arg)
                 vid_text_center(120, 26, "PLACE YOUR BET", C_WHITE);
 
                 char b[32];
-                vid_rect(62, 40, 116, 30, C_BLACK);
-                vid_frame_rect(62, 40, 116, 30, T.v->accent);
-                ui_brackets(61, 39, 118, 32, T.v->accent, 5);
                 b[0] = 0x09; str_money(b + 1, T.bet);
+                /* the box grows with the stake (2x text) so seven digits fit */
+                int bw = vid_text_len(b) * 2 + 12;
+                if (bw < 116) bw = 116;
+                int bx = 120 - bw / 2;
+                vid_rect(bx, 40, bw, 30, C_BLACK);
+                vid_frame_rect(bx, 40, bw, 30, T.v->accent);
+                ui_brackets(bx - 1, 39, bw + 2, 32, T.v->accent, 5);
                 vid_text_center_s(120, 46, b, C_WHITE, 2);
 
                 char *p = str_int(b, units);
                 str_cat(p, units == 1 ? " UNIT" : " UNITS");
-                vid_text_center(120, 75, b, C_MID);
+                if (!sim_basic()) vid_text_center(120, 75, b, C_MID);
 
                 /* the stack sits beside the readout, clear of every label */
                 /* the stake itself, on its own spot beside the readout */
-                vid_rect(4, 40, 54, 30, C_BLACK);
-                vid_frame_rect(4, 40, 54, 30, C_GRID);
-                draw_chips(31, 68, T.bet, bet_unit(), T.v->accent);
+                vid_rect(4, 40, 46, 30, C_BLACK);
+                vid_frame_rect(4, 40, 46, 30, C_GRID);
+                draw_chips(27, 68, T.bet, bet_unit(), T.v->accent);
 
                 /* the advisory is the lesson: bet with the count */
-                if (run_has(IMP_ORACLE) || (T.mode == TMODE_PRACTICE && T.coach)) {
-                    char a[40]; char *q = str_cat(a, "ORACLE SAYS ");
+                if (sim_basic()) {
+                    /* nothing to advise before the count is taught */
+                } else if (run_has(IMP_ORACLE) || (T.mode == TMODE_PRACTICE && T.coach)) {
+                    char a[40]; char *q = str_cat(a, "COACH SAYS: BET ");
                     q = str_int(q, advised_units());
                     str_cat(q, advised_units() == 1 ? " UNIT" : " UNITS");
                     vid_text_center(120, 92, a, C_MAG);
                 } else if (T.hands_total > 0) {
-                    vid_text_center(120, 92, "SMALL WHEN COLD. BIG WHEN RICH.", C_DIM);
+                    vid_text_center(120, 92, "SMALL WHEN COLD. BIG WHEN RICH.", C_MID);
                 }
 
                 draw_count_hud();
                 draw_message();
                 vid_rect(0, 121, 240, 15, C_BLACK);
-                vid_text_center(120, 125, "HOLD THE COUNT AND THE CEILING RISES", C_DIM);
+                if (!sim_basic())
+                    vid_text_center(120, 125, "HOLD THE COUNT AND YOUR MAX RISES", C_DIM);
                 ui_hint2("\x03\x04 BET   \x13 DEAL", "\x14 LEAVE   START RULES");
                 app_frame_end();
             }
@@ -1158,12 +1237,14 @@ hand_done:
             int chance = 6 + g_run.night * 2;
             if (T.mode == TMODE_PRACTICE) chance = 14;
 #ifdef EC_HOST
-            { extern int host_no_pulse; if (host_no_pulse) chance = 0; }
+            { extern int host_no_pulse;
+              if (host_no_pulse == 1) chance = 0;
+              if (host_no_pulse == 2) chance = 100; }
 #endif
 #ifdef EC_DEBUG
             chance = 100;
 #endif
-            if (T.hands_this_shoe >= 3 && !T.shoe.recycled && rng_chance(chance))
+            if (!sim_basic() && T.hands_this_shoe >= 3 && !T.shoe.recycled && rng_chance(chance))
                 pulse_check(rng_chance(45) ? CHK_TRUE : CHK_RUNNING);
         }
 
@@ -1174,6 +1255,20 @@ hand_done:
 
     mus_set_intensity(0);
     if (T.mode == TMODE_PRACTICE) {
+        if (g_table_end == TEND_BROKE) {
+            sfx(SFX_BAD);
+            epilogue("PLAY MONEY GONE",
+                "The sim has no more play money. Nothing real was lost.\n\n"
+                "Grey clears the table. Back to the course.",
+                "\x13 LEAVE", C_AMBER);
+        }
+        else if (g_table_end == TEND_BACKED_OFF) {
+            sfx(SFX_ALERT);
+            epilogue("SIM CLOSED",
+                "The pit watched you too closely, even here. Grey closes the sim. Nothing real was lost.\n\n"
+                "Back to the course.",
+                "\x13 LEAVE", C_AMBER);
+        }
         g_run = real;
         return SC_HUB;
     }

@@ -38,10 +38,19 @@ void app_frame_end(void)
 
 /* Holding frames must not flip: the hidden page is two frames stale, so
  * flipping without redrawing makes the picture shimmer between the two. */
+#ifdef EC_HOST
+int g_hold_frame;   /* test harness only: 1 while a hold frame waits for VBlank */
+#endif
 static void hold_frame(void)
 {
     app_frame_begin();
+#ifdef EC_HOST
+    g_hold_frame = 1;
+#endif
     vid_vsync();
+#ifdef EC_HOST
+    g_hold_frame = 0;
+#endif
 }
 
 /* shows whatever has just been drawn, then keeps it up for `frames` */

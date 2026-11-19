@@ -1,4 +1,5 @@
 # Mid-game save: hub, escrow line, codex, venue board, clinic, drills, night end
+set lessons 7
 set night 3
 set creds 900000
 set escrow 80000
@@ -143,6 +144,10 @@ press start
 wait 30
 press down
 # index plays
+press a
+wait 40
+press a
+wait 30
 press a
 wait 40
 press right

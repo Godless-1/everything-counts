@@ -10,6 +10,6 @@ SPDX-License-Identifier = "CC-BY-SA-4.0"
 
 # Test scripts and repository plumbing that cannot carry a header of their own.
 [[annotations]]
-path = ["test/play/scripts/**", ".gitignore"]
+path = ["test/play/scripts/**", "test/play/allowlist.tsv", "test/play/term_order.tsv", ".gitignore"]
 SPDX-FileCopyrightText = "2026 Godless-1"
 SPDX-License-Identifier = "AGPL-3.0-or-later"

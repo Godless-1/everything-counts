@@ -63,6 +63,14 @@ static const char *GLOSS[] = {
  "BACKED OFF", "Politely told you may no longer play this game.",
  "WIRE",       "Detectable telemetry from your chrome. The pit scans for it.",
  "DRIFT",      "How much of the counting is no longer being done by you.",
+ "HI-LO (TAGS)","Tags: +1 for 2 to 6, 0 for 7 to 9, -1 for 10 to ace. Add them up as cards land. The sum is the running count.",
+ "PULSE CHECK","A surprise stop where the table asks for your running count from memory.",
+ "HOUSE EDGE", "The share of every bet the casino expects to keep over time. THE ROOMS lists it for each room.",
+ "CEILING",    "The most you may bet in a room. The table shows it as MAX UNITS. A high ceiling lets a counter ramp hard.",
+ "DISCARD TRAY","Where used cards stack. How tall the pile is tells you how many decks are gone.",
+ "H17 / S17",  "The dealer hits (H17) or stands (S17) on a soft 17. H17 is worse for you.",
+ "DAS / RSA",  "DAS: double down after a split. RSA: split aces again. Both help you.",
+ "CHROME",     "Implants that do part of the counting for you. The pit scans for them.",
 };
 #define NGLOSS ((int)(sizeof(GLOSS)/sizeof(char*)/2))
 
@@ -89,6 +97,34 @@ static const char *I18[] = {
 #define NI18 ((int)(sizeof(I18)/sizeof(char*)))
 
 /* ---------------------------------------------------------------------- */
+/* D-B11: the INDEX PLAYS drill asks about all 17 plays but MOD 3 teaches two.
+ * Before the first question it shows the codex's list (without the insurance
+ * row, which is not a hand play) on two screens. */
+void codex_index_primer(void)
+{
+    const int per = 9;
+    int page = 0;
+    key_flush();
+    for (;;) {
+        app_frame_begin();
+        if (key_down(KEY_A)) {
+            sfx(SFX_SELECT);
+            if (page == 1) return;
+            page = 1;
+        }
+        if (key_down(KEY_B) && page == 1) { sfx(SFX_BACK); page = 0; }
+        ui_backdrop(BG_TERMINAL, g_t, RAMP_VIOLET);
+        char b[8]; char *p = str_int(b, page + 1); str_cat(p, "/2");
+        ui_titlebar("INDEX PLAYS", b, C_PURPLE);
+        int first = 1 + page * per;                 /* I18[0] is insurance */
+        for (int i = 0; i < per && first + i < NI18; i++)
+            vid_text(6, 16 + i * 11, I18[first + i], C_WHITE);
+        vid_text_center(120, 124, "THE COUNT BREAKS THE CHART HERE.", C_MID);
+        ui_hint("INDEX: LEARN THESE 17, THEN PRESS A");
+        app_frame_end();
+    }
+}
+
 static void codex_pages(const char **heads, const char **bodies, int n, u8 col)
 {
     int p = 0;
@@ -208,6 +244,7 @@ static void codex_rooms(void)
             char b[16]; int e = venue_edge_x100(&VENUES[i]);
             str_pct100(b, e, 0);
             vid_text(236 - vid_text_len(b), y, b, e > 100 ? C_BLOOD : (e < 35 ? C_GREEN : C_AMBER));
+            vid_text(130, y, "HOUSE EDGE", C_MID);
         }
         vid_rect(0, 86, 240, 64, C_BLACK);
         vid_hline(0, 86, 240, v->accent);
@@ -268,13 +305,13 @@ static void codex_stats(void)
         vid_text(8, y, b, C_TEXT); y += 12;
         p = str_cat(b, "BASIC STRATEGY     "); p = str_int(p, run_bs_accuracy()); str_cat(p, "%");
         vid_text(8, y, b, C_CYAN); y += 12;
-        p = str_cat(b, "COUNT CHECKS       "); p = str_int(p, run_check_accuracy()); str_cat(p, "%");
+        p = str_cat(b, "PULSE CHECKS       "); p = str_int(p, run_check_accuracy()); str_cat(p, "%");
         vid_text(8, y, b, C_GREEN); y += 12;
         p = str_cat(b, "BEST WIN STREAK    "); str_int(p, g_run.best_streak);
         vid_text(8, y, b, C_AMBER); y += 12;
         p = str_cat(b, "BIGGEST POT        "); *p++ = 0x09; str_money(p, g_run.biggest_win);
         vid_text(8, y, b, C_WHITE); y += 16;
-        vid_text(8, y, "RANGE BESTS", C_DIM); y += 12;
+        vid_text(8, y, "DRILL BESTS", C_DIM); y += 12;
         static const char *dn[5] = { "TAGS", "SPEED COUNT", "TRUE COUNT", "BASIC", "INDEX" };
         for (int i = 0; i < 5; i++) {
             p = str_cat(b, dn[i]);
@@ -335,10 +372,26 @@ int sc_codex(int arg)
 }
 
 /* ---------------------------------------------------------------------- */
+/* D-B01: each module builds on the one before it, and the strategy chart
+ * (REF) needs the strategy module.  needs[i] = the lesson bit that must be
+ * ticked first, or -1 for none; row NLESSONS is the chart. */
+static int teach_need(int row)
+{
+    if (row == 0) return -1;
+    return row == NLESSONS ? 1 : row - 1;
+}
+
+static int teach_locked(int row)
+{
+    int n = teach_need(row);
+    return n >= 0 && !((g_run.lessons_done >> n) & 1);
+}
+
 int sc_teach(int arg)
 {
     (void)arg;
     int sel = 0;
+    int deny = 0;                       /* frames the lock message stays red */
     key_flush();
     app_fade_in(10);
     mus_play(MUS_NEON_RAIN);
@@ -347,7 +400,11 @@ int sc_teach(int arg)
         if (key_repeat(KEY_DOWN)) { sel = (sel + 1) % (NLESSONS + 1); sfx(SFX_MOVE); }
         if (key_repeat(KEY_UP))   { sel = (sel + NLESSONS) % (NLESSONS + 1); sfx(SFX_MOVE); }
         if (key_down(KEY_B)) { sfx(SFX_BACK); app_fade_out(10); return SC_QUIT; }
-        if (key_down(KEY_A)) {
+        if (deny > 0) deny--;
+        if (key_down(KEY_A) && teach_locked(sel)) {
+            sfx(SFX_DENY);
+            deny = 40;
+        } else if (key_down(KEY_A)) {
             sfx(SFX_SELECT);
             if (sel < NLESSONS) {
                 if (teach_run_lesson(sel)) { g_run.lessons_done |= (1 << sel); save_write(); }
@@ -368,34 +425,51 @@ int sc_teach(int arg)
         for (int i = 0; i < NLESSONS; i++) {
             int y = 34 + i * 20;
             u8 c = C_GREEN;
+            u8 dc = (i == sel) ? C_MID : C_DIM;     /* C_DIM is too dark on the highlight bar */
             int done = (g_run.lessons_done >> i) & 1;
+            int lk = teach_locked(i);
+            if (lk) c = C_DIM;
             if (i == sel) {
                 vid_hgrad(4, y - 2, 232, 19, RAMP_VIOLET, 10, 0);
-                vid_text(8, y + 4, "\x01", c);
+                vid_text(8, y + 4, "\x01", lk ? C_MID : c);
                 c = C_WHITE;
+                if (lk) c = C_MID;
             }
-            vid_text(22, y, LESSONS[i].code, C_DIM);
+            vid_text(22, y, LESSONS[i].code, dc);
             vid_text(58, y, LESSONS[i].name, c);
             char b[16]; char *p = str_int(b, LESSONS[i].npages); str_cat(p, " PAGES");
-            vid_text(58, y + 9, b, C_DIM);
+            vid_text(58, y + 9, b, dc);
             if (done) vid_text(216, y + 4, "\x10", C_GREEN);
+            if (lk) vid_text(216, y + 4, "\x0F", dc);
         }
         {
             int y = 34 + NLESSONS * 20;
             u8 c = C_CYAN;
+            u8 dc = (sel == NLESSONS) ? C_MID : C_DIM;
+            int lk = teach_locked(NLESSONS);
+            if (lk) c = C_DIM;
             if (sel == NLESSONS) {
                 vid_hgrad(4, y - 2, 232, 19, RAMP_VIOLET, 10, 0);
-                vid_text(8, y + 4, "\x01", c);
+                vid_text(8, y + 4, "\x01", lk ? C_MID : c);
                 c = C_WHITE;
+                if (lk) c = C_MID;
             }
-            vid_text(22, y, "REF", C_DIM);
+            vid_text(22, y, "REF", dc);
             vid_text(58, y, "THE STRATEGY CHART", c);
-            vid_text(58, y + 9, "browse every decision", C_DIM);
+            vid_text(58, y + 9, "browse every decision", dc);
+            if (lk) vid_text(216, y + 4, "\x0F", dc);
         }
         vid_rect(0, 132, 240, 28, C_BLACK);
         vid_hline(0, 132, 240, C_GRID);
-        vid_text(4, 137, "NEVER PLAYED CARDS? START AT MOD 1.", C_MID);
-        vid_text(4, 148, "NOTHING HERE ASSUMES YOU HAVE.", C_MID);
+        if (teach_locked(sel)) {
+            char m[32]; char *q = str_cat(m, "FINISH MOD ");
+            q = str_int(q, teach_need(sel) + 1); str_cat(q, " FIRST.");
+            vid_text(4, 137, m, deny > 0 && (deny & 4) ? C_WHITE : C_BLOOD);
+            vid_text(4, 148, "THE CONSTRUCT DOES NOT SKIP AHEAD.", C_MID);
+        } else {
+            vid_text(4, 137, "NEVER PLAYED CARDS? START AT MOD 1.", C_MID);
+            vid_text(4, 148, "NOTHING HERE ASSUMES YOU HAVE.", C_MID);
+        }
         app_frame_end();
     }
 }

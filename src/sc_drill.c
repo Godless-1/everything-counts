@@ -27,6 +27,17 @@ static const char *DR_DESC[DR_COUNT_] = {
     "A hand and an up card. The one correct play, nothing else.",
     "The count breaks the chart. Know the eighteen places where it does.",
 };
+/* D-B03: a drill tests what a module taught.  Bit of g_run.lessons_done that
+ * must be ticked first: MOD 2 (strategy) or MOD 3 (counting). */
+static const u8 DR_NEED[DR_COUNT_] = { 2, 2, 2, 1, 2 };
+
+static int drill_need_mod(int d) { return DR_NEED[d] == 1 ? 2 : 3; }
+
+static int drill_locked(int d)
+{
+    return !((g_run.lessons_done >> (drill_need_mod(d) - 1)) & 1);
+}
+
 static const u8 DR_COL[DR_COUNT_] = { C_GREEN, C_AMBER, C_MAG, C_CYAN, C_PURPLE };
 
 /* ---------------------------------------------------------------------- */
@@ -62,7 +73,7 @@ static void drill_result(const char *name, int score, int nq, int drill)
             pct >= 80 ? "CLOSE. THE PIT PUNISHES CLOSE." :
             pct >= 50 ? "YOU ARE GUESSING SOMETIMES. IT SHOWS." :
                         "GO BACK TO DRY RUN. THIS IS NOT YET A SKILL.";
-        vid_text_wrap(34, 80, 30, verdict, C_MID);
+        vid_text_wrap(36, 80, 28, verdict, C_MID);
         p = str_cat(b, "BEST "); p = str_int(p, g_run.best_drill[drill]); str_cat(p, "%");
         vid_text_center(120, 106, b, C_DIM);
         ui_hint("\x13 BACK");
@@ -137,7 +148,7 @@ static void drill_speed(void)
                 card_draw(105, 44, c, TAG_HIDE);
                 char b[16]; char *p = str_int(b, i + 1);
                 p = str_cat(p, " OF "); str_int(p, n);
-                vid_text_center(120, 96, b, C_DIM);
+                vid_text_center(120, 96, b, C_MID);
                 ui_hint2("HOLD THE COUNT", "\x16 FASTER   START: QUIT");
                 app_frame_end();
                 if (key_down(KEY_START)) return;
@@ -226,7 +237,7 @@ static void drill_true(void)
             vid_rect(88, 84, 64, 24, C_BLACK);
             vid_frame_rect(88, 84, 64, 24, C_MAG);
             vid_text_center_s(120, 88, b, C_WHITE, 2);
-            ui_hint2("\x03\x04 +/-1   \x13 LOCK IN", "START: QUIT");
+            ui_hint2("\x03\x04 +/-1  \x02\x01 +/-5  \x13 LOCK", "START: QUIT");
             app_frame_end();
         }
         int ok = (v == tc);
@@ -235,13 +246,13 @@ static void drill_true(void)
         for (int f = 0; f < 400; f++) {
             app_frame_begin();
             drill_frame("TRUE COUNT", q + 1, NQ, score, C_MAG);
-            ui_panel(24, 40, 192, 70, ok ? C_GREEN : C_BLOOD, 0);
+            ui_panel(24, 40, 192, 80, ok ? C_GREEN : C_BLOOD, 0);
             char b[40], *p;
             p = str_int(b, rc); p = str_cat(p, " / "); p = str_int(p, decks);
             p = str_cat(p, " = "); str_int(p, tc);
             vid_text_center(120, 52, b, C_WHITE);
             vid_text_center(120, 68, ok ? "\x10 RIGHT" : "\x11 WRONG", ok ? C_GREEN : C_BLOOD);
-            vid_text_wrap(32, 82, 29, "Round toward zero. Half a deck of error is survivable; a whole deck is not.", C_DIM);
+            vid_text_wrap(32, 82, 29, "Drop the fraction. Half a deck of error is survivable; a whole deck is not.", C_DIM);
             ui_hint("\x13 NEXT");
             app_frame_end();
             if (key_down(KEY_A)) break;
@@ -255,7 +266,8 @@ static void drill_play(int use_index)
 {
     const int NQ = 14;
     int score = 0;
-    const Venue *v = &VENUES[2];
+    const Venue *v = &VENUES[CHART_VENUE];
+    if (use_index) codex_index_primer();
     for (int q = 0; q < NQ; q++) {
         Hand h; hand_clear(&h);
         Shoe s; shoe_build(&s, 6, 80);
@@ -292,10 +304,10 @@ static void drill_play(int use_index)
 
             drill_frame(use_index ? "INDEX PLAYS" : "BASIC STRATEGY", q + 1, NQ, score,
                         use_index ? C_PURPLE : C_CYAN);
-            vid_text(4, 18, "DEALER", C_DIM);
+            vid_text(4, 18, "DEALER", C_MID);
             card_draw(100, 16, up, TAG_HIDE);
             card_draw_back(134, 16);
-            vid_text(4, 62, "YOU", C_DIM);
+            vid_text(4, 62, "YOU", C_MID);
             card_draw(100, 60, h.card[0], TAG_HIDE);
             card_draw(134, 60, h.card[1], TAG_HIDE);
             {
@@ -355,6 +367,7 @@ int sc_drill(int arg)
 {
     (void)arg;
     int sel = 0;
+    int deny = 0;
     key_flush();
     app_fade_in(12);
     mus_play(MUS_OVERCLOCK);
@@ -363,7 +376,11 @@ int sc_drill(int arg)
         if (key_repeat(KEY_DOWN)) { sel = (sel + 1) % DR_COUNT_; sfx(SFX_MOVE); }
         if (key_repeat(KEY_UP))   { sel = (sel + DR_COUNT_ - 1) % DR_COUNT_; sfx(SFX_MOVE); }
         if (key_down(KEY_B)) { sfx(SFX_BACK); app_fade_out(10); return SC_QUIT; }
-        if (key_down(KEY_A)) {
+        if (deny > 0) deny--;
+        if (key_down(KEY_A) && drill_locked(sel)) {
+            sfx(SFX_DENY);
+            deny = 40;
+        } else if (key_down(KEY_A)) {
             sfx(SFX_SELECT);
             switch (sel) {
                 case DR_TAGS:  drill_tags(); break;
@@ -377,19 +394,22 @@ int sc_drill(int arg)
         }
 
         ui_backdrop(BG_GRID, g_t, RAMP_CYAN);
-        ui_titlebar("THE RANGE", "B: BACK", C_ICE);
+        ui_titlebar("DRILLS", "B: BACK", C_ICE);
         /* list on a plate at the left; the sun keeps the right */
         ui_panel(2, 17, 140, 74, C_ICE, 0);
         for (int i = 0; i < DR_COUNT_; i++) {
             int y = 22 + i * 14;
             u8 c = DR_COL[i];
+            int lk = drill_locked(i);
+            if (lk) c = C_DIM;
             if (i == sel) {
                 vid_hgrad(4, y - 2, 136, 12, RAMP_VIOLET, 10, 0);
-                vid_text(6, y, "\x01", c);
-                c = C_WHITE;
+                vid_text(6, y, "\x01", lk ? C_MID : c);
+                c = lk ? C_MID : C_WHITE;
             }
             vid_text(16, y, DR_NAME[i], c);
-            if (g_run.best_drill[i]) {
+            if (lk) vid_text(130, y, "\x0F", i == sel ? C_MID : C_DIM);
+            else if (g_run.best_drill[i]) {
                 char b[12]; char *p = str_int(b, g_run.best_drill[i]); str_cat(p, "%");
                 vid_text(138 - vid_text_len(b), y, b, C_MID);
             }
@@ -397,7 +417,14 @@ int sc_drill(int arg)
         vid_rect(0, 96, 240, 54, C_BLACK);
         vid_hline(0, 96, 240, DR_COL[sel]);
         vid_text(4, 100, DR_NAME[sel], DR_COL[sel]);
-        vid_text_wrap(4, 112, 38, DR_DESC[sel], C_TEXT);
+        if (drill_locked(sel)) {
+            char m[32]; char *q = str_cat(m, "NEEDS MOD ");
+            q = str_int(q, drill_need_mod(sel)); str_cat(q, ".");
+            vid_text(4, 112, m, deny > 0 && (deny & 4) ? C_WHITE : C_BLOOD);
+            vid_text_wrap(4, 124, 38, "The range only tests what the construct has taught you.", C_MID);
+        } else {
+            vid_text_wrap(4, 112, 38, DR_DESC[sel], C_TEXT);
+        }
         ui_hint("\x13 START");
         app_frame_end();
     }

@@ -1,0 +1,405 @@
+# audit-table-special: 6 to 5 blackjack, surrender, four splits, split aces, flags, heat and wire, scan, backed off, tapped out, huge stakes, then the Vault (S383-S403)
+autoshot au-special
+set night 7
+set creds 50000000
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set beat.4 1
+set beat.5 1
+set beat.6 1
+set beat.7 1
+set started 1
+save
+waitfor 600 UNASSISTED
+press a
+waitfor 300 CONTINUE
+press down
+press a
+waitfor 300 FIND A GAME
+press a
+waitfor 300 THE STRIP
+mash down 1 10
+seed 4242
+nopulse 1
+stack 1 9 13 7
+press a
+waitfor 600 PLACE YOUR BET
+wait 5
+press a
+wait 40
+shot S383-lucky-nine-bj
+waitfor 600 NEXT HAND
+wait 10
+shot S383-lucky-nine-bj-paid
+press a
+waitfor 600 PLACE YOUR BET
+press b
+wait 10
+press a
+waitfor 400 THE STRIP
+wait 10
+mash down 1 10
+seed 4242
+nopulse 1
+stack 8 13 8 7 13 13 6 7 8 6 8 10 8 8 3 3 3 3 11
+press a
+waitfor 600 PLACE YOUR BET
+wait 5
+press a
+waitfor 300 STAND
+wait 8
+shot S384-lotus-button0
+press right
+wait 8
+shot S384-lotus-button1
+press right
+wait 8
+shot S384-lotus-button2
+press right
+wait 8
+shot S384-lotus-button3
+press right
+wait 8
+shot S384-lotus-button4
+press right
+press right
+press a
+waitfor 600 NEXT HAND
+press a
+waitfor 600 PLACE YOUR BET
+wait 5
+press a
+waitfor 300 STAND
+press left
+press a
+wait 6
+shot S385-lotus-folded
+waitfor 600 NEXT HAND
+press a
+waitfor 600 PLACE YOUR BET
+wait 5
+press a
+waitfor 300 STAND
+mash right 3 6
+press a
+wait 15
+press a
+wait 15
+shot S386-lotus-split-a
+press right
+press a
+wait 10
+press right
+press a
+wait 10
+mash right 3 6
+press a
+wait 15
+shot S386-lotus-split-c
+press right
+press a
+wait 10
+press right
+press a
+wait 60
+shot S386-lotus-four-hands
+waitfor 600 NEXT HAND
+press a
+waitfor 600 PLACE YOUR BET
+press b
+wait 10
+press a
+waitfor 400 THE STRIP
+wait 10
+mash down 2 10
+seed 4242
+nopulse 1
+stack 1 6 1 10 1 5
+press a
+waitfor 600 PLACE YOUR BET
+wait 5
+tset heat 85
+wait 8
+shot S390-heat-85
+set wire 100
+wait 8
+shot S391-wire-100
+set wire 0
+tset heat 0
+press a
+waitfor 300 STAND
+mash right 3 6
+press a
+wait 25
+shot S387-skydeck-split-aces-resplit
+press a
+wait 20
+press right
+press a
+waitfor 600 NEXT HAND
+press a
+waitfor 600 PLACE YOUR BET
+press b
+wait 10
+press a
+waitfor 400 THE STRIP
+wait 10
+set flag.0 1
+mash down 4 10
+seed 4242
+nopulse 1
+press a
+waitfor 600 PLACE YOUR BET
+wait 5
+wait 20
+shot S388-lotus-mara-spared
+press b
+wait 10
+press a
+waitfor 400 THE STRIP
+wait 10
+set flag.0 0
+set flag.1 1
+seed 4242
+nopulse 1
+press a
+waitfor 600 PLACE YOUR BET
+wait 5
+wait 20
+shot S389-lotus-mara-sold
+press b
+wait 10
+press a
+waitfor 400 THE STRIP
+wait 10
+set flag.1 0
+set wire 100
+mash down 2 10
+seed 4242
+nopulse 1
+press a
+waitfor 600 PLACE YOUR BET
+wait 5
+mashuntil a 12 3000 SCANNED
+wait 30
+shot S392-scanned-panel
+press a
+wait 60
+shot S393-after-scan-message
+wait 60
+shot S393-after-scan-message-later
+press b
+wait 10
+press a
+waitfor 400 THE STRIP
+wait 10
+set wire 0
+wait 10
+mash down 4 10
+seed 4242
+nopulse 1
+press a
+waitfor 600 PLACE YOUR BET
+wait 5
+tset heat 100
+press a
+waitfor 300 STAND
+press right
+press a
+waitfor 600 NEXT HAND
+press a
+wait 30
+shot S394-backed-off
+press a
+waitfor 400 THE STRIP
+set locked.2 0
+set creds 2500
+seed 4242
+nopulse 1
+stack 13 13 6 7 10
+press a
+waitfor 600 PLACE YOUR BET
+wait 5
+press a
+waitfor 300 STAND
+press a
+waitfor 600 NEXT HAND
+press a
+wait 30
+shot S395-tapped-out
+press a
+waitfor 400 THE STRIP
+set creds 2500
+seed 4242
+nopulse 1
+stack 8 13 8 7
+press a
+waitfor 600 PLACE YOUR BET
+wait 5
+press a
+waitfor 300 STAND
+wait 10
+shot S402-no-credit-to-double-or-split
+press right
+press a
+waitfor 600 NEXT HAND
+press a
+wait 30
+shot S402-then-tapped-out
+press a
+waitfor 400 THE STRIP
+set creds 99999999
+mash down 2 10
+seed 4242
+nopulse 1
+stack 5 10 6 7 2
+press a
+waitfor 600 PLACE YOUR BET
+wait 5
+wait 8
+shot S398-credits-99999999
+tset trust 100
+mash right 3 6
+wait 10
+shot S400-six-digit-stake
+press a
+waitfor 300 STAND
+wait 10
+shot S400-six-digit-stake-turn
+press right
+press right
+press a
+waitfor 600 NEXT HAND
+wait 10
+shot S400-six-digit-stake-showdown
+press a
+waitfor 600 PLACE YOUR BET
+press b
+wait 10
+press a
+waitfor 400 THE STRIP
+wait 10
+set flag.3 1
+set wire 100
+seed 4242
+nopulse 1
+stack 10 6 8 11 12 13 6 8 10 11 12 6 8 13 10 11 6 8 12 13 10 6 8 11 12
+press a
+waitfor 600 PLACE YOUR BET
+wait 5
+press a
+waitfor 300 STAND
+press right
+press a
+waitfor 600 NEXT HAND
+press a
+waitfor 600 PLACE YOUR BET
+wait 5
+press a
+waitfor 300 STAND
+press right
+press a
+waitfor 600 NEXT HAND
+press a
+waitfor 600 PLACE YOUR BET
+wait 5
+press a
+waitfor 300 STAND
+press right
+press a
+waitfor 600 NEXT HAND
+press a
+waitfor 600 PLACE YOUR BET
+wait 5
+press a
+waitfor 300 STAND
+press right
+press a
+waitfor 600 NEXT HAND
+press a
+waitfor 600 PLACE YOUR BET
+wait 5
+press a
+waitfor 300 STAND
+press right
+press a
+waitfor 600 NEXT HAND
+press a
+waitfor 600 PLACE YOUR BET
+wait 5
+shot S403-laundered-no-scans
+press b
+wait 10
+press a
+waitfor 400 THE STRIP
+wait 10
+set flag.3 0
+set wire 70
+set night 6
+set creds 2000000000
+set escrow 1450000
+set drift 80
+set wire 70
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set beat.4 1
+set beat.5 1
+set beat.6 1
+set beat.7 0
+set flag.8 1
+nopulse 1
+press b
+waitfor 300 FIND A GAME
+mashuntil up 8 12 suspend. resume
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+press a
+mashuntil a 60 40 DECIDE
+seed 4242
+stack 10 11 6 7 12 13 10 6 7 11 12 13 6 7 10
+wait 30
+press a
+waitfor 600 PLACE YOUR BET
+wait 20
+shot S399-vault-two-billion
+shot S397-vault-heat-zero-a
+tset heat 60
+wait 10
+shot S397-vault-heat-zero-b
+tset trust 100
+mash right 3 6
+wait 10
+shot S401-vault-max-stake
+press a
+waitfor 300 DOUBLE
+press right
+press right
+press a
+wait 40
+shot S401-vault-doubled
+waitfor 600 NEXT HAND
+wait 10
+shot S401-vault-loss
+press a
+waitfor 600 PLACE YOUR BET
+wait 10
+shot S397-vault-heat-after-hand
+set creds 100000
+mash left 6 6
+press a
+waitfor 300 STAND
+press a
+waitfor 600 NEXT HAND
+press a
+wait 30
+shot S396-vault-tapped-out
+press a
+wait 400
+shot X-after-vault
+quit

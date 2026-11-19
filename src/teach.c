@@ -26,12 +26,12 @@ void teach_tag_table(int x, int y)
     static const u8 col[3] = { C_GREEN, C_ICE, C_BLOOD };
     for (int i = 0; i < 3; i++) {
         int ry = y + i * 22;
-        vid_rect(x, ry, 214, 19, C_BLACK);
-        vid_frame_rect(x, ry, 214, 19, col[i]);
-        vid_hgrad(x + 1, ry + 1, 30, 17, RAMP_VIOLET, 8, 0);
-        vid_text_s(x + 6, ry + 2, val[i], col[i], 2);
+        vid_rect(x, ry, 214, 21, C_BLACK);
+        vid_frame_rect(x, ry, 214, 21, col[i]);
+        vid_hgrad(x + 1, ry + 1, 30, 19, RAMP_VIOLET, 8, 0);
+        vid_text_s(x + 6, ry + 3, val[i], col[i], 2);
         vid_text(x + 38, ry + 2, grp[i], C_WHITE);
-        vid_text(x + 38, ry + 11, note[i], C_DIM);
+        vid_text(x + 38, ry + 10, note[i], C_DIM);
     }
 }
 
@@ -46,38 +46,13 @@ static const char *chart_row_label(int tab, int row)
     if (tab == 0) { str_int(b, row + 5); return b; }
     if (tab == 1) { char *p = str_cat(b, "A"); str_int(p, row + 2); return b; }
     {
-        static const char *pr[10] = { "A,A","2,2","3,3","4,4","5,5","6,6","7,7","8,8","9,9","T,T" };
+        static const char *pr[10] = { "A,A","2,2","3,3","4,4","5,5","6,6","7,7","8,8","9,9","10,10" };
         return pr[row];
     }
 }
 
-/* the chart is rendered straight out of the strategy engine so it can
- * never drift from what the table actually grades you against */
-static void chart_build_hand(int tab, int row, Hand *h)
-{
-    hand_clear(h);
-    if (tab == 0) {
-        int total = row + 5;
-        if (total >= 21) {                 /* 21 has to be three cards */
-            hand_add(h, CARD(9, 0));
-            hand_add(h, CARD(8, 1));
-            hand_add(h, CARD(1, 2));
-        } else if (total <= 11) {
-            hand_add(h, CARD(total - 2 - 1, 0));   /* e.g. 9 -> a seven */
-            hand_add(h, CARD(1, 1));               /* plus a two       */
-        } else {
-            hand_add(h, CARD(9, 0));               /* a ten            */
-            hand_add(h, CARD(total - 10 - 1, 1));
-        }
-    } else if (tab == 1) {
-        hand_add(h, CARD(0, 0));
-        hand_add(h, CARD(row + 1, 1));       /* A,2 .. A,9 */
-    } else {
-        static const u8 pr[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        hand_add(h, CARD(pr[row], 0));
-        hand_add(h, CARD(pr[row], 1));
-    }
-}
+/* the chart is rendered straight out of the strategy engine (chart_action in
+ * game.c) so it can never drift from what the table grades you against */
 
 static const u8 UPCARD[10] = { CARD(1,0),CARD(2,0),CARD(3,0),CARD(4,0),CARD(5,0),
                                CARD(6,0),CARD(7,0),CARD(8,0),CARD(9,0),CARD(0,0) };
@@ -87,7 +62,7 @@ void teach_chart_browser(void)
     int tab = 0, row = 0, up = 0, top = 0;
     static const int nrows[3] = { 17, 8, 10 };
     static const char *tabname[3] = { "HARD", "SOFT", "PAIRS" };
-    const Venue *v = &VENUES[2];
+    const Venue *v = &VENUES[CHART_VENUE];
     key_flush();
     for (;;) {
         app_frame_begin();
@@ -109,7 +84,7 @@ void teach_chart_browser(void)
         ui_titlebar("BASIC STRATEGY", tabname[tab], C_CYAN);
 
         /* column headers */
-        vid_text(6, 16, "VS", C_DIM);
+        vid_text(6, 16, "VS", C_MID);
         for (int i = 0; i < 10; i++) {
             int cx = 34 + i * 20;
             vid_text(cx + (ec_strlen(UPS[i]) == 1 ? 4 : 1), 16, UPS[i],
@@ -123,12 +98,8 @@ void teach_chart_browser(void)
             u8 lab = (rr == row) ? C_WHITE : C_MID;
             if (rr == row) vid_hgrad(0, ry - 1, 240, 13, RAMP_VIOLET, 7, 0);
             vid_text(4, ry + 1, chart_row_label(tab, rr), lab);
-            Hand h; chart_build_hand(tab, rr, &h);
             for (int i = 0; i < 10; i++) {
-                int cds = hand_can_double(&h, v->das);
-                int cs  = (tab == 2);
-                int csu = v->surrender && hand_can_surrender(&h) && tab != 2;
-                int a = bs_action(&h, UPCARD[i], v, cds, cs, csu);
+                int a = chart_action(v, tab, rr, UPCARD[i]);
                 const char *g = (a == ACT_HIT) ? "H" : (a == ACT_STAND) ? "S" :
                                 (a == ACT_DOUBLE) ? "D" : (a == ACT_SPLIT) ? "P" : "F";
                 u8 c = (a == ACT_HIT) ? C_ICE : (a == ACT_STAND) ? C_BLOOD :
@@ -153,14 +124,16 @@ void teach_chart_browser(void)
         vid_text(188, 125, "F FOLD", C_PURPLE);
 
         {
-            Hand h; chart_build_hand(tab, row, &h);
-            int cds = hand_can_double(&h, v->das);
-            int cs  = (tab == 2);
-            int csu = v->surrender && hand_can_surrender(&h) && tab != 2;
-            int a = bs_action(&h, UPCARD[up], v, cds, cs, csu);
+            Hand h; chart_hand(tab, row, &h);
+            int a = chart_action(v, tab, row, UPCARD[up]);
             char b[64]; char *p = b;
             p = str_cat(p, tab == 2 ? "PAIR " : (tab == 1 ? "SOFT " : "HARD "));
             p = str_cat(p, chart_row_label(tab, row));
+            if (tab == 1) {                     /* SOFT A7 (ace + 7 = 18) */
+                p = str_cat(p, " (ace + "); p = str_int(p, row + 2);
+                p = str_cat(p, " = "); p = str_int(p, row + 13);
+                p = str_cat(p, ")");
+            }
             p = str_cat(p, " vs ");
             p = str_cat(p, UPS[up]);
             p = str_cat(p, "  \x01  ");
@@ -353,6 +326,8 @@ static int page_speak(const Lesson *L, int idx, const Page *p)
 static int page_quiz(const Lesson *L, int idx, const Page *p)
 {
     int sel = 0, answered = -1;
+    int rpg = 0;                       /* screen of the explanation after an answer */
+    u16 roffs[8]; int rnp = 1;
     key_flush();
     for (;;) {
         app_frame_begin();
@@ -361,14 +336,20 @@ static int page_quiz(const Lesson *L, int idx, const Page *p)
             if (key_repeat(KEY_UP))   { sel = (sel + p->nopt - 1) % p->nopt; sfx(SFX_MOVE); }
             if (key_down(KEY_A)) {
                 answered = sel;
+                rpg = 0;
                 sfx(answered == p->correct ? SFX_GOOD : SFX_BAD);
             }
             if (key_down(KEY_B)) { sfx(SFX_BACK); return -1; }
-            if (key_down(KEY_SELECT)) { sfx(SFX_BACK); return -2; }
-        if (key_down(KEY_SELECT)) { sfx(SFX_BACK); return -2; }
+                if (key_down(KEY_SELECT)) { sfx(SFX_BACK); return -2; }
         } else {
-            if (key_down(KEY_A)) { sfx(SFX_SELECT); return 1; }
-            if (key_down(KEY_B)) { answered = -1; sfx(SFX_BACK); }
+            if (key_down(KEY_A)) {
+                sfx(SFX_SELECT);
+                if (rpg + 1 < rnp) rpg++; else return 1;
+            }
+            if (key_down(KEY_B)) {
+                sfx(SFX_BACK);
+                if (rpg > 0) rpg--; else answered = -1;
+            }
         }
 
         ui_backdrop(BG_TERMINAL, g_t, RAMP_MAG);
@@ -386,7 +367,7 @@ static int page_quiz(const Lesson *L, int idx, const Page *p)
                 vid_rect(10, by, 220, bh, C_BLACK);
                 vid_frame_rect(10, by, 220, bh, c);
                 char lab[2] = { (char)('A' + i), 0 };
-                vid_text(15, by + 2, lab, c);
+                vid_text(15, by + 2, lab, tc);
                 vid_text_wrap(30, by + 2, QUIZ_COLS, p->opt[i], tc);
                 if (i == sel) vid_text(221, by + 2, "\x01", C_CYAN);
                 by += bh + 2;
@@ -395,21 +376,39 @@ static int page_quiz(const Lesson *L, int idx, const Page *p)
         } else {
             int ok = (answered == p->correct);
             u8 col = ok ? C_GREEN : C_BLOOD;
-            vid_rect(0, 28, 240, 18, C_BLACK);
-            vid_hline(0, 28, 240, col);
-            vid_hline(0, 45, 240, col);
-            vid_text_center(120, 33, ok ? "\x10  RIGHT" : "\x11  NOT QUITE", col);
-
-            int wy = 52;
+            int wy = 50;
             if (!ok) {
-                vid_text(6, wy, "YOU SAID", C_DIM);
-                wy += vid_text_wrap(60, wy, 29, p->opt[answered], C_BLOOD) * 10 + 2;
+                wy += vid_text_wrap_lines(29, p->opt[answered]) * 10 + 1;
             }
-            vid_text(6, wy, "ANSWER", C_DIM);
-            wy += vid_text_wrap(60, wy, 29, p->opt[p->correct], C_GREEN) * 10 + 8;
-            vid_hline(6, wy - 6, 228, C_GRID);
-            vid_text_wrap(6, wy, 38, p->why, C_TEXT);
-            ui_hint2("\x14 TRY AGAIN", "\x13 CONTINUE");
+            /* the reveal measures itself: what does not fit above the hint
+             * bar (last line must start at y <= 140) goes on the next screen */
+            int ay = wy;
+            wy += vid_text_wrap_lines(29, p->opt[p->correct]) * 10 + 5;
+            int rows = (140 - wy) / 10 + 1;
+            if (rows < 1) rows = 1;
+            rnp = text_pages(p->why, 38, rows, roffs, 8);
+            if (rpg == 0) {
+                vid_rect(0, 26, 240, 16, C_BLACK);
+                vid_hline(0, 26, 240, col);
+                vid_hline(0, 41, 240, col);
+                vid_text_center(120, 30, ok ? "\x10  RIGHT" : "\x11  NOT QUITE", col);
+                if (!ok) {
+                    vid_text(6, 50, "YOU SAID", C_DIM);
+                    vid_text_wrap(60, 50, 29, p->opt[answered], C_BLOOD);
+                }
+                vid_text(6, ay, "ANSWER", C_DIM);
+                vid_text_wrap(60, ay, 29, p->opt[p->correct], C_GREEN);
+                vid_hline(6, wy - 3, 228, C_GRID);
+            }
+            {
+                int ty = rpg == 0 ? wy : 30;
+                const char *txt = p->why + roffs[rpg];
+                int len = (rpg + 1 < rnp) ? (int)(roffs[rpg + 1] - roffs[rpg]) : (int)ec_strlen(txt);
+                while (*txt == '\n' && len > 0) { txt++; len--; }
+                vid_text_wrap_n(6, ty, 38, txt, C_TEXT, len);
+            }
+            if (rpg + 1 < rnp) ui_hint2(rpg ? "\x14 BACK" : "\x14 TRY AGAIN", "\x13 MORE");
+            else               ui_hint2(rpg ? "\x14 BACK" : "\x14 TRY AGAIN", "\x13 CONTINUE");
         }
         app_frame_end();
     }
@@ -417,18 +416,31 @@ static int page_quiz(const Lesson *L, int idx, const Page *p)
 
 static int page_tags(const Lesson *L, int idx, const Page *p)
 {
-    key_flush();
+    /* the table takes the top; the words below it have 5 rows, longer ones
+     * go on a second screen (A = MORE) instead of running under the hint bar */
+    u16 offs[8];
+    int np = text_pages(p->body, 38, 5, offs, 8);
+    int pg = 0;
     for (;;) {
-        app_frame_begin();
-        if (key_down(KEY_A)) { sfx(SFX_SELECT); return 1; }
-        if (key_down(KEY_B)) { sfx(SFX_BACK); return -1; }
-        if (key_down(KEY_SELECT)) { sfx(SFX_BACK); return -2; }
-        ui_backdrop(BG_TERMINAL, g_t, RAMP_GREEN);
-        page_header(L, idx, p->head);
-        teach_tag_table(13, 30);
-        vid_text_wrap(6, 100, 38, p->body, C_TEXT);
-        ui_hint("\x13 NEXT    \x14 BACK");
-        app_frame_end();
+        const char *txt = p->body + offs[pg];
+        int total = (pg + 1 < np) ? (int)(offs[pg + 1] - offs[pg]) : (int)ec_strlen(txt);
+        while (*txt == '\n' && total > 0) { txt++; total--; }
+        int go = 0;
+        key_flush();
+        while (!go) {
+            app_frame_begin();
+            if (key_down(KEY_A)) { sfx(SFX_SELECT); go = 1; }
+            if (key_down(KEY_B)) { sfx(SFX_BACK); go = -1; }
+            if (key_down(KEY_SELECT)) { sfx(SFX_BACK); return -2; }
+            ui_backdrop(BG_TERMINAL, g_t, RAMP_GREEN);
+            page_header(L, idx, p->head);
+            teach_tag_table(13, 28);
+            vid_text_wrap_n(6, 100, 38, txt, C_TEXT, total);
+            ui_hint(pg + 1 < np ? "\x13 MORE    \x14 BACK" : "\x13 NEXT    \x14 BACK");
+            app_frame_end();
+        }
+        if (go > 0) { if (++pg >= np) return 1; }
+        else        { if (--pg < 0)   return -1; }
     }
 }
 
@@ -456,26 +468,26 @@ static int page_countdemo(const Lesson *L, int idx, const Page *p)
         vid_text_wrap(6, 28, 38, p->body, C_TEXT);
 
         for (int i = 0; i < n; i++) {
-            int x = 8 + (i % 4) * 58, y = 52 + (i / 4) * 30;
+            int x = 6 + (i % 4) * 34, y = 62 + (i / 4) * 30;
             if (i < shown) {
                 card_draw_mini(x, y, p->cards[i]);
                 int tg = card_tag(p->cards[i]);
                 char b[6];
                 str_signed(b, tg);
-                vid_text(x + 18, y + 5, b, tg > 0 ? C_GREEN : (tg < 0 ? C_BLOOD : C_ICE));
+                vid_text(x + 17, y + 5, b, tg > 0 ? C_GREEN : (tg < 0 ? C_BLOOD : C_ICE));
             } else {
                 vid_rect(x, y, 14, 18, C_BLACK);
                 vid_frame_rect(x, y, 14, 18, C_GRID);
             }
         }
 
-        vid_rect(150, 52, 84, 48, C_BLACK);
-        vid_frame_rect(150, 52, 84, 48, C_AMBER);
-        ui_brackets(149, 51, 86, 50, C_AMBER, 5);
-        vid_text_center(192, 56, "RUNNING", C_AMBER);
-        vid_text_center(192, 66, "COUNT", C_AMBER);
+        vid_rect(150, 62, 84, 48, C_BLACK);
+        vid_frame_rect(150, 62, 84, 48, C_AMBER);
+        ui_brackets(149, 61, 86, 50, C_AMBER, 5);
+        vid_text_center(192, 66, "RUNNING", C_AMBER);
+        vid_text_center(192, 76, "COUNT", C_AMBER);
         char b[8]; str_signed(b, rc);
-        vid_text_center_s(192, 78, b, C_WHITE, 2);
+        vid_text_center_s(192, 88, b, C_WHITE, 2);
 
         ui_hint(shown < n ? "\x13 SKIP AHEAD" : "\x13 NEXT");
         app_frame_end();
@@ -512,7 +524,7 @@ static int page_practice(const Lesson *L, int idx, const Page *p)
         if (key_down(KEY_A)) {
             sfx(SFX_SELECT);
             app_fade_out(14);
-            sc_table(TABLE_ARG(0, TMODE_PRACTICE));
+            sc_table(TABLE_ARG_SIM(L->module));
             app_fade_in(14);
             key_flush();
             return 1;
