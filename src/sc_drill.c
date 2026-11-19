@@ -73,7 +73,7 @@ static void drill_result(const char *name, int score, int nq, int drill)
             pct >= 80 ? "CLOSE. THE PIT PUNISHES CLOSE." :
             pct >= 50 ? "YOU ARE GUESSING SOMETIMES. IT SHOWS." :
                         "GO BACK TO DRY RUN. THIS IS NOT YET A SKILL.";
-        vid_text_wrap(34, 80, 30, verdict, C_MID);
+        vid_text_wrap(36, 80, 28, verdict, C_MID);
         p = str_cat(b, "BEST "); p = str_int(p, g_run.best_drill[drill]); str_cat(p, "%");
         vid_text_center(120, 106, b, C_DIM);
         ui_hint("\x13 BACK");
@@ -246,7 +246,7 @@ static void drill_true(void)
         for (int f = 0; f < 400; f++) {
             app_frame_begin();
             drill_frame("TRUE COUNT", q + 1, NQ, score, C_MAG);
-            ui_panel(24, 40, 192, 70, ok ? C_GREEN : C_BLOOD, 0);
+            ui_panel(24, 40, 192, 80, ok ? C_GREEN : C_BLOOD, 0);
             char b[40], *p;
             p = str_int(b, rc); p = str_cat(p, " / "); p = str_int(p, decks);
             p = str_cat(p, " = "); str_int(p, tc);
