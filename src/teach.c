@@ -469,26 +469,26 @@ static int page_countdemo(const Lesson *L, int idx, const Page *p)
         vid_text_wrap(6, 28, 38, p->body, C_TEXT);
 
         for (int i = 0; i < n; i++) {
-            int x = 8 + (i % 4) * 58, y = 52 + (i / 4) * 30;
+            int x = 6 + (i % 4) * 34, y = 62 + (i / 4) * 30;
             if (i < shown) {
                 card_draw_mini(x, y, p->cards[i]);
                 int tg = card_tag(p->cards[i]);
                 char b[6];
                 str_signed(b, tg);
-                vid_text(x + 18, y + 5, b, tg > 0 ? C_GREEN : (tg < 0 ? C_BLOOD : C_ICE));
+                vid_text(x + 17, y + 5, b, tg > 0 ? C_GREEN : (tg < 0 ? C_BLOOD : C_ICE));
             } else {
                 vid_rect(x, y, 14, 18, C_BLACK);
                 vid_frame_rect(x, y, 14, 18, C_GRID);
             }
         }
 
-        vid_rect(150, 52, 84, 48, C_BLACK);
-        vid_frame_rect(150, 52, 84, 48, C_AMBER);
-        ui_brackets(149, 51, 86, 50, C_AMBER, 5);
-        vid_text_center(192, 56, "RUNNING", C_AMBER);
-        vid_text_center(192, 66, "COUNT", C_AMBER);
+        vid_rect(150, 62, 84, 48, C_BLACK);
+        vid_frame_rect(150, 62, 84, 48, C_AMBER);
+        ui_brackets(149, 61, 86, 50, C_AMBER, 5);
+        vid_text_center(192, 66, "RUNNING", C_AMBER);
+        vid_text_center(192, 76, "COUNT", C_AMBER);
         char b[8]; str_signed(b, rc);
-        vid_text_center_s(192, 78, b, C_WHITE, 2);
+        vid_text_center_s(192, 88, b, C_WHITE, 2);
 
         ui_hint(shown < n ? "\x13 SKIP AHEAD" : "\x13 NEXT");
         app_frame_end();
