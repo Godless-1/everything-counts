@@ -368,29 +368,31 @@ int sc_teach(int arg)
         for (int i = 0; i < NLESSONS; i++) {
             int y = 34 + i * 20;
             u8 c = C_GREEN;
+            u8 dc = (i == sel) ? C_MID : C_DIM;     /* C_DIM is too dark on the highlight bar */
             int done = (g_run.lessons_done >> i) & 1;
             if (i == sel) {
                 vid_hgrad(4, y - 2, 232, 19, RAMP_VIOLET, 10, 0);
                 vid_text(8, y + 4, "\x01", c);
                 c = C_WHITE;
             }
-            vid_text(22, y, LESSONS[i].code, C_DIM);
+            vid_text(22, y, LESSONS[i].code, dc);
             vid_text(58, y, LESSONS[i].name, c);
             char b[16]; char *p = str_int(b, LESSONS[i].npages); str_cat(p, " PAGES");
-            vid_text(58, y + 9, b, C_DIM);
+            vid_text(58, y + 9, b, dc);
             if (done) vid_text(216, y + 4, "\x10", C_GREEN);
         }
         {
             int y = 34 + NLESSONS * 20;
             u8 c = C_CYAN;
+            u8 dc = (sel == NLESSONS) ? C_MID : C_DIM;
             if (sel == NLESSONS) {
                 vid_hgrad(4, y - 2, 232, 19, RAMP_VIOLET, 10, 0);
                 vid_text(8, y + 4, "\x01", c);
                 c = C_WHITE;
             }
-            vid_text(22, y, "REF", C_DIM);
+            vid_text(22, y, "REF", dc);
             vid_text(58, y, "THE STRATEGY CHART", c);
-            vid_text(58, y + 9, "browse every decision", C_DIM);
+            vid_text(58, y + 9, "browse every decision", dc);
         }
         vid_rect(0, 132, 240, 28, C_BLACK);
         vid_hline(0, 132, 240, C_GRID);

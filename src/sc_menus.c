@@ -100,13 +100,14 @@ int sc_title(int arg)
         for (int i = 0; i < 5; i++) {
             int y = 98 + i * 10;
             u8 c = m[i].enabled ? m[i].colour : C_DIM;
+            u8 dc = (i == sel) ? C_MID : C_DIM;     /* C_DIM is too dark on the highlight bar */
             if (i == sel) {
                 vid_hgrad(mx - 10, y - 1, 110, 10, RAMP_VIOLET, 10, 0);
-                vid_text(mx - 8, y, "\x01", c);
+                vid_text(mx - 8, y, "\x01", m[i].enabled ? c : dc);
                 c = C_WHITE;
             }
             vid_text(mx + 4, y, m[i].label, c);
-            if (!m[i].enabled) vid_text(mx + 84, y, "\x0F", C_DIM);
+            if (!m[i].enabled) vid_text(mx + 84, y, "\x0F", dc);
         }
         vid_rect(0, 150, 240, 10, C_BLACK);
         vid_text_center(120, 151, "NEW HERE? START WITH DRY RUN.", C_DIM);
@@ -286,7 +287,7 @@ int sc_hub(int arg)
             u8 c = m[i].enabled ? m[i].colour : C_DIM;
             if (i == sel) {
                 vid_hgrad(4, y - 1, 132, 11, RAMP_VIOLET, 10, 0);
-                vid_text(6, y, "\x01", c);
+                vid_text(6, y, "\x01", m[i].enabled ? c : C_MID);   /* C_DIM is too dark on the bar */
                 c = C_WHITE;
             }
             vid_text(18, y, m[i].label, c);
@@ -362,12 +363,13 @@ int sc_venue(int arg)
             int lk = g_run.night < w->night_min || i == 5 || g_run.venue_locked[i];
             u8 c = lk ? C_DIM : w->accent;
             if (i == sel) {
+                if (lk) c = C_MID;                  /* C_DIM is too dark on the highlight bar */
                 vid_hgrad(0, y - 1, 240, 11, RAMP_VIOLET, 9, 0);
                 vid_text(2, y, "\x01", c);
                 if (!lk) c = C_WHITE;
             }
             vid_text(12, y, w->name, c);
-            if (lk) vid_text(222, y, "\x0F", C_DIM);
+            if (lk) vid_text(222, y, "\x0F", i == sel ? C_MID : C_DIM);
         }
 
         /* the board */
@@ -487,6 +489,7 @@ int sc_clinic(int arg)
             const Implant *w = &IMPLANTS[i];
             u8 c = g_run.implant[i] ? C_DIM : w->colour;
             if (i == sel) {
+                if (g_run.implant[i]) c = C_MID;    /* C_DIM is too dark on the highlight bar */
                 vid_hgrad(0, y - 1, 240, 10, RAMP_VIOLET, 9, 0);
                 vid_text(2, y, "\x01", c);
                 if (!g_run.implant[i]) c = C_WHITE;
