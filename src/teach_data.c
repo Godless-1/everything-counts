@@ -253,7 +253,7 @@ static const Page m3[] = {
   0,0,{0},0,0,0,0,0 },
 
 { PT_COUNTDEMO, "RUNNING COUNT",
-  "Watch. Each card moves the number. Start at zero every time a fresh shoe is shuffled.",
+  "Watch. Each card moves the running count (RC). Start at zero every time a fresh shoe is shuffled.",
   d_run1,0,{0},0,0,0,0,0 },
 
 { PT_QUIZ, "CHECK",
@@ -263,7 +263,7 @@ static const Page m3[] = {
   0,0 },
 
 { PT_TEXT, "THE TRUE COUNT",
-  "A running count of +6 means very different things with one deck left versus six decks left.\n\nTRUE COUNT = RUNNING COUNT divided by DECKS REMAINING.\n\n+6 with 2 decks left is a true count of +3. +6 with 6 decks left is only +1. Estimate the decks left from the discard tray. Nearest half deck is close enough.",
+  "A running count (RC) of +6 means very different things with one deck left versus six decks left.\n\nTRUE COUNT (TC) = RUNNING COUNT divided by DECKS REMAINING (DL).\n\n+6 with 2 decks left is a true count of +3. +6 with 6 decks left is only +1. Estimate the decks left from the discard tray (the rack where used cards pile up). Nearest half deck is close enough.",
   0,0,{0},0,0,0,0,0 },
 
 { PT_QUIZ, "CHECK",
@@ -273,15 +273,15 @@ static const Page m3[] = {
   0,0 },
 
 { PT_TEXT, "BETTING THE COUNT",
-  "Counting earns nothing unless your money moves with it.\n\nA workable ramp: bet (TRUE COUNT minus 1) units, minimum one unit.\n\nTC 0 or less: 1 unit. TC +2: 1 unit. TC +3: 2 units. TC +5: 4 units.\n\nSmall when the shoe is dead. Large when it is rich. That difference is your entire wage.",
+  "Counting earns nothing unless your money moves with it.\n\nA workable ramp: bet (TRUE COUNT minus 1) units, minimum one unit. A unit is your smallest bet.\n\nTC 0 or less: 1 unit. TC +2: 1 unit. TC +3: 2 units. TC +5: 4 units.\n\nSmall when the shoe is dead (full of low cards). Large when it is rich. That difference is your entire wage.",
   0,0,{0},0,0,0,0,0 },
 
 { PT_TEXT, "THE PART THAT GETS YOU CAUGHT",
-  "Pit bosses do not catch counters by counting. They catch them by watching bet sizes.\n\nA player who bets one unit for ten hands and then suddenly slides out eight units is advertising. Move in steps. Keep some bets wrong on purpose. Lose a little cover money.\n\nOn this floor that is the HEAT bar. Fill it and you are done for the night.",
+  "Pit bosses (the casino staff who watch the tables) do not catch counters by counting. They catch them by watching bet sizes.\n\nA player who bets one unit for ten hands and then suddenly slides out eight units is advertising. Move in steps. Keep some bets wrong on purpose. Lose a little cover money.\n\nOn this floor that is the HEAT bar. Fill it and you are done for the night.",
   0,0,{0},0,0,0,0,0 },
 
 { PT_TEXT, "INDEX PLAYS",
-  "At extreme counts, basic strategy stops being correct.\n\nThe big one: take INSURANCE at true count +3 or higher. That single deviation is worth more than most of the others put together.\n\nThe next: STAND on 16 against a TEN at true count 0 or better.\n\nThe game will flag these as INDEX when you have the chrome for it.",
+  "At extreme counts, basic strategy stops being correct.\n\nThe big one: take INSURANCE at true count +3 or higher. That single deviation is worth more than most of the others put together.\n\nThe next: STAND on 16 against a TEN at true count 0 or better.\n\nThe game will flag these as INDEX when you have the chrome (the implant) for it.",
   0,0,{0},0,0,0,0,0 },
 
 { PT_QUIZ, "CHECK",
@@ -291,11 +291,11 @@ static const Page m3[] = {
   0,0 },
 
 { PT_SPEAK, "THE COUNT",
-  "One number. In your head. Never on a screen, never on chrome the pit can scan. The second a machine does it for you, it is not yours and it is not deniable.",
+  "One number. In your head. Never on a screen, never on chrome the pit can scan (check for hidden machines). The second a machine does it for you, it is not yours and it is not deniable.",
   0,0,{0},0,0,0, CH_GREY, 0 },
 
 { PT_PRACTICE, "PUT IT TOGETHER",
-  "Live hands, coach on, counter on. Play until the pulse checks stop frightening you.\n\nThen press SELECT at the table to switch both off, and do it again.",
+  "Live hands, coach on, count readout on. Now and then the sim stops and asks for your running count: that is a pulse check. Answer from memory.\n\nThen press SELECT at the table to switch both off, and do it again.",
   0,0,{0},0,0,0,0,0 },
 };
 
