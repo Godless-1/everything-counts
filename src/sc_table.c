@@ -594,7 +594,7 @@ static void recount_after_recycle(void)
         for (int k = 0; k < T.tbl.hand[i].n; k++) count_card(&T.cnt, T.tbl.hand[i].card[k]);
     for (int k = 0; k < T.tbl.dealer.n; k++)
         if (k != 1 || T.tbl.hole_shown) count_card(&T.cnt, T.tbl.dealer.card[k]);
-    say("SHOE DRY: DISCARDS RESHUFFLED", C_AMBER);
+    say("SHOE DRY: RESHUFFLING", C_AMBER);
 }
 
 static u8 draw_card(void)
@@ -981,7 +981,7 @@ static void scan_check(void)
         "He does not look at you. He looks at the pit, and the pit looks at you.\n\n"
         "Your chrome is louder than this room allows.",
         "\x13 KEEP PLAYING", C_MAG);
-    say("WIRE OVER THIS ROOM'S LIMIT", C_MAG);
+    say("WIRE OVER ROOM LIMIT", C_MAG);
 }
 
 int sc_table(int arg)
