@@ -1,0 +1,24 @@
+# audit-teachmenu: the DRY RUN course menu, all cursor positions and the ticked state (S015-S019)
+autoshot au-teachmenu
+waitfor 600 UNASSISTED
+press a
+waitfor 300 NEW RUN
+wait 20
+press down
+press a
+waitfor 300 GREY'S TRAINING CONSTRUCT
+wait 20
+shot S015-course-menu-mod1
+press down
+wait 20
+shot S016-course-menu-mod2
+press down
+wait 20
+shot S017-course-menu-mod3
+press down
+wait 20
+shot S018-course-menu-ref-chart
+set lessons 7
+wait 20
+shot S019-course-menu-all-ticked
+quit
