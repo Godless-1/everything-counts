@@ -28,6 +28,8 @@ waitfor 400 6/16
 wait 8
 wait 30
 press a
+wait 30
+press a
 waitfor 400 7/16
 wait 8
 wait 100
@@ -187,6 +189,8 @@ wait 8
 mashuntil a 170 12 6/16
 waitfor 400 6/16
 wait 8
+wait 30
+press a
 wait 30
 press a
 waitfor 400 7/16

@@ -211,8 +211,12 @@ static void draw_hand_mini(int x, int y, const Hand *h, int active, int idx)
     }
     b[0] = 'A' + idx; b[1] = 0;
     vid_text(x, y + 5, b, active ? T.v->accent : C_DIM);
-    for (int i = 0; i < h->n && i < 6; i++)
-        card_draw_mini(x + 8 + i * 11, y, h->card[i]);
+    /* every card is drawn: 11 px apart up to six, then squeezed into the
+     * 70 px between the letter and the total (a mini card is 14 px wide) */
+    int mstep = h->n <= 6 ? 11 : 56 / (h->n - 1);
+    if (mstep < 4) mstep = 4;
+    for (int i = 0; i < h->n; i++)
+        card_draw_mini(x + 8 + i * mstep, y, h->card[i]);
     char t[16]; char *p = t;
     if (hand_is_soft(h)) p = str_cat(p, "S");
     p = str_int(p, hand_total(h));
