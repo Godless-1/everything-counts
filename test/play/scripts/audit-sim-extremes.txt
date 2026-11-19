@@ -1,4 +1,5 @@
 # audit-sim-extremes: the practice sim at its limits: 5..11-card hands, 8-card dealer hand, 7-card split hand, no credit for insurance, play money runs out (S306-S309, S321, S333; S331 is unreachable, see HANDOFF)
+set lessons 3
 waitfor 600 UNASSISTED
 press a
 waitfor 300 NEW RUN

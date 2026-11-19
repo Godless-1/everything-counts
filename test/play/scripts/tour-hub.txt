@@ -1,4 +1,5 @@
 # Mid-game save: hub, escrow line, codex, venue board, clinic, drills, night end
+set lessons 7
 set night 3
 set creds 900000
 set escrow 80000

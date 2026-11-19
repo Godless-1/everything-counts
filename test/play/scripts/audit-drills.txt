@@ -1,5 +1,6 @@
 # audit-drills: the range menu and all five drills with fixed seed (S244-S286)
 autoshot au-drills
+set lessons 7
 waitfor 600 UNASSISTED
 press a
 waitfor 300 NEW RUN

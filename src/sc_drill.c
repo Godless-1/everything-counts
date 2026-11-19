@@ -27,6 +27,17 @@ static const char *DR_DESC[DR_COUNT_] = {
     "A hand and an up card. The one correct play, nothing else.",
     "The count breaks the chart. Know the eighteen places where it does.",
 };
+/* D-B03: a drill tests what a module taught.  Bit of g_run.lessons_done that
+ * must be ticked first: MOD 2 (strategy) or MOD 3 (counting). */
+static const u8 DR_NEED[DR_COUNT_] = { 2, 2, 2, 1, 2 };
+
+static int drill_need_mod(int d) { return DR_NEED[d] == 1 ? 2 : 3; }
+
+static int drill_locked(int d)
+{
+    return !((g_run.lessons_done >> (drill_need_mod(d) - 1)) & 1);
+}
+
 static const u8 DR_COL[DR_COUNT_] = { C_GREEN, C_AMBER, C_MAG, C_CYAN, C_PURPLE };
 
 /* ---------------------------------------------------------------------- */
@@ -355,6 +366,7 @@ int sc_drill(int arg)
 {
     (void)arg;
     int sel = 0;
+    int deny = 0;
     key_flush();
     app_fade_in(12);
     mus_play(MUS_OVERCLOCK);
@@ -363,7 +375,11 @@ int sc_drill(int arg)
         if (key_repeat(KEY_DOWN)) { sel = (sel + 1) % DR_COUNT_; sfx(SFX_MOVE); }
         if (key_repeat(KEY_UP))   { sel = (sel + DR_COUNT_ - 1) % DR_COUNT_; sfx(SFX_MOVE); }
         if (key_down(KEY_B)) { sfx(SFX_BACK); app_fade_out(10); return SC_QUIT; }
-        if (key_down(KEY_A)) {
+        if (deny > 0) deny--;
+        if (key_down(KEY_A) && drill_locked(sel)) {
+            sfx(SFX_DENY);
+            deny = 40;
+        } else if (key_down(KEY_A)) {
             sfx(SFX_SELECT);
             switch (sel) {
                 case DR_TAGS:  drill_tags(); break;
@@ -383,13 +399,16 @@ int sc_drill(int arg)
         for (int i = 0; i < DR_COUNT_; i++) {
             int y = 22 + i * 14;
             u8 c = DR_COL[i];
+            int lk = drill_locked(i);
+            if (lk) c = C_DIM;
             if (i == sel) {
                 vid_hgrad(4, y - 2, 136, 12, RAMP_VIOLET, 10, 0);
-                vid_text(6, y, "\x01", c);
-                c = C_WHITE;
+                vid_text(6, y, "\x01", lk ? C_MID : c);
+                c = lk ? C_MID : C_WHITE;
             }
             vid_text(16, y, DR_NAME[i], c);
-            if (g_run.best_drill[i]) {
+            if (lk) vid_text(130, y, "\x0F", i == sel ? C_MID : C_DIM);
+            else if (g_run.best_drill[i]) {
                 char b[12]; char *p = str_int(b, g_run.best_drill[i]); str_cat(p, "%");
                 vid_text(138 - vid_text_len(b), y, b, C_MID);
             }
@@ -397,7 +416,14 @@ int sc_drill(int arg)
         vid_rect(0, 96, 240, 54, C_BLACK);
         vid_hline(0, 96, 240, DR_COL[sel]);
         vid_text(4, 100, DR_NAME[sel], DR_COL[sel]);
-        vid_text_wrap(4, 112, 38, DR_DESC[sel], C_TEXT);
+        if (drill_locked(sel)) {
+            char m[32]; char *q = str_cat(m, "NEEDS MOD ");
+            q = str_int(q, drill_need_mod(sel)); str_cat(q, ".");
+            vid_text(4, 112, m, deny > 0 && (deny & 4) ? C_WHITE : C_BLOOD);
+            vid_text_wrap(4, 124, 38, "The range only tests what the construct has taught you.", C_MID);
+        } else {
+            vid_text_wrap(4, 112, 38, DR_DESC[sel], C_TEXT);
+        }
         ui_hint("\x13 START");
         app_frame_end();
     }

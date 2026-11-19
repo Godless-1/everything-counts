@@ -1,5 +1,6 @@
 # audit-chart: strategy chart browser, every cursor position of the three tabs (S135-S172)
 autoshot au-chart
+set lessons 3
 waitfor 600 UNASSISTED
 press a
 waitfor 300 NEW RUN

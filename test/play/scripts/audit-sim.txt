@@ -1,4 +1,5 @@
 # audit-sim: the practice sim (MOD 3 page 16): bets, turns, coach, grades, splits, insurance, pulse checks, rules book (S287-S342 except S306-S309, S321, S331, S333)
+set lessons 3
 waitfor 600 UNASSISTED
 press a
 waitfor 300 NEW RUN

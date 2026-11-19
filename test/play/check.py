@@ -70,6 +70,16 @@ with tempfile.TemporaryDirectory() as tmp:
     check(num(d, 'hub', 'night') == 3 and num(d, 'hub', 'escrow') == 220000,
           'CONTINUE resumes that campaign')
 
+    print('-- the locks: a fresh cartridge cannot open MOD 2, MOD 3, the chart or a drill')
+    # the script itself fails (exit 3) if a locked A opens anything: it waits for the
+    # refusal text 'FINISH MOD 1 FIRST' / 'NEEDS MOD 3' on screen, then the menu title
+    d, ev = play('audit-locks.txt', os.path.join(tmp, 'locks'))
+    check(all(k in d for k in ('mod2refused', 'teachrefused', 'rangerefused', 'opened')),
+          'the lock script ran to its end (every refusal text was shown)')
+    check(num(d, 'rangerefused', 'lessons') == 0, 'refused entries finish no lesson')
+    check(num(d, 'opened', 'lessons') == 1 and num(d, 'opened', 'night') == 1,
+          'with MOD 1 ticked, MOD 2 opens (its first page was reached)')
+
     print('-- every screen: the tours must show no broken text')
     for t in sorted(f for f in os.listdir(SCR) if f.startswith('tour-')):
         d, ev = play(t, os.path.join(tmp, t))
