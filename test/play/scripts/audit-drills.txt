@@ -396,6 +396,13 @@ wait 20
 press down
 seed 4242
 press a
+waitfor 100 LEARN THESE 17
+wait 30
+shot S692-index-primer-1
+press a
+wait 30
+shot S693-index-primer-2
+press a
 wait 8
 shot S277-index-question-soft
 wait 7

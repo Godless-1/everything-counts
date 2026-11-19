@@ -267,6 +267,7 @@ static void drill_play(int use_index)
     const int NQ = 14;
     int score = 0;
     const Venue *v = &VENUES[2];
+    if (use_index) codex_index_primer();
     for (int q = 0; q < NQ; q++) {
         Hand h; hand_clear(&h);
         Shoe s; shoe_build(&s, 6, 80);

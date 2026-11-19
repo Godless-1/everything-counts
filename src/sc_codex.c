@@ -89,6 +89,34 @@ static const char *I18[] = {
 #define NI18 ((int)(sizeof(I18)/sizeof(char*)))
 
 /* ---------------------------------------------------------------------- */
+/* D-B11: the INDEX PLAYS drill asks about all 17 plays but MOD 3 teaches two.
+ * Before the first question it shows the codex's list (without the insurance
+ * row, which is not a hand play) on two screens. */
+void codex_index_primer(void)
+{
+    const int per = 9;
+    int page = 0;
+    key_flush();
+    for (;;) {
+        app_frame_begin();
+        if (key_down(KEY_A)) {
+            sfx(SFX_SELECT);
+            if (page == 1) return;
+            page = 1;
+        }
+        if (key_down(KEY_B) && page == 1) { sfx(SFX_BACK); page = 0; }
+        ui_backdrop(BG_TERMINAL, g_t, RAMP_VIOLET);
+        char b[8]; char *p = str_int(b, page + 1); str_cat(p, "/2");
+        ui_titlebar("INDEX PLAYS", b, C_PURPLE);
+        int first = 1 + page * per;                 /* I18[0] is insurance */
+        for (int i = 0; i < per && first + i < NI18; i++)
+            vid_text(6, 16 + i * 11, I18[first + i], C_WHITE);
+        vid_text_center(120, 124, "THE COUNT BREAKS THE CHART HERE.", C_MID);
+        ui_hint("INDEX: LEARN THESE 17, THEN PRESS A");
+        app_frame_end();
+    }
+}
+
 static void codex_pages(const char **heads, const char **bodies, int n, u8 col)
 {
     int p = 0;

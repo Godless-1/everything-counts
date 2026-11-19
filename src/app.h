@@ -51,6 +51,7 @@ int sc_story(int arg);
 int sc_teach(int arg);
 int sc_drill(int arg);
 int sc_codex(int arg);
+void codex_index_primer(void);    /* the 17 index plays, shown before the INDEX drill */
 int sc_night_end(int arg);
 int sc_ending(int arg);
 
