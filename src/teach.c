@@ -353,6 +353,8 @@ static int page_speak(const Lesson *L, int idx, const Page *p)
 static int page_quiz(const Lesson *L, int idx, const Page *p)
 {
     int sel = 0, answered = -1;
+    int rpg = 0;                       /* screen of the explanation after an answer */
+    u16 roffs[8]; int rnp = 1;
     key_flush();
     for (;;) {
         app_frame_begin();
@@ -361,14 +363,20 @@ static int page_quiz(const Lesson *L, int idx, const Page *p)
             if (key_repeat(KEY_UP))   { sel = (sel + p->nopt - 1) % p->nopt; sfx(SFX_MOVE); }
             if (key_down(KEY_A)) {
                 answered = sel;
+                rpg = 0;
                 sfx(answered == p->correct ? SFX_GOOD : SFX_BAD);
             }
             if (key_down(KEY_B)) { sfx(SFX_BACK); return -1; }
-            if (key_down(KEY_SELECT)) { sfx(SFX_BACK); return -2; }
-        if (key_down(KEY_SELECT)) { sfx(SFX_BACK); return -2; }
+                if (key_down(KEY_SELECT)) { sfx(SFX_BACK); return -2; }
         } else {
-            if (key_down(KEY_A)) { sfx(SFX_SELECT); return 1; }
-            if (key_down(KEY_B)) { answered = -1; sfx(SFX_BACK); }
+            if (key_down(KEY_A)) {
+                sfx(SFX_SELECT);
+                if (rpg + 1 < rnp) rpg++; else return 1;
+            }
+            if (key_down(KEY_B)) {
+                sfx(SFX_BACK);
+                if (rpg > 0) rpg--; else answered = -1;
+            }
         }
 
         ui_backdrop(BG_TERMINAL, g_t, RAMP_MAG);
@@ -395,21 +403,39 @@ static int page_quiz(const Lesson *L, int idx, const Page *p)
         } else {
             int ok = (answered == p->correct);
             u8 col = ok ? C_GREEN : C_BLOOD;
-            vid_rect(0, 28, 240, 18, C_BLACK);
-            vid_hline(0, 28, 240, col);
-            vid_hline(0, 45, 240, col);
-            vid_text_center(120, 33, ok ? "\x10  RIGHT" : "\x11  NOT QUITE", col);
-
-            int wy = 52;
+            int wy = 50;
             if (!ok) {
-                vid_text(6, wy, "YOU SAID", C_DIM);
-                wy += vid_text_wrap(60, wy, 29, p->opt[answered], C_BLOOD) * 10 + 2;
+                wy += vid_text_wrap_lines(29, p->opt[answered]) * 10 + 1;
             }
-            vid_text(6, wy, "ANSWER", C_DIM);
-            wy += vid_text_wrap(60, wy, 29, p->opt[p->correct], C_GREEN) * 10 + 8;
-            vid_hline(6, wy - 6, 228, C_GRID);
-            vid_text_wrap(6, wy, 38, p->why, C_TEXT);
-            ui_hint2("\x14 TRY AGAIN", "\x13 CONTINUE");
+            /* the reveal measures itself: what does not fit above the hint
+             * bar (last line must start at y <= 140) goes on the next screen */
+            int ay = wy;
+            wy += vid_text_wrap_lines(29, p->opt[p->correct]) * 10 + 5;
+            int rows = (140 - wy) / 10 + 1;
+            if (rows < 1) rows = 1;
+            rnp = text_pages(p->why, 38, rows, roffs, 8);
+            if (rpg == 0) {
+                vid_rect(0, 26, 240, 16, C_BLACK);
+                vid_hline(0, 26, 240, col);
+                vid_hline(0, 41, 240, col);
+                vid_text_center(120, 30, ok ? "\x10  RIGHT" : "\x11  NOT QUITE", col);
+                if (!ok) {
+                    vid_text(6, 50, "YOU SAID", C_DIM);
+                    vid_text_wrap(60, 50, 29, p->opt[answered], C_BLOOD);
+                }
+                vid_text(6, ay, "ANSWER", C_DIM);
+                vid_text_wrap(60, ay, 29, p->opt[p->correct], C_GREEN);
+                vid_hline(6, wy - 3, 228, C_GRID);
+            }
+            {
+                int ty = rpg == 0 ? wy : 30;
+                const char *txt = p->why + roffs[rpg];
+                int len = (rpg + 1 < rnp) ? (int)(roffs[rpg + 1] - roffs[rpg]) : (int)ec_strlen(txt);
+                while (*txt == '\n' && len > 0) { txt++; len--; }
+                vid_text_wrap_n(6, ty, 38, txt, C_TEXT, len);
+            }
+            if (rpg + 1 < rnp) ui_hint2(rpg ? "\x14 BACK" : "\x14 TRY AGAIN", "\x13 MORE");
+            else               ui_hint2(rpg ? "\x14 BACK" : "\x14 TRY AGAIN", "\x13 CONTINUE");
         }
         app_frame_end();
     }
