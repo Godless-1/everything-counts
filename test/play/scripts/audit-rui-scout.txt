@@ -1,0 +1,241 @@
+# scout
+set night 3
+set creds 900000
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set beat.4 1
+set beat.5 1
+set beat.6 1
+set beat.7 1
+set drift 0
+set rui 100
+set started 1
+save
+nopulse 1
+waitfor 600 UNASSISTED
+press a
+waitfor 300 CONTINUE
+press down
+press a
+waitfor 300 FIND A GAME
+mash down 3 8
+autoshot au-ruis
+set drift 0
+set night 3
+set flag.9 3
+wait 10
+seed 1
+press a
+wait 16
+shot rsw-1
+mashuntil a 60 30 FIND A GAME
+set drift 0
+set night 3
+set flag.9 3
+wait 10
+seed 2
+press a
+wait 16
+shot rsw-2
+mashuntil a 60 30 FIND A GAME
+set drift 0
+set night 3
+set flag.9 3
+wait 10
+seed 3
+press a
+wait 16
+shot rsw-3
+mashuntil a 60 30 FIND A GAME
+set drift 0
+set night 3
+set flag.9 3
+wait 10
+seed 4
+press a
+wait 16
+shot rsw-4
+mashuntil a 60 30 FIND A GAME
+set drift 0
+set night 3
+set flag.9 3
+wait 10
+seed 5
+press a
+wait 16
+shot rsw-5
+mashuntil a 60 30 FIND A GAME
+set drift 0
+set night 3
+set flag.9 3
+wait 10
+seed 6
+press a
+wait 16
+shot rsw-6
+mashuntil a 60 30 FIND A GAME
+set drift 0
+set night 3
+set flag.9 3
+wait 10
+seed 7
+press a
+wait 16
+shot rsw-7
+mashuntil a 60 30 FIND A GAME
+set drift 0
+set night 3
+set flag.9 3
+wait 10
+seed 8
+press a
+wait 16
+shot rsw-8
+mashuntil a 60 30 FIND A GAME
+set drift 0
+set night 3
+set flag.9 3
+wait 10
+seed 9
+press a
+wait 16
+shot rsw-9
+mashuntil a 60 30 FIND A GAME
+set drift 0
+set night 3
+set flag.9 3
+wait 10
+seed 10
+press a
+wait 16
+shot rsw-10
+mashuntil a 60 30 FIND A GAME
+set drift 0
+set night 3
+set flag.9 3
+wait 10
+seed 11
+press a
+wait 16
+shot rsw-11
+mashuntil a 60 30 FIND A GAME
+set drift 0
+set night 3
+set flag.9 3
+wait 10
+seed 12
+press a
+wait 16
+shot rsw-12
+mashuntil a 60 30 FIND A GAME
+set drift 40
+set night 3
+set flag.9 3
+wait 10
+seed 1
+press a
+wait 16
+shot rsc-1
+mashuntil a 60 30 FIND A GAME
+set drift 40
+set night 3
+set flag.9 3
+wait 10
+seed 2
+press a
+wait 16
+shot rsc-2
+mashuntil a 60 30 FIND A GAME
+set drift 40
+set night 3
+set flag.9 3
+wait 10
+seed 3
+press a
+wait 16
+shot rsc-3
+mashuntil a 60 30 FIND A GAME
+set drift 40
+set night 3
+set flag.9 3
+wait 10
+seed 4
+press a
+wait 16
+shot rsc-4
+mashuntil a 60 30 FIND A GAME
+set drift 40
+set night 3
+set flag.9 3
+wait 10
+seed 5
+press a
+wait 16
+shot rsc-5
+mashuntil a 60 30 FIND A GAME
+set drift 40
+set night 3
+set flag.9 3
+wait 10
+seed 6
+press a
+wait 16
+shot rsc-6
+mashuntil a 60 30 FIND A GAME
+set drift 40
+set night 3
+set flag.9 3
+wait 10
+seed 7
+press a
+wait 16
+shot rsc-7
+mashuntil a 60 30 FIND A GAME
+set drift 40
+set night 3
+set flag.9 3
+wait 10
+seed 8
+press a
+wait 16
+shot rsc-8
+mashuntil a 60 30 FIND A GAME
+set drift 40
+set night 3
+set flag.9 3
+wait 10
+seed 9
+press a
+wait 16
+shot rsc-9
+mashuntil a 60 30 FIND A GAME
+set drift 40
+set night 3
+set flag.9 3
+wait 10
+seed 10
+press a
+wait 16
+shot rsc-10
+mashuntil a 60 30 FIND A GAME
+set drift 40
+set night 3
+set flag.9 3
+wait 10
+seed 11
+press a
+wait 16
+shot rsc-11
+mashuntil a 60 30 FIND A GAME
+set drift 40
+set night 3
+set flag.9 3
+wait 10
+seed 12
+press a
+wait 16
+shot rsc-12
+mashuntil a 60 30 FIND A GAME
+quit

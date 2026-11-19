@@ -1,0 +1,209 @@
+# audit-rui: calls to Rui: warm, cold, and the first call of each of the seven nights (S472-S493)
+autoshot au-rui
+set night 3
+set creds 900000
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set beat.4 1
+set beat.5 1
+set beat.6 1
+set beat.7 1
+set drift 0
+set rui 100
+set started 1
+save
+nopulse 1
+waitfor 600 UNASSISTED
+press a
+waitfor 300 CONTINUE
+press down
+press a
+waitfor 300 FIND A GAME
+mash down 3 8
+set drift 0
+set night 3
+set flag.9 3
+wait 10
+seed 4
+press a
+wait 3
+wait 90
+shot S472-rui-warm-pick1-box1
+press a
+wait 90
+shot S473-rui-warm-pick1-box2
+press a
+waitfor 300 FIND A GAME
+wait 10
+set drift 0
+set night 3
+set flag.9 3
+wait 10
+seed 2
+press a
+wait 3
+wait 90
+shot S474-rui-warm-pick2-box1
+press a
+wait 90
+shot S475-rui-warm-pick2-box2
+press a
+waitfor 300 FIND A GAME
+wait 10
+set drift 0
+set night 3
+set flag.9 3
+wait 10
+seed 1
+press a
+wait 3
+wait 90
+shot S476-rui-warm-pick3-box1
+press a
+wait 90
+shot S477-rui-warm-pick3-box2
+press a
+waitfor 300 FIND A GAME
+wait 10
+set drift 40
+set night 3
+set flag.9 3
+wait 10
+seed 4
+press a
+wait 3
+wait 90
+shot S478-rui-cold-pick1-box1
+press a
+wait 90
+shot S479-rui-cold-pick1-box2
+press a
+waitfor 300 FIND A GAME
+wait 10
+set drift 40
+set night 3
+set flag.9 3
+wait 10
+seed 2
+press a
+wait 3
+wait 90
+shot S480-rui-cold-pick2-box1
+press a
+waitfor 300 FIND A GAME
+wait 10
+set drift 40
+set night 3
+set flag.9 3
+wait 10
+seed 1
+press a
+wait 3
+wait 90
+shot S481-rui-cold-pick3-box1
+press a
+waitfor 300 FIND A GAME
+wait 10
+set drift 0
+set night 1
+set flag.9 0
+wait 10
+press a
+wait 3
+wait 90
+shot S482-rui-night1-first-call-box1
+press a
+waitfor 300 FIND A GAME
+wait 10
+set drift 0
+set night 2
+set flag.9 0
+wait 10
+press a
+wait 3
+wait 90
+shot S483-rui-night2-first-call-box1
+press a
+wait 90
+shot S484-rui-night2-first-call-box2
+press a
+waitfor 300 FIND A GAME
+wait 10
+set drift 0
+set night 3
+set flag.9 0
+wait 10
+press a
+wait 3
+wait 90
+shot S485-rui-night3-first-call-box1
+press a
+wait 90
+shot S486-rui-night3-first-call-box2
+press a
+waitfor 300 FIND A GAME
+wait 10
+set drift 0
+set night 4
+set flag.9 0
+wait 10
+press a
+wait 3
+wait 90
+shot S487-rui-night4-first-call-box1
+press a
+wait 90
+shot S488-rui-night4-first-call-box2
+press a
+waitfor 300 FIND A GAME
+wait 10
+set drift 0
+set night 5
+set flag.9 0
+wait 10
+press a
+wait 3
+wait 90
+shot S489-rui-night5-first-call-box1
+press a
+waitfor 300 FIND A GAME
+wait 10
+set drift 0
+set night 6
+set flag.9 0
+wait 10
+press a
+wait 3
+wait 90
+shot S490-rui-night6-first-call-box1
+press a
+wait 90
+shot S491-rui-night6-first-call-box2
+press a
+waitfor 300 FIND A GAME
+wait 10
+set drift 0
+set night 7
+set flag.9 0
+wait 10
+press a
+wait 3
+wait 90
+shot S492-rui-night7-first-call-box1
+press a
+waitfor 300 FIND A GAME
+wait 10
+set drift 40
+set night 7
+set flag.9 0
+wait 10
+press a
+wait 3
+wait 90
+shot S493-rui-last-night-cold
+press a
+waitfor 300 FIND A GAME
+wait 10
+quit
