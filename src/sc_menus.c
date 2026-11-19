@@ -340,7 +340,7 @@ int sc_venue(int arg)
         int locked = g_run.night < v->night_min || sel == 5 || barred;
         if (key_down(KEY_A)) {
             if (locked) { sfx(SFX_DENY); }
-            else if (g_run.creds < v->min_bet) { sfx(SFX_DENY); }
+            else if (g_run.creds < v->min_bet) { sfx(SFX_DENY); toast("NOT ENOUGH ON HAND", C_BLOOD); app_wait(50); }
             else {
                 sfx(SFX_SELECT);
                 app_fade_out(12);
