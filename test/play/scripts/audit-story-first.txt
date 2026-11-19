@@ -1,0 +1,72 @@
+# audit-story-first: a true first-time run with no set lines: NEW RUN, prologue, B out of the course menu, night one, hub, The Strip, Slag Pit, one hand, leave, clinic, CALL RUI, END THE NIGHT, ledger
+autoshot au-first
+nopulse 1
+waitfor 600 UNASSISTED
+wait 20
+shot F-title-fresh
+press a
+waitfor 300 NEW RUN
+wait 20
+shot F-title-menu-fresh
+press a
+mashuntil a 60 60 DECIDE
+wait 20
+shot F-prologue-decide
+press a
+waitfor 400 GREY'S TRAINING CONSTRUCT
+wait 20
+shot F-course-menu-first
+press b
+mashuntil a 60 60 FIND A GAME
+wait 20
+shot F-hub-night1-first
+press a
+waitfor 300 THE STRIP
+wait 20
+shot F-strip-night1
+seed 4242
+press a
+waitfor 600 PLACE YOUR BET
+wait 20
+shot F-slag-pit-bet-first
+press a
+mashuntil a 40 30 NEXT HAND
+wait 20
+shot F-slag-pit-first-hand
+press a
+waitfor 600 PLACE YOUR BET
+wait 10
+press b
+wait 10
+press a
+waitfor 400 THE STRIP
+wait 10
+press b
+waitfor 300 FIND A GAME
+wait 20
+shot F-hub-after-hand
+press down
+press a
+waitfor 300 SUBLEVEL 2
+wait 20
+shot F-clinic-first
+press b
+waitfor 300 FIND A GAME
+wait 10
+mash down 3 8
+wait 6
+press a
+mashuntil a 60 30 FIND A GAME
+wait 20
+shot F-hub-after-rui-call
+mashuntil up 8 12 what you have is what
+wait 4
+press a
+waitfor 200 SLEEP
+wait 10
+shot F-sleep-confirm
+press a
+waitfor 400 LEDGER
+wait 20
+shot F-ledger-night1
+quit
