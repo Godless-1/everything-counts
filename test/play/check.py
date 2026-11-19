@@ -9,6 +9,9 @@ whole game and asserts on the bankroll, the save file and the text watcher.
 """
 import os, re, subprocess, sys, tempfile
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import audit
+
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 RUN = os.path.join(ROOT, 'test', 'play', 'run.sh')
 SCR = os.path.join(ROOT, 'test', 'play', 'scripts')
@@ -105,6 +108,21 @@ with tempfile.TemporaryDirectory() as tmp:
     for t in sorted(f for f in os.listdir(SCR) if f.startswith('tour-')):
         d, ev = play(t, os.path.join(tmp, t))
         check(ev == [], '%s: %d text problem(s): %r' % (t, len(ev), ev[:3]))
+
+    print('-- the screen audit: every audit script, pixel by pixel, and the order of the lesson words')
+    # each audit-*.txt runs with -x -g; whatever the watcher (events.log) or pixelcheck.py
+    # (pixel.log) reports must be explained by a row of allowlist.tsv or by the card-rank
+    # echo rule; the three lesson walks must also gloss each term where it first appears
+    for a in sorted(f for f in os.listdir(SCR) if f.startswith('audit-') and f.endswith('.txt')):
+        name = a[:-4]
+        out = os.path.join(tmp, name)
+        play(a, out, '-x', '-g')
+        audit.run_pixelcheck(out)
+        bad = audit.findings(out, name)
+        check(not bad, '%s: %d unexplained text problem(s): %r' % (name, len(bad), bad[:3]))
+        if name.startswith('audit-walk-mod'):
+            bad = audit.term_order(out, name)
+            check(not bad, '%s: term order: %r' % (name, bad[:3]))
 
 print('\n%d checks, %d failures' % (checks, fails))
 sys.exit(1 if fails else 0)

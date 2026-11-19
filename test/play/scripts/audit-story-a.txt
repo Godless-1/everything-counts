@@ -39,6 +39,9 @@ wait 95
 shot S508-b0l5box3
 press a
 wait 95
+shot S509-b0l5box4
+press a
+wait 95
 shot S510-b0l6box1
 press a
 wait 95
@@ -81,6 +84,9 @@ shot S520-b1l5box1
 press a
 wait 95
 shot S521-b1l6box1
+press a
+wait 95
+shot S521-b1l6box2
 press a
 waitfor 600 FIND A GAME
 wait 10

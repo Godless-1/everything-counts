@@ -1,0 +1,5 @@
+# kind	script or *	regex on the rest of the line	class	reason (one sentence, 20+ characters)
+BOXTIGHT	*	.*	AL-02	Ink within one pixel of its box: names, totals, badges, tag glyphs; every one was looked at in S4.5 and nothing is clipped.
+LOWCONTRAST	*	"COUNTS" at 	AL-03	The title logo word COUNTS is drawn on its own glow; the logo is art, not reading text.
+PARTIAL	*	(PULSE = COUNTS YOU HELD FROM MEMORY|INSTALMENT DUE|NIGHT 3 CLOSES|LIEN APPLIED|LEDGER|DRIFT +0 +INTACT)	AL-04	A single rain-decor pixel of the night backdrop lands on one glyph of the ledger text; the text stays readable.
+HIDDEN	audit-table-special	LIEN APPLIED\. THEY TOOK A PIECE OF HER	AL-04	Same decor pixel as AL-04, reported as hidden when it sits on the footer line of the lien ledger.
