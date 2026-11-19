@@ -1,0 +1,308 @@
+# audit-story-echoes: every echo line (an earlier choice coming back as a line) with its flag forced on (S603-S618)
+autoshot au-echoes
+nopulse 1
+set night 1
+set creds 3000000
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set beat.4 1
+set beat.5 1
+set beat.6 1
+set beat.7 1
+set drift 0
+set rui 100
+set started 1
+save
+nopulse 1
+waitfor 600 UNASSISTED
+press a
+waitfor 300 CONTINUE
+press down
+press a
+waitfor 300 FIND A GAME
+set night 2
+set creds 3000000
+set drift 0
+set flag.0 0
+set flag.1 1
+set flag.2 0
+set flag.3 0
+set flag.4 0
+set flag.5 0
+set flag.6 0
+set beat.3 0
+mashuntil up 8 12 what you have is what
+wait 4
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+wait 10
+press a
+waitfor 600 STILL WARM
+wait 95
+press a
+wait 95
+shot S603-echo-b3-mara_sold-box1
+press a
+wait 95
+shot S604-echo-b3-mara_sold-box2
+press a
+mashuntil a 60 60 DECIDE
+wait 10
+press a
+mashuntil a 60 40 FIND A GAME
+wait 10
+set night 2
+set creds 3000000
+set drift 0
+set flag.0 1
+set flag.1 0
+set flag.2 0
+set flag.3 0
+set flag.4 0
+set flag.5 0
+set flag.6 0
+set beat.3 0
+mashuntil up 8 12 what you have is what
+wait 4
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+wait 10
+press a
+waitfor 600 STILL WARM
+wait 95
+press a
+wait 95
+shot S605-echo-b3-mara_spared-box1
+press a
+wait 95
+shot S606-echo-b3-mara_spared-box2
+press a
+mashuntil a 60 60 DECIDE
+wait 10
+press a
+mashuntil a 60 40 FIND A GAME
+wait 10
+set night 3
+set creds 3000000
+set drift 0
+set flag.0 0
+set flag.1 0
+set flag.2 1
+set flag.3 0
+set flag.4 0
+set flag.5 0
+set flag.6 0
+set beat.4 0
+mashuntil up 8 12 what you have is what
+wait 4
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+wait 10
+press a
+waitfor 600 COVER
+wait 95
+press a
+wait 95
+shot S607-echo-b4-hot_chrome-box1
+press a
+wait 95
+shot S608-echo-b4-hot_chrome-box2
+press a
+mashuntil a 60 60 DECIDE
+wait 10
+press a
+mashuntil a 60 40 FIND A GAME
+wait 10
+set night 4
+set creds 3000000
+set drift 0
+set flag.0 0
+set flag.1 0
+set flag.2 0
+set flag.3 1
+set flag.4 0
+set flag.5 0
+set flag.6 0
+set beat.5 0
+mashuntil up 8 12 what you have is what
+wait 4
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+wait 10
+press a
+waitfor 600 THE WHALE
+wait 95
+press a
+wait 95
+press a
+wait 95
+shot S609-echo-b5-laundered-box1
+press a
+wait 95
+shot S610-echo-b5-laundered-box2
+press a
+mashuntil a 60 60 DECIDE
+wait 10
+press a
+mashuntil a 60 40 FIND A GAME
+wait 10
+set night 4
+set creds 3000000
+set drift 0
+set flag.0 0
+set flag.1 0
+set flag.2 0
+set flag.3 0
+set flag.4 1
+set flag.5 0
+set flag.6 0
+set beat.5 0
+mashuntil up 8 12 what you have is what
+wait 4
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+wait 10
+press a
+waitfor 600 THE WHALE
+wait 95
+press a
+wait 95
+press a
+wait 95
+shot S611-echo-b5-refused_sable-box1
+press a
+wait 95
+shot S612-echo-b5-refused_sable-box2
+press a
+mashuntil a 60 60 DECIDE
+wait 10
+press a
+mashuntil a 60 40 FIND A GAME
+wait 10
+set night 5
+set creds 3000000
+set drift 0
+set flag.0 0
+set flag.1 0
+set flag.2 0
+set flag.3 0
+set flag.4 0
+set flag.5 1
+set flag.6 0
+set beat.6 0
+mashuntil up 8 12 what you have is what
+wait 4
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+wait 10
+press a
+waitfor 600 AN INSTANCE OF YOU
+wait 95
+press a
+wait 95
+press a
+wait 95
+press a
+wait 95
+press a
+wait 95
+shot S613-echo-b6-ozerov_taken-box1
+press a
+wait 95
+shot S614-echo-b6-ozerov_taken-box2
+press a
+mashuntil a 60 60 DECIDE
+wait 10
+press down
+wait 6
+press a
+mashuntil a 60 40 FIND A GAME
+wait 10
+set night 5
+set creds 3000000
+set drift 0
+set flag.0 0
+set flag.1 0
+set flag.2 0
+set flag.3 0
+set flag.4 0
+set flag.5 0
+set flag.6 1
+set beat.6 0
+mashuntil up 8 12 what you have is what
+wait 4
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+wait 10
+press a
+waitfor 600 AN INSTANCE OF YOU
+wait 95
+press a
+wait 95
+press a
+wait 95
+press a
+wait 95
+press a
+wait 95
+shot S615-echo-b6-ozerov_spared-box1
+press a
+wait 95
+shot S616-echo-b6-ozerov_spared-box2
+press a
+mashuntil a 60 60 DECIDE
+wait 10
+press down
+wait 6
+press a
+mashuntil a 60 40 FIND A GAME
+wait 10
+set night 6
+set creds 3000000
+set drift 60
+set flag.0 0
+set flag.1 0
+set flag.2 0
+set flag.3 0
+set flag.4 0
+set flag.5 0
+set flag.6 0
+set beat.7 0
+mashuntil up 8 12 suspend. resume
+wait 4
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+wait 10
+press a
+waitfor 600 THE VAULT
+wait 95
+press a
+wait 95
+press a
+wait 95
+press a
+wait 95
+shot S617-echo-b7-drift-box1
+press a
+wait 95
+shot S618-echo-b7-drift-box2
+press a
+quit

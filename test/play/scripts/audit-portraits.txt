@@ -1,0 +1,210 @@
+# audit-portraits: the Kestrel portrait at the five drift tiers, and the blink and live-feed tick over 200 frames (S632-S636, S645)
+autoshot au-portraits
+nopulse 1
+set night 1
+set creds 3000000
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set beat.4 1
+set beat.5 1
+set beat.6 1
+set beat.7 1
+set drift 0
+set rui 100
+set started 1
+save
+nopulse 1
+waitfor 600 UNASSISTED
+press a
+waitfor 300 CONTINUE
+press down
+press a
+waitfor 300 FIND A GAME
+set night 1
+set creds 3000000
+set drift 0
+set beat.2 0
+mashuntil up 8 12 what you have is what
+wait 4
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+wait 10
+press a
+waitfor 600 THE DEALER
+wait 95
+shot S632-kestrel-portrait-drift0
+wait 5
+shot S645-blink-00
+wait 5
+shot S645-blink-01
+wait 5
+shot S645-blink-02
+wait 5
+shot S645-blink-03
+wait 5
+shot S645-blink-04
+wait 5
+shot S645-blink-05
+wait 5
+shot S645-blink-06
+wait 5
+shot S645-blink-07
+wait 5
+shot S645-blink-08
+wait 5
+shot S645-blink-09
+wait 5
+shot S645-blink-10
+wait 5
+shot S645-blink-11
+wait 5
+shot S645-blink-12
+wait 5
+shot S645-blink-13
+wait 5
+shot S645-blink-14
+wait 5
+shot S645-blink-15
+wait 5
+shot S645-blink-16
+wait 5
+shot S645-blink-17
+wait 5
+shot S645-blink-18
+wait 5
+shot S645-blink-19
+wait 5
+shot S645-blink-20
+wait 5
+shot S645-blink-21
+wait 5
+shot S645-blink-22
+wait 5
+shot S645-blink-23
+wait 5
+shot S645-blink-24
+wait 5
+shot S645-blink-25
+wait 5
+shot S645-blink-26
+wait 5
+shot S645-blink-27
+wait 5
+shot S645-blink-28
+wait 5
+shot S645-blink-29
+wait 5
+shot S645-blink-30
+wait 5
+shot S645-blink-31
+wait 5
+shot S645-blink-32
+wait 5
+shot S645-blink-33
+wait 5
+shot S645-blink-34
+wait 5
+shot S645-blink-35
+wait 5
+shot S645-blink-36
+wait 5
+shot S645-blink-37
+wait 5
+shot S645-blink-38
+wait 5
+shot S645-blink-39
+press a
+mashuntil a 60 60 DECIDE
+wait 10
+press a
+mashuntil a 60 40 FIND A GAME
+wait 10
+set night 1
+set creds 3000000
+set drift 15
+set beat.2 0
+mashuntil up 8 12 what you have is what
+wait 4
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+wait 10
+press a
+waitfor 600 THE DEALER
+wait 95
+shot S633-kestrel-portrait-drift15
+press a
+mashuntil a 60 60 DECIDE
+wait 10
+press a
+mashuntil a 60 40 FIND A GAME
+wait 10
+set night 1
+set creds 3000000
+set drift 35
+set beat.2 0
+mashuntil up 8 12 what you have is what
+wait 4
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+wait 10
+press a
+waitfor 600 THE DEALER
+wait 95
+shot S634-kestrel-portrait-drift35
+press a
+mashuntil a 60 60 DECIDE
+wait 10
+press a
+mashuntil a 60 40 FIND A GAME
+wait 10
+set night 1
+set creds 3000000
+set drift 55
+set beat.2 0
+mashuntil up 8 12 suspend. resume
+wait 4
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+wait 10
+press a
+waitfor 600 THE DEALER
+wait 95
+shot S635-kestrel-portrait-drift55
+press a
+mashuntil a 60 60 DECIDE
+wait 10
+press a
+mashuntil a 60 40 FIND A GAME
+wait 10
+set night 1
+set creds 3000000
+set drift 80
+set beat.2 0
+mashuntil up 8 12 suspend. resume
+wait 4
+press a
+waitfor 200 SLEEP
+press a
+waitfor 400 LEDGER
+wait 10
+press a
+waitfor 600 THE DEALER
+wait 95
+shot S636-kestrel-portrait-drift80
+press a
+mashuntil a 60 60 DECIDE
+wait 10
+press a
+mashuntil a 60 40 FIND A GAME
+wait 10
+quit

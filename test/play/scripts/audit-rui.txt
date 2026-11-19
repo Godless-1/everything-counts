@@ -31,6 +31,7 @@ press a
 wait 3
 wait 90
 shot S472-rui-warm-pick1-box1
+shot S637-portrait-rui
 press a
 wait 90
 shot S473-rui-warm-pick1-box2
