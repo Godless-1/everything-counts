@@ -29,6 +29,7 @@ press a
 waitfor 400 LEDGER
 press a
 mashuntil a 60 40 DECIDE
+seed 4242
 stack 8 6 8 10 10 10 10 10
 wait 30
 press a
