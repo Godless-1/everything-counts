@@ -66,11 +66,11 @@ static const u8 d_99[]      = { C_(R_9,SP), C_(R_9,WI), END };
 
 static const Page m1[] = {
 { PT_SPEAK, "DRY RUN", 
-  "You lost the lace, so you lost the shortcut. Fine. I am going to teach you the game the way people learned it before anybody had chrome in their skull. Slowly, and from nothing.",
+  "You lost the lace, so you lost the shortcut. Fine. I am going to teach you the game the way people learned it before anybody had chrome (implants) in their skull. Slowly, and from nothing.",
   0,0,{0},0,0,0, CH_GREY, 0 },
 
 { PT_TEXT, "ONE RULE FIRST",
-  "Blackjack is one number against another number.\n\nYou build a total. The dealer builds a total. Whoever is closer to 21 without going over wins.\n\nGo over 21 and you lose immediately. That is called a BUST, and it is the only reason the house makes money.",
+  "Blackjack is one number against another number.\n\nYou build a total. The dealer (the casino's player) builds a total. Whoever is closer to 21 without going over wins.\n\nGo over 21 and you lose immediately. That is called a BUST, and it is the only reason the house (the casino) makes money.",
   0,0,{0},0,0,0,0,0 },
 
 { PT_CARDS, "NUMBER CARDS",
@@ -78,11 +78,11 @@ static const Page m1[] = {
   d_numbers,0,{0},0,0,0,0,0 },
 
 { PT_CARDS, "THE PICTURE CARDS",
-  "10, JACK, QUEEN and KING are all worth exactly 10.\n\nThat means sixteen cards in every 52 are worth ten. Remember that. Later it is the whole game.",
+  "10, JACK, QUEEN and KING are all worth exactly 10.\n\nThat means sixteen cards in every 52 (one full pack) are worth ten. Remember that. Later it is the whole game.",
   d_tens,0,{0},0,0,0,0,0 },
 
 { PT_CARDS, "THE ACE IS TWO CARDS",
-  "An ACE is worth 11, or 1, whichever is better for you. It changes value by itself, hand by hand.\n\nYou never have to decide. It is always counted the way that helps you.",
+  "An ACE is worth 11, or 1, whichever is better for you. It changes value by itself, hand by hand (your hand is the cards you hold).\n\nYou never have to decide. It is always counted the way that helps you.",
   d_aces,0,{0},0,0,0,0,0 },
 
 { PT_CARDS, "SOFT HANDS",
@@ -90,7 +90,7 @@ static const Page m1[] = {
   d_soft17,0,{0},0,0,0,0,0 },
 
 { PT_CARDS, "HARD HANDS",
-  "TEN plus SEVEN is HARD 17. There is no ace to fall back on.\n\nDraw to it and any card above a four kills you. Same number, completely different hand - which is why the game keeps them apart.",
+  "TEN plus SEVEN is HARD 17. There is no ace to fall back on.\n\nDraw (take another card) to it and any card above a four kills you. Same number, completely different hand - which is why the game keeps them apart.",
   d_hard17,0,{0},0,0,0,0,0 },
 
 { PT_CARDS, "WHEN SOFT GOES HARD",
@@ -104,7 +104,7 @@ static const Page m1[] = {
   0,0 },
 
 { PT_CARDS, "BLACKJACK",
-  "An ACE with any ten-value card, in your first two cards, is a BLACKJACK. 21 on the deal.\n\nIt beats any other 21 and it pays extra - 3 to 2 instead of even money. Bet 100, win 150.",
+  "An ACE with any ten-value card, in your first two cards, is a BLACKJACK. 21 with two cards.\n\nIt beats any other 21 and it pays extra - 3 to 2 instead of even money (1 to 1). Bet 100, win 150.",
   d_bj,0,{0},0,0,0,0,0 },
 
 { PT_TEXT, "WHAT A TABLE LOOKS LIKE",
@@ -122,7 +122,7 @@ static const Page m1[] = {
   0,0 },
 
 { PT_TEXT, "THE DEALER IS A MACHINE",
-  "The dealer makes no decisions. Ever.\n\nThey turn over the hole card and then follow one rule: draw while the total is 16 or less, stop at 17 or more.\n\nSome houses make the dealer HIT a soft 17 as well. That single rule costs you about a fifth of a percent. Always check.",
+  "The dealer makes no decisions. Ever.\n\nThey turn over the hole card and then follow one rule: draw while the total is 16 or less, stop at 17 or more.\n\nSome houses make the dealer HIT a soft 17 as well. That single rule costs you about a fifth of a percent of every bet you make. Always check.",
   0,0,{0},0,0,0,0,0 },
 
 { PT_QUIZ, "CHECK",
@@ -154,11 +154,11 @@ static const Page m1[] = {
   0,0,{0},0,0,0,0,0 },
 
 { PT_HAND, "INSURANCE",
-  "When the dealer shows an ACE they offer INSURANCE - a side bet, half your stake, that pays 2 to 1 if their hole card is a ten.\n\nThere are 16 ten-value cards in 52. The bet needs better than one in three to break even. It does not get there. Insurance loses money.",
+  "When the dealer shows an ACE they offer INSURANCE - a side bet, half your bet, that pays 2 to 1 if their hole card is a ten.\n\nThere are 16 ten-value cards in 52. The bet needs better than one in three to break even. It does not get there. Insurance loses money.",
   d_16, d_upA, {0},0,0,0,0,0 },
 
 { PT_SPEAK, "DRY RUN",
-  "Refuse insurance. Every time. Until the day you can actually see that the shoe is stuffed with tens - and then take it, and take it hard. That day is what the rest of this course is for.",
+  "Refuse insurance. Every time. Until the day you can actually see that the shoe (the box the cards are dealt from) is stuffed with tens - and then take it, and take it hard. That day is what the rest of this course is for.",
   0,0,{0},0,0,0, CH_GREY, 0 },
 
 { PT_PRACTICE, "LIVE HANDS",
