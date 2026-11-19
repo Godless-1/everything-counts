@@ -14,6 +14,12 @@ press a
 waitfor 400 1/23
 wait 8
 shot w1-p01-typing
+press a
+wait 160
+shot w1-p01-s2
+press a
+wait 160
+shot w1-p01-s3
 mashuntil a 170 12 2/23
 # ---- page 2/23 PT_TEXT
 waitfor 400 2/23
@@ -24,31 +30,49 @@ mashuntil a 170 12 3/23
 waitfor 400 3/23
 wait 8
 shot w1-p03-typing
+press a
+wait 160
+shot w1-p03-s2
 mashuntil a 170 12 4/23
 # ---- page 4/23 PT_CARDS
 waitfor 400 4/23
 wait 8
 shot w1-p04-typing
+press a
+wait 160
+shot w1-p04-s2
 mashuntil a 170 12 5/23
 # ---- page 5/23 PT_CARDS
 waitfor 400 5/23
 wait 8
 shot w1-p05-typing
+press a
+wait 160
+shot w1-p05-s2
 mashuntil a 170 12 6/23
 # ---- page 6/23 PT_CARDS
 waitfor 400 6/23
 wait 8
 shot w1-p06-typing
+press a
+wait 160
+shot w1-p06-s2
 mashuntil a 170 12 7/23
 # ---- page 7/23 PT_CARDS
 waitfor 400 7/23
 wait 8
 shot w1-p07-typing
+press a
+wait 160
+shot w1-p07-s2
 mashuntil a 170 12 8/23
 # ---- page 8/23 PT_CARDS
 waitfor 400 8/23
 wait 8
 shot w1-p08-typing
+press a
+wait 160
+shot w1-p08-s2
 mashuntil a 170 12 9/23
 # ---- page 9/23 PT_QUIZ
 waitfor 400 9/23
@@ -85,6 +109,9 @@ press a
 waitfor 400 10/23
 wait 8
 shot w1-p10-typing
+press a
+wait 160
+shot w1-p10-s2
 mashuntil a 170 12 11/23
 # ---- page 11/23 PT_TEXT
 waitfor 400 11/23
@@ -95,6 +122,9 @@ mashuntil a 170 12 12/23
 waitfor 400 12/23
 wait 8
 shot w1-p12-typing
+press a
+wait 160
+shot w1-p12-s2
 mashuntil a 170 12 13/23
 # ---- page 13/23 PT_QUIZ
 waitfor 400 13/23
@@ -172,11 +202,17 @@ mashuntil a 170 12 17/23
 waitfor 400 17/23
 wait 8
 shot w1-p17-typing
+press a
+wait 160
+shot w1-p17-s2
 mashuntil a 170 12 18/23
 # ---- page 18/23 PT_HAND
 waitfor 400 18/23
 wait 8
 shot w1-p18-typing
+press a
+wait 160
+shot w1-p18-s2
 mashuntil a 170 12 19/23
 # ---- page 19/23 PT_QUIZ
 waitfor 400 19/23
@@ -218,11 +254,20 @@ mashuntil a 170 12 21/23
 waitfor 400 21/23
 wait 8
 shot w1-p21-typing
+press a
+wait 160
+shot w1-p21-s2
 mashuntil a 170 12 22/23
 # ---- page 22/23 PT_SPEAK
 waitfor 400 22/23
 wait 8
 shot w1-p22-typing
+press a
+wait 160
+shot w1-p22-s2
+press a
+wait 160
+shot w1-p22-s3
 mashuntil a 170 12 23/23
 # ---- page 23/23 PT_PRACTICE
 waitfor 400 23/23

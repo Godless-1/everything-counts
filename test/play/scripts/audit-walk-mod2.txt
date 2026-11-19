@@ -15,6 +15,12 @@ press a
 waitfor 400 1/10
 wait 8
 shot w2-p01-typing
+press a
+wait 160
+shot w2-p01-s2
+press a
+wait 160
+shot w2-p01-s3
 mashuntil a 170 12 2/10
 # ---- page 2/10 PT_TEXT
 waitfor 400 2/10
@@ -30,11 +36,17 @@ mashuntil a 170 12 4/10
 waitfor 400 4/10
 wait 8
 shot w2-p04-typing
+press a
+wait 160
+shot w2-p04-s2
 mashuntil a 170 12 5/10
 # ---- page 5/10 PT_HAND
 waitfor 400 5/10
 wait 8
 shot w2-p05-typing
+press a
+wait 160
+shot w2-p05-s2
 mashuntil a 170 12 6/10
 # ---- page 6/10 PT_QUIZ
 waitfor 400 6/10
@@ -71,6 +83,9 @@ press a
 waitfor 400 7/10
 wait 8
 shot w2-p07-typing
+press a
+wait 160
+shot w2-p07-s2
 mashuntil a 170 12 8/10
 # ---- page 8/10 PT_CHART
 waitfor 400 8/10
