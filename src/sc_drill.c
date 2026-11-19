@@ -237,7 +237,7 @@ static void drill_true(void)
             vid_rect(88, 84, 64, 24, C_BLACK);
             vid_frame_rect(88, 84, 64, 24, C_MAG);
             vid_text_center_s(120, 88, b, C_WHITE, 2);
-            ui_hint2("\x03\x04 +/-1   \x13 LOCK IN", "START: QUIT");
+            ui_hint2("\x03\x04 +/-1  \x02\x01 +/-5  \x13 LOCK", "START: QUIT");
             app_frame_end();
         }
         int ok = (v == tc);
