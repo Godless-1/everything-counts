@@ -315,7 +315,7 @@ int sc_hub(int arg)
         vid_rect(0, 143, 240, 17, C_BLACK);
         vid_hline(0, 143, 240, C_GRID);
         vid_text(4, 147, run_drift_level() >= 3 ? flat[sel] : hint[sel],
-                 run_drift_level() >= 3 ? C_MAGD : C_DIM);
+                 run_drift_level() >= 3 ? C_MAG : C_DIM);
         app_frame_end();
     }
 }
@@ -591,7 +591,7 @@ int sc_night_end(int arg)
             vid_text_center(120, 140, "LIEN APPLIED. THEY TOOK A PIECE OF HER.", C_BLOOD);
             ui_noise(0, 0, 240, 160, g_t, C_BLOOD, 30);
         } else if (run_drift_level() >= 3) {
-            vid_text_center(120, 140, "YOU DID NOT DREAM. IT DEFRAGMENTED.", C_MAGD);
+            vid_text_center(120, 140, "YOU DID NOT DREAM. IT DEFRAGMENTED.", C_MAG);
         } else if (due > 0) {
             vid_text_center(120, 140, "HALCYON THANKS YOU FOR YOUR PROMPTNESS.", C_DIM);
         } else {
