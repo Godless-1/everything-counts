@@ -21,12 +21,14 @@ void host_glyph_begin(int x, int y, u8 ch, int scale);
 void host_glyph_end(void);
 void host_px(int x, int y, int w, int h);
 void host_clip(int x, int y);
+void host_box(int x, int y, int w, int h);
 #else
 #define host_text(s)                 ((void)0)
 #define host_glyph_begin(x, y, c, s) ((void)0)
 #define host_glyph_end()             ((void)0)
 #define host_px(x, y, w, h)          ((void)0)
 #define host_clip(x, y)              ((void)0)
+#define host_box(x, y, w, h)         ((void)0)
 #endif
 
 u8 *vid_back;
@@ -180,6 +182,7 @@ void vid_frame_rect(int x, int y, int w, int h, u8 c)
     vid_hline(x, y + h - 1, w, c);
     vid_vline(x, y, h, c);
     vid_vline(x + w - 1, y, h, c);
+    host_box(x, y, w, h);
 }
 
 void vid_rect_dither(int x, int y, int w, int h, u8 a, u8 b)

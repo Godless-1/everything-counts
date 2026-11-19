@@ -66,6 +66,24 @@ typedef struct {
 
 static Tbl T;
 
+#ifdef EC_HOST
+/* test harness: set or read the live table (0 trust, 1 heat; peek 2 rc, 3 tc) */
+void host_table_poke(int what, int v)
+{
+    if (what == 0) T.trust = v;
+    else if (what == 1) T.heat = v;
+}
+int host_table_peek(int what)
+{
+    switch (what) {
+    case 0: return T.trust;
+    case 1: return T.heat;
+    case 2: return T.cnt.running;
+    default: return count_true(&T.cnt, &T.shoe);
+    }
+}
+#endif
+
 /* ---------------------------------------------------------------------- */
 static void say(const char *s, u8 col)
 {
@@ -1158,7 +1176,9 @@ hand_done:
             int chance = 6 + g_run.night * 2;
             if (T.mode == TMODE_PRACTICE) chance = 14;
 #ifdef EC_HOST
-            { extern int host_no_pulse; if (host_no_pulse) chance = 0; }
+            { extern int host_no_pulse;
+              if (host_no_pulse == 1) chance = 0;
+              if (host_no_pulse == 2) chance = 100; }
 #endif
 #ifdef EC_DEBUG
             chance = 100;
