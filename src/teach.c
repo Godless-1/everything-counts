@@ -46,7 +46,7 @@ static const char *chart_row_label(int tab, int row)
     if (tab == 0) { str_int(b, row + 5); return b; }
     if (tab == 1) { char *p = str_cat(b, "A"); str_int(p, row + 2); return b; }
     {
-        static const char *pr[10] = { "A,A","2,2","3,3","4,4","5,5","6,6","7,7","8,8","9,9","T,T" };
+        static const char *pr[10] = { "A,A","2,2","3,3","4,4","5,5","6,6","7,7","8,8","9,9","10,10" };
         return pr[row];
     }
 }
@@ -161,6 +161,11 @@ void teach_chart_browser(void)
             char b[64]; char *p = b;
             p = str_cat(p, tab == 2 ? "PAIR " : (tab == 1 ? "SOFT " : "HARD "));
             p = str_cat(p, chart_row_label(tab, row));
+            if (tab == 1) {                     /* SOFT A7 (ace + 7 = 18) */
+                p = str_cat(p, " (ace + "); p = str_int(p, row + 2);
+                p = str_cat(p, " = "); p = str_int(p, row + 13);
+                p = str_cat(p, ")");
+            }
             p = str_cat(p, " vs ");
             p = str_cat(p, UPS[up]);
             p = str_cat(p, "  \x01  ");
