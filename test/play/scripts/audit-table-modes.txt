@@ -1,0 +1,227 @@
+# audit-table-modes: Golden Lotus with each count-display implant set in turn (S373-S382)
+autoshot au-modes
+set night 7
+set creds 50000000
+set beat.0 1
+set beat.1 1
+set beat.2 1
+set beat.3 1
+set beat.4 1
+set beat.5 1
+set beat.6 1
+set beat.7 1
+set started 1
+save
+waitfor 600 UNASSISTED
+press a
+waitfor 300 CONTINUE
+press down
+press a
+waitfor 300 FIND A GAME
+press a
+waitfor 300 THE STRIP
+mash down 2 10
+seed 4242
+nopulse 1
+stack 5 6 5 4 2 3 4 6 5 4 6 3 4 4 6 6 3 4 2 3 9 1 5 6 5 5 3 6 2 3 2 6 4 5 5 3 2 3 10 11 6 12 7 4 5 6 2 2 3 4 2
+press a
+waitfor 600 PLACE YOUR BET
+wait 5
+wait 5
+shot S373-bet-no-chrome
+press a
+waitfor 300 STAND
+wait 10
+shot S373-turn-no-chrome
+press select
+wait 8
+shot S373-select-no-optic
+press right
+press a
+waitfor 600 NEXT HAND
+press a
+waitfor 600 PLACE YOUR BET
+wait 5
+set implant.0 1
+set implant.1 0
+set implant.2 0
+set implant.3 0
+set implant.4 0
+set implant.5 0
+set implant.6 0
+set implant.7 0
+wait 5
+shot S374-bet-optic
+press a
+waitfor 300 STAND
+press select
+wait 10
+shot S374-turn-optic
+press right
+press a
+waitfor 600 NEXT HAND
+press a
+waitfor 600 PLACE YOUR BET
+wait 5
+set implant.0 0
+set implant.1 1
+set implant.2 0
+set implant.3 0
+set implant.4 0
+set implant.5 0
+set implant.6 0
+set implant.7 0
+wait 5
+shot S375-bet-abacus
+press a
+waitfor 300 STAND
+wait 10
+shot S375-turn-abacus
+press right
+press a
+waitfor 600 NEXT HAND
+press a
+waitfor 600 PLACE YOUR BET
+wait 5
+set implant.0 0
+set implant.1 0
+set implant.2 1
+set implant.3 0
+set implant.4 0
+set implant.5 0
+set implant.6 0
+set implant.7 0
+wait 5
+shot S376-bet-oracle
+press a
+waitfor 300 INSURANCE
+wait 12
+shot S376-insurance-oracle
+press a
+waitfor 300 STAND
+wait 10
+shot S376-turn-oracle
+press right
+press a
+waitfor 600 NEXT HAND
+press a
+waitfor 600 PLACE YOUR BET
+wait 5
+set implant.0 0
+set implant.1 0
+set implant.2 0
+set implant.3 1
+set implant.4 0
+set implant.5 0
+set implant.6 0
+set implant.7 0
+wait 5
+shot S377-bet-eidetic
+press a
+waitfor 300 STAND
+wait 10
+shot S377-turn-eidetic
+press right
+press a
+waitfor 600 NEXT HAND
+press a
+waitfor 600 PLACE YOUR BET
+wait 5
+set implant.0 0
+set implant.1 1
+set implant.2 1
+set implant.3 1
+set implant.4 0
+set implant.5 0
+set implant.6 0
+set implant.7 0
+wait 5
+shot S378-bet-three-counters
+press a
+waitfor 300 STAND
+wait 10
+shot S378-turn-three-counters
+set implant.0 1
+set implant.1 1
+set implant.2 1
+set implant.3 1
+set implant.4 0
+set implant.5 0
+set implant.6 0
+set implant.7 0
+wait 5
+shot S379-turn-three-counters-and-coach
+press right
+press a
+waitfor 600 NEXT HAND
+press a
+waitfor 600 PLACE YOUR BET
+wait 5
+set implant.0 1
+set implant.1 0
+set implant.2 0
+set implant.3 0
+set implant.4 1
+set implant.5 0
+set implant.6 0
+set implant.7 0
+wait 5
+shot S380-bet-mnemonic-optic
+press a
+waitfor 300 STAND
+wait 10
+shot S380-turn-index-box
+press right
+press a
+wait 30
+shot S380-grade-index
+waitfor 600 NEXT HAND
+press a
+waitfor 600 PLACE YOUR BET
+wait 5
+set implant.0 0
+set implant.1 0
+set implant.2 0
+set implant.3 0
+set implant.4 0
+set implant.5 1
+set implant.6 0
+set implant.7 0
+nopulse 2
+wait 5
+shot S381-bet-chrono
+press a
+waitfor 300 STAND
+press right
+press a
+waitfor 600 NEXT HAND
+press a
+waitfor 900 COUNT?
+wait 3
+shot S381-pulse-chrono
+wait 300
+shot S381-pulse-chrono-later
+press a
+waitfor 300 CONTINUE
+press a
+waitfor 600 PLACE YOUR BET
+wait 5
+nopulse 1
+set implant.0 1
+set implant.1 1
+set implant.2 1
+set implant.3 1
+set implant.4 1
+set implant.5 1
+set implant.6 1
+set implant.7 1
+wait 5
+shot S382-bet-all-implants
+press a
+waitfor 300 STAND
+wait 10
+shot S382-turn-all-implants
+press right
+press a
+waitfor 600 NEXT HAND
+quit

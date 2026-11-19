@@ -293,7 +293,7 @@ waitfor 600 NEXT HAND
 press a
 waitfor 900 PLACE YOUR BET
 wait 5
-stack 5 6 5 4 2 3 4 6 5 4 6 5 6 4 6 6 3 2 3 4 5 5 3 7 5 6 4 5 7 7 4 9 6 2 9 3 3 7 4 3 2 3 7 9 2 2 7 2 2 7 9 7 8 9 9
+stack 5 6 5 4 2 3 4 6 5 4 6 5 6 4 6 6 3 2 3 4 5 5 3 7 5 10 11 6 11 4 9 6 2 9 3 3 7 4 3 2 3 7 9 2 2 7 2 2 7 9 7 8 9 9
 press a
 waitfor 300 STAND
 press right
@@ -395,6 +395,8 @@ wait 5
 wait 5
 press a
 waitfor 300 STAND
+wait 10
+shot S296-coach-index-stand
 press right
 press a
 waitfor 600 NEXT HAND
@@ -404,7 +406,7 @@ waitfor 900 COUNT?
 wait 3
 dump p3
 shot p3-q
-mash up 27 3
+mash up 22 3
 press a
 waitfor 300 CONTINUE
 wait 20
@@ -424,11 +426,11 @@ waitfor 900 COUNT?
 wait 3
 dump p4
 shot p4-q
-mash up 24 3
+mash left 12 6
 press a
 waitfor 300 CONTINUE
 wait 20
-shot p4-result
+shot S327-pulse-dropped-running
 press a
 waitfor 400 PLACE YOUR BET
 wait 5
@@ -444,7 +446,6 @@ waitfor 900 COUNT?
 wait 3
 dump p5
 shot p5-q
-mash up 28 3
 press a
 waitfor 300 CONTINUE
 wait 20
@@ -464,11 +465,10 @@ waitfor 900 COUNT?
 wait 3
 dump p6
 shot p6-q
-mash left 12 6
 press a
 waitfor 300 CONTINUE
 wait 20
-shot S327-pulse-dropped-running
+shot p6-result
 press a
 waitfor 400 PLACE YOUR BET
 wait 5
