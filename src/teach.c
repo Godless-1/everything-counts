@@ -109,7 +109,7 @@ void teach_chart_browser(void)
         ui_titlebar("BASIC STRATEGY", tabname[tab], C_CYAN);
 
         /* column headers */
-        vid_text(6, 16, "VS", C_DIM);
+        vid_text(6, 16, "VS", C_MID);
         for (int i = 0; i < 10; i++) {
             int cx = 34 + i * 20;
             vid_text(cx + (ec_strlen(UPS[i]) == 1 ? 4 : 1), 16, UPS[i],

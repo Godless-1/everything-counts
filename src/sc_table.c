@@ -204,13 +204,13 @@ static void draw_hand_full(int cx, int y, const Hand *h, int hide_hole)
 static void draw_hand_mini(int x, int y, const Hand *h, int active, int idx)
 {
     char b[20];
-    u8 col = active ? C_WHITE : C_DIM;
+    u8 col = active ? C_WHITE : C_MID;
     if (active) {
         vid_rect(x - 2, y - 2, 116, 22, C_BLACK);
         ui_brackets(x - 2, y - 2, 116, 22, T.v->accent, 4);
     }
     b[0] = 'A' + idx; b[1] = 0;
-    vid_text(x, y + 5, b, active ? T.v->accent : C_DIM);
+    vid_text(x, y + 5, b, active ? T.v->accent : C_MID);
     /* every card is drawn: 11 px apart up to six, then squeezed into the
      * 70 px between the letter and the total (a mini card is 14 px wide) */
     int mstep = h->n <= 6 ? 11 : 56 / (h->n - 1);
@@ -343,7 +343,7 @@ static void draw_table(int hide_hole)
     vid_text(3, 22, "DEALER", C_MID);
     if (T.tbl.dealer.n) {
         draw_hand_full(152, 20, &T.tbl.dealer, hide_hole);
-        hand_label(3, 32, &T.tbl.dealer, hide_hole, hide_hole ? C_DIM : C_WHITE);
+        hand_label(3, 32, &T.tbl.dealer, hide_hole, hide_hole ? C_MID : C_WHITE);
     }
 
     /* ---- player ------------------------------------------------------ */
@@ -1091,7 +1091,7 @@ int sc_table(int arg)
                     str_cat(q, advised_units() == 1 ? " UNIT" : " UNITS");
                     vid_text_center(120, 92, a, C_MAG);
                 } else if (T.hands_total > 0) {
-                    vid_text_center(120, 92, "SMALL WHEN COLD. BIG WHEN RICH.", C_DIM);
+                    vid_text_center(120, 92, "SMALL WHEN COLD. BIG WHEN RICH.", C_MID);
                 }
 
                 draw_count_hud();

@@ -137,7 +137,7 @@ static void drill_speed(void)
                 card_draw(105, 44, c, TAG_HIDE);
                 char b[16]; char *p = str_int(b, i + 1);
                 p = str_cat(p, " OF "); str_int(p, n);
-                vid_text_center(120, 96, b, C_DIM);
+                vid_text_center(120, 96, b, C_MID);
                 ui_hint2("HOLD THE COUNT", "\x16 FASTER   START: QUIT");
                 app_frame_end();
                 if (key_down(KEY_START)) return;
@@ -292,10 +292,10 @@ static void drill_play(int use_index)
 
             drill_frame(use_index ? "INDEX PLAYS" : "BASIC STRATEGY", q + 1, NQ, score,
                         use_index ? C_PURPLE : C_CYAN);
-            vid_text(4, 18, "DEALER", C_DIM);
+            vid_text(4, 18, "DEALER", C_MID);
             card_draw(100, 16, up, TAG_HIDE);
             card_draw_back(134, 16);
-            vid_text(4, 62, "YOU", C_DIM);
+            vid_text(4, 62, "YOU", C_MID);
             card_draw(100, 60, h.card[0], TAG_HIDE);
             card_draw(134, 60, h.card[1], TAG_HIDE);
             {
