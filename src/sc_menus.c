@@ -664,7 +664,7 @@ int sc_ending(int arg)
         ui_backdrop(BG_VOID, g_t, E->ramp);
         vid_hline(0, 26, 240, E->col);
         vid_text_center_s(120, 10, E->title, E->col, 2);
-        vid_text_wrap_n(10, 32, 37, E->body, C_TEXT, chars);   /* room for 12 lines */
+        vid_text_wrap_n(10, 28, 37, E->body, C_TEXT, chars);   /* 12 lines: y=28..145, rule at 26 */
         if (chars >= total) ui_hint("\x13");
         app_frame_end();
     }
