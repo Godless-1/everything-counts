@@ -1064,10 +1064,14 @@ int sc_table(int arg)
                 vid_text_center(120, 26, "PLACE YOUR BET", C_WHITE);
 
                 char b[32];
-                vid_rect(62, 40, 116, 30, C_BLACK);
-                vid_frame_rect(62, 40, 116, 30, T.v->accent);
-                ui_brackets(61, 39, 118, 32, T.v->accent, 5);
                 b[0] = 0x09; str_money(b + 1, T.bet);
+                /* the box grows with the stake (2x text) so seven digits fit */
+                int bw = vid_text_len(b) * 2 + 12;
+                if (bw < 116) bw = 116;
+                int bx = 120 - bw / 2;
+                vid_rect(bx, 40, bw, 30, C_BLACK);
+                vid_frame_rect(bx, 40, bw, 30, T.v->accent);
+                ui_brackets(bx - 1, 39, bw + 2, 32, T.v->accent, 5);
                 vid_text_center_s(120, 46, b, C_WHITE, 2);
 
                 char *p = str_int(b, units);
@@ -1076,9 +1080,9 @@ int sc_table(int arg)
 
                 /* the stack sits beside the readout, clear of every label */
                 /* the stake itself, on its own spot beside the readout */
-                vid_rect(4, 40, 54, 30, C_BLACK);
-                vid_frame_rect(4, 40, 54, 30, C_GRID);
-                draw_chips(31, 68, T.bet, bet_unit(), T.v->accent);
+                vid_rect(4, 40, 46, 30, C_BLACK);
+                vid_frame_rect(4, 40, 46, 30, C_GRID);
+                draw_chips(27, 68, T.bet, bet_unit(), T.v->accent);
 
                 /* the advisory is the lesson: bet with the count */
                 if (run_has(IMP_ORACLE) || (T.mode == TMODE_PRACTICE && T.coach)) {
