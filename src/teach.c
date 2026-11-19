@@ -386,7 +386,7 @@ static int page_quiz(const Lesson *L, int idx, const Page *p)
                 vid_rect(10, by, 220, bh, C_BLACK);
                 vid_frame_rect(10, by, 220, bh, c);
                 char lab[2] = { (char)('A' + i), 0 };
-                vid_text(15, by + 2, lab, c);
+                vid_text(15, by + 2, lab, tc);
                 vid_text_wrap(30, by + 2, QUIZ_COLS, p->opt[i], tc);
                 if (i == sel) vid_text(221, by + 2, "\x01", C_CYAN);
                 by += bh + 2;
