@@ -958,8 +958,8 @@ static void epilogue(const char *title, const char *text, const char *hint, u8 c
         draw_table(0);
         vid_overlay();
         for (int j = 0; j < 160; j += 2) vid_hline(0, j, 240, C_BLACK);
-        ui_panel(14, 30, 212, 104, col, title);
-        vid_text_wrap(21, 40, 33, text, C_TEXT);
+        ui_panel(10, 22, 220, 124, col, title);
+        vid_text_wrap(16, 33, 35, text, C_TEXT);
         ui_hint(hint);
         app_frame_end();
         if (key_down(KEY_A)) { sfx(SFX_SELECT); break; }
