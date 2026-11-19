@@ -233,16 +233,6 @@ shot S239-chrome-7-none
 press down
 wait 20
 shot S240-chrome-8-none
-set implant.0 1
-set implant.1 1
-set implant.2 1
-set implant.3 1
-set implant.4 1
-set implant.5 1
-set implant.6 1
-set implant.7 1
-wait 20
-shot S241-chrome-all-installed
 press b
 wait 10
 press down
@@ -251,23 +241,4 @@ wait 20
 shot S242-your-numbers-fresh
 press b
 wait 10
-set hands 65535
-set bs_total 65535
-set bs_correct 65535
-set checks_passed 65535
-set checks_failed 65535
-set best_streak 65535
-set biggest_win 2147483647
-set drill.0 100
-set drill.1 100
-set drill.2 100
-set drill.3 100
-set drill.4 100
-set creds 2147483647
-set escrow 99999999
-set drift 100
-set wire 100
-press a
-wait 20
-shot S243-your-numbers-extreme
 quit

@@ -555,15 +555,12 @@ press down
 press down
 seed 9
 press a
+waitfor 100 LEARN THESE 17
+press a
+wait 30
+press a
 wait 8
 shot S276-index-question-pair
 press start
 wait 20
-set drill.0 100
-set drill.1 100
-set drill.2 100
-set drill.3 100
-set drill.4 100
-wait 20
-shot S249-range-all-best-100
 quit

@@ -1,0 +1,25 @@
+# audit-drills-stats: the range menu once every drill has a best score of 100% (S249).
+# Split from audit-drills (D-B18) so that script has no `set` after its first waitfor.
+autoshot au-drills-stats
+set lessons 7
+set drill.0 100
+set drill.1 100
+set drill.2 100
+set drill.3 100
+set drill.4 100
+waitfor 600 UNASSISTED
+press a
+waitfor 300 NEW RUN
+wait 20
+press down
+press down
+press a
+waitfor 300 THE RANGE
+wait 20
+press down
+press down
+press down
+press down
+wait 20
+shot S249-range-all-best-100
+quit
