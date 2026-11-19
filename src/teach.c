@@ -51,33 +51,8 @@ static const char *chart_row_label(int tab, int row)
     }
 }
 
-/* the chart is rendered straight out of the strategy engine so it can
- * never drift from what the table actually grades you against */
-static void chart_build_hand(int tab, int row, Hand *h)
-{
-    hand_clear(h);
-    if (tab == 0) {
-        int total = row + 5;
-        if (total >= 21) {                 /* 21 has to be three cards */
-            hand_add(h, CARD(9, 0));
-            hand_add(h, CARD(8, 1));
-            hand_add(h, CARD(1, 2));
-        } else if (total <= 11) {
-            hand_add(h, CARD(total - 2 - 1, 0));   /* e.g. 9 -> a seven */
-            hand_add(h, CARD(1, 1));               /* plus a two       */
-        } else {
-            hand_add(h, CARD(9, 0));               /* a ten            */
-            hand_add(h, CARD(total - 10 - 1, 1));
-        }
-    } else if (tab == 1) {
-        hand_add(h, CARD(0, 0));
-        hand_add(h, CARD(row + 1, 1));       /* A,2 .. A,9 */
-    } else {
-        static const u8 pr[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        hand_add(h, CARD(pr[row], 0));
-        hand_add(h, CARD(pr[row], 1));
-    }
-}
+/* the chart is rendered straight out of the strategy engine (chart_action in
+ * game.c) so it can never drift from what the table grades you against */
 
 static const u8 UPCARD[10] = { CARD(1,0),CARD(2,0),CARD(3,0),CARD(4,0),CARD(5,0),
                                CARD(6,0),CARD(7,0),CARD(8,0),CARD(9,0),CARD(0,0) };
@@ -87,7 +62,7 @@ void teach_chart_browser(void)
     int tab = 0, row = 0, up = 0, top = 0;
     static const int nrows[3] = { 17, 8, 10 };
     static const char *tabname[3] = { "HARD", "SOFT", "PAIRS" };
-    const Venue *v = &VENUES[2];
+    const Venue *v = &VENUES[CHART_VENUE];
     key_flush();
     for (;;) {
         app_frame_begin();
@@ -123,12 +98,8 @@ void teach_chart_browser(void)
             u8 lab = (rr == row) ? C_WHITE : C_MID;
             if (rr == row) vid_hgrad(0, ry - 1, 240, 13, RAMP_VIOLET, 7, 0);
             vid_text(4, ry + 1, chart_row_label(tab, rr), lab);
-            Hand h; chart_build_hand(tab, rr, &h);
             for (int i = 0; i < 10; i++) {
-                int cds = hand_can_double(&h, v->das);
-                int cs  = (tab == 2);
-                int csu = v->surrender && hand_can_surrender(&h) && tab != 2;
-                int a = bs_action(&h, UPCARD[i], v, cds, cs, csu);
+                int a = chart_action(v, tab, rr, UPCARD[i]);
                 const char *g = (a == ACT_HIT) ? "H" : (a == ACT_STAND) ? "S" :
                                 (a == ACT_DOUBLE) ? "D" : (a == ACT_SPLIT) ? "P" : "F";
                 u8 c = (a == ACT_HIT) ? C_ICE : (a == ACT_STAND) ? C_BLOOD :
@@ -153,11 +124,8 @@ void teach_chart_browser(void)
         vid_text(188, 125, "F FOLD", C_PURPLE);
 
         {
-            Hand h; chart_build_hand(tab, row, &h);
-            int cds = hand_can_double(&h, v->das);
-            int cs  = (tab == 2);
-            int csu = v->surrender && hand_can_surrender(&h) && tab != 2;
-            int a = bs_action(&h, UPCARD[up], v, cds, cs, csu);
+            Hand h; chart_hand(tab, row, &h);
+            int a = chart_action(v, tab, row, UPCARD[up]);
             char b[64]; char *p = b;
             p = str_cat(p, tab == 2 ? "PAIR " : (tab == 1 ? "SOFT " : "HARD "));
             p = str_cat(p, chart_row_label(tab, row));
@@ -556,7 +524,7 @@ static int page_practice(const Lesson *L, int idx, const Page *p)
         if (key_down(KEY_A)) {
             sfx(SFX_SELECT);
             app_fade_out(14);
-            sc_table(TABLE_ARG(0, TMODE_PRACTICE));
+            sc_table(TABLE_ARG_SIM(L->module));
             app_fade_in(14);
             key_flush();
             return 1;

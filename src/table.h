@@ -13,6 +13,9 @@
 
 enum { TMODE_PLAY, TMODE_PRACTICE, TMODE_STORY_VAULT };
 #define TABLE_ARG(venue, mode) ((venue) | ((mode) << 8))
+/* the practice sim runs on the chart's rules (CHART_VENUE, Golden Lotus); level
+ * is the module just finished (1..3) and decides how much of the HUD shows */
+#define TABLE_ARG_SIM(level) (CHART_VENUE | (TMODE_PRACTICE << 8) | ((level) << 12))
 
 /* results handed back to the night loop */
 enum { TEND_LEFT, TEND_BACKED_OFF, TEND_BROKE, TEND_TARGET };

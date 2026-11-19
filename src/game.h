@@ -71,6 +71,8 @@ typedef struct {
 
 #define NVENUES 6
 enum { VENUE_SLAG, VENUE_NINE, VENUE_LOTUS, VENUE_SUTRA, VENUE_SKYDECK, VENUE_VAULT };
+/* the room whose rules the chart, the drills and the practice sim all use */
+#define CHART_VENUE VENUE_LOTUS
 extern const Venue VENUES[NVENUES];
 
 int venue_edge_x100(const Venue *v);     /* house edge, hundredths of a % */
@@ -160,6 +162,9 @@ enum { ACT_HIT, ACT_STAND, ACT_DOUBLE, ACT_SPLIT, ACT_SURRENDER, ACT_NONE };
 
 int  bs_action(const Hand *h, int dealer_up, const Venue *v, int can_double,
                int can_split, int can_surrender);
+void chart_hand(int tab, int row, Hand *h);
+int  chart_action(const Venue *v, int tab, int row, int dealer_up);
+int  sim_action(const Hand *h, int dealer_up, const Venue *v, int nhands, int afford);
 int  dev_action(const Hand *h, int dealer_up, int tc, const Venue *v,
                 int can_double, int can_split, int can_surrender, int *deviated);
 int  dev_insurance(int tc);

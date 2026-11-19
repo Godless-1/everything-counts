@@ -45,6 +45,7 @@ typedef struct {
     int   hands_total;
     int   pending_check;
     int   coach;
+    int   level;            /* practice sim: the module just finished (1..3) */
     int   showdown_timer;
 
     char  msg[64];
@@ -452,10 +453,11 @@ static void draw_coach(void)
     Hand *h = &T.tbl.hand[T.tbl.active];
     if (!h->n || !T.tbl.dealer.n) return;
 
-    int cds = hand_can_double(h, T.v->das);
-    int cs  = hand_can_split(h, T.tbl.nhands, T.v->max_hands, T.v->rsa);
+    int afford = g_run.creds >= h->bet;
+    int cds = afford && hand_can_double(h, T.v->das);
+    int cs  = afford && hand_can_split(h, T.tbl.nhands, T.v->max_hands, T.v->rsa);
     int csu = T.v->surrender && hand_can_surrender(h) && T.tbl.nhands == 1;
-    int base = bs_action(h, T.tbl.dealer.card[0], T.v, cds, cs, csu);
+    int base = sim_action(h, T.tbl.dealer.card[0], T.v, T.tbl.nhands, afford);
     int dev = 0, act = base;
     if (run_has(IMP_MNEMONIC) || T.mode == TMODE_PRACTICE)
         act = dev_action(h, T.tbl.dealer.card[0], true_count(), T.v, cds, cs, csu, &dev);
@@ -687,7 +689,7 @@ static void grade_action(int chosen)
     int dev = 0;
     int right = dev_action(h, T.tbl.dealer.card[0], true_count(), T.v,
                            cds, cs, csu, &dev);
-    int basic = bs_action(h, T.tbl.dealer.card[0], T.v, cds, cs, csu);
+    int basic = sim_action(h, T.tbl.dealer.card[0], T.v, T.tbl.nhands, afford);
 
     g_run.bs_total++;
     if (chosen == right || chosen == basic) {
@@ -991,14 +993,15 @@ static void scan_check(void)
 int sc_table(int arg)
 {
     int vi = arg & 0xFF;
-    T.mode = (arg >> 8) & 0xFF;
+    T.mode = (arg >> 8) & 0x0F;
+    T.level = (arg >> 12) & 0x0F;
     T.v = &VENUES[vi];
     T.vi = vi;
 
     /* Grey's construct runs on play money: nothing that happens in it
      * touches the real bankroll, the stats or the save */
     Run real = g_run;
-    if (T.mode == TMODE_PRACTICE) g_run.creds = 50000;
+    if (T.mode == TMODE_PRACTICE) g_run.creds = 250000;   /* a unit of the Lotus is 2,500: 100 units */
     int song = T.mode == TMODE_PRACTICE    ? MUS_NEON_RAIN
              : T.mode == TMODE_STORY_VAULT ? MUS_VAULT : MUS_THE_SHOE;
 

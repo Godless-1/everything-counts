@@ -370,6 +370,55 @@ int bs_action(const Hand *h, int dealer_up, const Venue *v, int can_double,
     return resolve(c, can_double, can_split, can_surrender, v->das);
 }
 
+/* ---- chart, coach and grader: one rule set -------------------------- */
+/* The hand a chart cell stands for.  tab 0 = hard 5..21, 1 = soft A2..A9,
+ * 2 = pairs A,A..10,10. */
+void chart_hand(int tab, int row, Hand *h)
+{
+    hand_clear(h);
+    if (tab == 0) {
+        int total = row + 5;
+        if (total >= 21) {                 /* 21 has to be three cards */
+            hand_add(h, (u8)((9 << 2) | 0));
+            hand_add(h, (u8)((8 << 2) | 1));
+            hand_add(h, (u8)((1 << 2) | 2));
+        } else if (total <= 11) {
+            hand_add(h, (u8)(((total - 2 - 1) << 2) | 0));   /* e.g. 9 -> a seven */
+            hand_add(h, (u8)((1 << 2) | 1));                 /* plus a two        */
+        } else {
+            hand_add(h, (u8)((9 << 2) | 0));                 /* a ten             */
+            hand_add(h, (u8)(((total - 10 - 1) << 2) | 1));
+        }
+    } else if (tab == 1) {
+        hand_add(h, (u8)(0 | 0));
+        hand_add(h, (u8)(((row + 1) << 2) | 1));             /* A,2 .. A,9 */
+    } else {
+        hand_add(h, (u8)((row << 2) | 0));
+        hand_add(h, (u8)((row << 2) | 1));
+    }
+}
+
+/* what the chart browser shows for one cell */
+int chart_action(const Venue *v, int tab, int row, int dealer_up)
+{
+    Hand h; chart_hand(tab, row, &h);
+    int cds = hand_can_double(&h, v->das);
+    int cs  = (tab == 2);
+    int csu = v->surrender && hand_can_surrender(&h) && tab != 2;
+    return bs_action(&h, dealer_up, v, cds, cs, csu);
+}
+
+/* what the practice sim's coach says and its grader accepts as basic
+ * strategy: the options really on offer at the table (nhands hands in
+ * play; afford = the bankroll covers a double or a split) */
+int sim_action(const Hand *h, int dealer_up, const Venue *v, int nhands, int afford)
+{
+    int cds = afford && hand_can_double(h, v->das);
+    int cs  = afford && hand_can_split(h, nhands, v->max_hands, v->rsa);
+    int csu = v->surrender && hand_can_surrender(h) && nhands == 1;
+    return bs_action(h, dealer_up, v, cds, cs, csu);
+}
+
 /* ---- the Illustrious 18 ---------------------------------------------- */
 typedef struct {
     s8 pair_tens;   /* 1 = applies only to a pair of tens */
