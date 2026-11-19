@@ -683,7 +683,7 @@ int sc_ending(int arg)
         ui_titlebar("RUN REPORT", 0, E->col);
         char b[48], *p;
         int y = 22;
-        ui_panel(10, 16, 220, 118, E->col, 0);
+        ui_panel(10, 16, 220, 128, E->col, 0);
         p = str_cat(b, "ESCROW PAID      "); *p++ = 0x09; str_money(p, g_run.escrow_paid);
         vid_text(16, y, b, C_AMBER); y += 11;
         p = str_cat(b, "HANDS PLAYED     "); str_int(p, g_run.hands_played);
@@ -701,7 +701,7 @@ int sc_ending(int arg)
         p = str_cat(b, "WIRE             "); str_int(p, g_run.wire);
         vid_text(16, y, b, C_ICE); y += 11;
         p = str_cat(b, "BIGGEST POT      "); *p++ = 0x09; str_money(p, g_run.biggest_win);
-        vid_text(16, y, b, C_WHITE); y += 14;
+        vid_text(16, y, b, C_WHITE); y += 11;
         vid_text_wrap(16, y, 34,
             "The count was never the hard part. Deciding what to spend to keep it was.", C_DIM);
         ui_hint("\x13 TITLE");
