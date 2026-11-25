@@ -15,3 +15,10 @@ cp test/host/sim.c "$STAGE/"
 gcc -O2 -Wall -Wno-unused-function -I"$STAGE" -o "$STAGE/sim" \
     "$STAGE/sim.c" "$STAGE/blackjack.c" "$STAGE/cards.c" "$STAGE/game.c" "$STAGE/rng.c"
 "$STAGE/sim"
+# the card corner number must keep a clear pixel from the outline, and
+# the button glyphs must stay readable and distinct
+cp src/gen/gen_art.c src/gen/gen_font.c test/host/cardgap.c "$STAGE/"
+gcc -O1 -Wall -Wno-unused-function -I"$STAGE" -o "$STAGE/cardgap" \
+    "$STAGE/cardgap.c" "$STAGE/cards.c" "$STAGE/rng.c" "$STAGE/gen_art.c" "$STAGE/gen_font.c"
+"$STAGE/cardgap"
+python3 test/host/glyphs.py
