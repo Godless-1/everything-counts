@@ -205,8 +205,10 @@ void card_draw(int x, int y, u8 card, int tagmode)
 
     /* rank: top-left, echoed bottom-left clear of the cut corner */
     const char *rn = rank_names[r];
-    vid_text(x + 5, y + 2, rn, C_WHITE);
-    vid_text(x + 4, y + 1, rn, sc);
+    /* one clear pixel between the number and the outline (both are the
+     * suit colour), so it starts at y+2, not on the line next to the border */
+    vid_text(x + 6, y + 3, rn, C_WHITE);
+    vid_text(x + 5, y + 2, rn, sc);
     if (tagmode != TAG_SHOW) vid_text(x + 5, y + CARD_H - 10, rn, sc);
     /* suit tick, top right */
     vid_rect(x + CARD_W - 8, y + 4, 3, 3, sc);

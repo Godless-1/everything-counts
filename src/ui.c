@@ -309,19 +309,96 @@ void ui_titlebar(const char *left, const char *right, u8 accent)
     if (right) vid_text(236 - vid_text_len(right), 2, right, C_MID);
 }
 
-void ui_hint(const char *s)
+/* ---- hint bar -------------------------------------------------------
+ * A hint is plain text with button glyphs (codes 0x01-0x04, 0x13-0x17) in
+ * it.  Glyphs are drawn bright, in their own colour, so they read as
+ * buttons; the words stay dim.  The words START and SELECT stand for the
+ * two small buttons and are drawn as a filled pill.  Both the drawing and
+ * the width sums go through hint_run so they cannot disagree. */
+static int hint_word(const char *s, const char *w)
+{
+    int n = (int)ec_strlen(w);
+    for (int i = 0; i < n; i++) if (s[i] != w[i]) return 0;
+    return s[n] == 0 || s[n] == ' ' || s[n] == ':';
+}
+
+static u8 hint_glyph_col(u8 ch)
+{
+    if (ch == 0x13) return C_MAG;
+    if (ch == 0x14) return C_CYAN;
+    return C_ICE;
+}
+
+/* draws (or only measures, when draw is 0) one hint; returns its width.
+ * Plain words go out as one vid_text call per run, so the harness still
+ * sees whole words. */
+static int hint_run(int x0, const char *s, int draw)
+{
+    int x = x0;
+    int word_start = 1;
+    char run[48];
+    int rl = 0, rx = 0;
+    while (1) {
+        u8 ch = (u8)*s;
+        int pill = (ch && word_start) ? (hint_word(s, "START") ? 5 : hint_word(s, "SELECT") ? 6 : 0) : 0;
+        int special = pill || ch < 0x20;           /* a glyph, a pill or the end */
+        if (special && rl) {
+            run[rl] = 0;
+            if (draw) vid_text(rx, 151, run, C_DIM);
+            rl = 0;
+        }
+        if (!ch) break;
+        if (pill) {
+            int w = pill * FONT_W + 1;            /* ink + one pixel each side */
+            if (draw) {
+                vid_rect(x, 150, w, 9, C_MID);
+                vid_plot(x, 150, C_BLACK);          /* rounded ends */
+                vid_plot(x + w - 1, 150, C_BLACK);
+                vid_plot(x, 158, C_BLACK);
+                vid_plot(x + w - 1, 158, C_BLACK);
+                char buf[8];
+                for (int i = 0; i < pill; i++) buf[i] = s[i];
+                buf[pill] = 0;
+                vid_text(x + 1, 151, buf, C_BLACK);
+            }
+            x += w + 1;
+            s += pill;
+            word_start = 0;
+            continue;
+        }
+        if (ch < 0x20) {
+            if (draw) {
+                char one[2] = { (char)ch, 0 };
+                vid_text(x, 151, one, hint_glyph_col(ch));
+            }
+        } else {
+            if (!rl) rx = x;
+            if (rl < (int)sizeof run - 1) run[rl++] = (char)ch;
+        }
+        x += FONT_W;
+        word_start = (ch == ' ');
+        s++;
+    }
+    return x - x0;
+}
+
+static void hint_bar(void)
 {
     vid_rect(0, 150, 240, 10, C_BLACK);
     vid_hline(0, 149, 240, C_GRID);
-    vid_text_center(120, 151, s, C_DIM);
+}
+
+void ui_hint(const char *s)
+{
+    hint_bar();
+    hint_run(120 - hint_run(0, s, 0) / 2, s, 1);
 }
 
 void ui_hint2(const char *a, const char *b)
 {
-    vid_rect(0, 150, 240, 10, C_BLACK);
-    vid_hline(0, 149, 240, C_GRID);
-    if (a) vid_text(4, 151, a, C_DIM);
-    if (b) vid_text(236 - vid_text_len(b), 151, b, C_DIM);
+    hint_bar();
+    if (a) hint_run(4, a, 1);
+    if (b) hint_run(236 - hint_run(0, b, 0), b, 1);
 }
 
 void ui_glitch_text(int x, int y, const char *s, u8 c, u32 t, int amount)
